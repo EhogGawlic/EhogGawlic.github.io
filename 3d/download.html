@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BOXSAND - &lt;3ᴅ ᴘʜʏsɪᴄs&gt; | Download</title>
+        <link rel="icon" href="3dball.jpg">
+        <style>
+            *{
+                font-family: 'Courier New', Courier, monospace;
+            }
+            body{
+                background-color: lightgray;
+            }
+            .section{
+                background-color: gray;
+                border-radius: 5px;
+                border: 2px solid black;
+            }
+            .section2{
+                background-color: white;
+                border-radius: 5px;
+                border: 2px solid black;
+                margin: 5px;
+                width: 25%;
+            }
+            .db{
+                margin: 5px;
+                width: 200px;
+                height: 50px;
+                background-color: greenyellow;
+                font-size: x-large;
+                border-radius: 10px;
+                cursor: pointer;
+            }
+            img{
+                width: 15px;
+                height: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="section">
+            <h1>WE HAVE 3D PHYSICS NOW!</h1><br>
+            <p>
+            Note: If you're on a chromebook and you don't<br>
+            have Linux, I'm gonna add it to the Play Store<br>
+            <s>soon</s> not very soon, because you have to pay<br>
+            $25 for an account.<br>
+            </p>
+        </div>
+        <div class="section">
+            <h2>DOWNLOAD</h2><br>
+            (if it doesnt work then sry)<br>
+            <br>
+            <div class="section2">
+                <h3>Windows (64bit) <img src="sources/windows.png"></h3> 
+                Unzip, then open Boxsand.exe file.<br>
+                <button class="db" id="DW">Download</button>
+            </div>
+            <div class="section2">
+                <h3>MacOS <img src="sources/macos.png"></h3>
+                Unzip, then open v0.1.0 -> MacOS -> Boxsand.<br>
+                <button class="db" id="DM">Download</button>
+            </div>
+            <div class="section2">
+                <h3>Linux <img src="sources/linux.png"></h3>
+                Unzip, then open Boxsand.x86_64.<br>
+                <button class="db" id="DL">Download</button>
+            </div><br>
+             Made with Unity.<br>͏
+             P.S. I learn from Google. (thanks, Google)<br>
+        </div>
+        <div class="section">
+            <h2>Links</h2>
+            <a href="../physics.html">Back to regular physics</a><br><br>
+            <a href="./tips.html">Tips</a><br>
+            <a href="../index.html">Main page</a>
+        </div><br><br><br><br><br><br><br><br><br><br><br>͏
+        <script>
+            function download(url, filename){
+                const link = document.createElement("a")
+                //link.download = filename
+                link.href=url
+                link.click()
+                link.remove()
+            }
+            document.getElementById("DW").addEventListener("click", ()=>{
+                download("https://drive.google.com/uc?export=download&id=1yptUfBatzO-1glxeC7rBN53hZ8edmwh3", "boxsand.zip")
+            })
+            document.getElementById("DM").addEventListener("click", ()=>{
+                download("https://drive.google.com/uc?export=download&id=1drJHh4v4g8CDlX0L617hENRHD83qNjCR", "boxsand.zip")
+            })
+            document.getElementById("DL").addEventListener("click", ()=>{
+                download("https://drive.google.com/uc?export=download&id=1aWJ9VGOg9dV9Xq2qZ0QGwl1pUmHyc7st", "boxsand.zip")
+            })
+        </script>
+    </body>
+</html>

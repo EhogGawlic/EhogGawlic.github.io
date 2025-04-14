@@ -1,0 +1,22 @@
+Instructions:
+    To open:
+        1. Open a new tab and press ctrl-o on Chromebook or press ⌘-o on Mac You can also go on Finder on Mac.
+        2. Go to the folder you found this in. Double-click "main.html".
+        3. Open!
+    To use:
+        To add a new ball, either press "Add ball" or click on the white box in the middle of the screen. This will place a ball where you clicked or where the x- and y- coordinates are.
+        The x- and y-coordinates are on the left light gray box and say "X-" or "Y-value of ball".
+        Radius is half the diameter of the ball, which is basically the width.
+        Bounciness is how much speed/velocity it retains after it hits a wall. 0 is no bounce, and 1 is full velocity/speed.
+        Ball color is self-explanatory.
+        Weight of the ball is also.
+        Density is expressed in kg/m². 78.3 kg/m² is the density of steel marbles. 
+        Presets are for if you just wanna belazy and not have to search stuff up and put it in manually.
+        Substeps are how many iterations are per frame, for realistic collisions.
+        Auto-create balls is for if you want to make a sea of marbles.
+        To select a ball, press "Select" and it should get a blue outline.
+        To remove the selected ball, press "Remove". The remove button only appears if you have a selected ball.
+        To clear, press "Clear".
+        Oh yeah, and the unit used for everything is meters (the white thing is 500 wide and tall) and meters/second (m/s).
+        There's also a FPS measurey thingy in the top right corner. It is set at 250 FPS.
+    Have fun! 

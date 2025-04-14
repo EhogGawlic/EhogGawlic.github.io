@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Boxsand / PHYSICS</title>
+        <meta name="description" content="A physics engine for 2D and 3D uses.">
+        <link rel="icon" href="3dball.jpg">
+        <style>
+            *{
+                font-family: 'Courier New', Courier, monospace;
+            }
+            body{
+                background-color: lightgray;
+            }
+            div{
+                background-color: gray;
+                border: 5px solid black;
+                border-radius: 10px;
+            }
+            #s1{
+                height: 100px;
+            }
+            #s2{
+                position: absolute;
+                top: 120px;
+                width: 63%;
+                bottom: 10px;
+            }
+            #s3{
+                position: absolute;
+                top: 120px;
+                right: 10px;
+                width: 35%;
+                bottom: 10px;
+            }
+            #s2 button{
+                position: absolute;
+                width:50%;
+                height: 20%;
+                left:2%;
+                border: 5px solid black;
+                border-radius: 10px;
+                background-color: lightgray;
+                font-size: x-large;
+                cursor:pointer;
+            }
+            #twdphys{
+                top:10%;
+            }
+            #thdphys{
+                top:40%;
+            }
+            #upd{
+                top: 70%;
+            }
+            #updates{
+                position: fixed;
+                top: 25%;
+                left: 25%;
+                right: 25%;
+                bottom: 25%;
+                display: none;
+            }
+            #closebtn{
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                width: 20px;
+                height: 20px;
+                background-color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="s1">
+            <h1>PHYSICS</h1>
+            <p>
+                A 2D and 3D physics engine for whatever you want.
+                Including an exploding banana.
+            </p>
+        </div>
+        <div id="s2">
+            <button id="twdphys">2D physics</button>
+            <button id="thdphys">3D physics</button>
+            <button id="upd">Updates</button>
+        </div>
+        <div id="s3">
+            Made by ᴇʜᴏɢ ɢᴀᴡʟɪᴄ (my nickname). By the way, I'm eleven years old.<br>
+            By the way, that was for people who don't beleive that I made this.<br>
+            <br>
+            Want me to add a feature? Tell me, if you know who I am. At 12:50
+            (in the middle of lunch).
+        </div>
+        <div id="updates">
+            <h2>Update log</h2>
+            <ul>
+                <li>2D: Added better water graphics.</li>
+                <li>2D: Faster collision detection.</li>
+                <li>2D: Fixed streams.</li>
+            </ul>
+            <h2>Update agenda</h2>
+            <ul>
+                <li>3D: Fix camera</li>
+                <li>3D: Add fixed boxes.</li>
+                <li>3D: Add box rotation.</li>
+                <li>2D: Add ball rotation.</li>
+                <li>2D: Add ball textures.</li>
+                <li>2D: Add <a href="https://en.wikipedia.org/wiki/B%C3%A9zier_curve">Bezier curves</a>.</li>
+                <li>2D: Fix surface tension.</li>
+                <li>2D: Fix curves.</li>
+            </ul>
+            <button id="closebtn">x</button>
+        </div>
+        <script>
+            const b1 = document.getElementById("twdphys")
+            const b2 = document.getElementById("thdphys")
+            const b3 = document.getElementById("upd")
+            const upd = document.getElementById("updates")
+            b3.onclick = function(){
+                upd.style.display = "block"
+            }
+            const cbtn = document.getElementById("closebtn")
+            cbtn.onclick = function(){
+                upd.style.display="none"
+            }
+            function goTo(url){
+                const a = document.createElement("a")
+                a.href=url
+                a.click()
+                a.remove()
+            }
+            b1.onclick = function(){goTo("https://boxsand.netlify.app/physics")}
+            b2.onclick = function(){goTo("https://boxsand.netlify.app/3d/download")}
+        </script>
+    </body>
+</html>

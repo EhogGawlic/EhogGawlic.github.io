@@ -1,0 +1,142 @@
+canvas{
+    position: absolute;
+    top: 0;
+    height: 94.5%;
+    background-color: white;
+    cursor:crosshair
+}
+body{
+    background-color: gray;
+}
+#main{
+
+    display:none;
+}
+#leftmenu{
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 300px;
+    background-color: lightgray;
+}
+#rightmenu{
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 300px;
+    background-color: lightgray;
+}
+*{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small;
+}
+p{
+    user-select: none;
+}
+button{
+    width: 100px;
+    cursor: pointer;
+}
+#FPS{
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+#hidden{
+    display: none;
+}
+#leftmenu{
+    overflow: scroll;
+}
+#rightmenu{
+    overflow: scroll;
+}
+/*
+#bsp{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: xx-small;
+}*/
+.tinytxt{
+    font-size: xx-small;
+}
+.idk{
+    margin: 2.5%;
+    background-color: gray;
+    border: 5px solid white;
+    border-radius: 5px;
+}
+#settingsbtn{
+    position: absolute;
+    right: 5px;
+    bottom: 10px;
+    width: 50px;
+    height: 50px;
+}
+#consolebtn{
+    position: absolute;
+    right: 5px;
+    bottom: 70px;
+    width: 50px;
+    height: 50px;
+}
+#settings{
+    display: none;
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 30%;
+    bottom: 30%;
+    background-color: gray;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+#console{
+    display: none;
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 30%;
+    bottom: 30%;
+    background-color: gray;
+    border: 5px solid black;
+    border-radius: 10px;
+}
+h1{
+    font-size: xx-large;
+}
+#xstbtn{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 25px;
+    height: 25px;
+    font-size:large;
+    background-color: red;
+}
+#lbg{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+}
+#lrt{
+    position: fixed;
+    top: 500px;
+    left: 45%;
+    right: 45%;
+}
+#crv button{
+    width:21px;
+    height: 21px;
+}
+
+#crv{
+    display: none;
+}
