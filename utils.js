@@ -466,9 +466,6 @@ function generateArc(x,y,sx,sy,mx,my,w,cw){
     const v1 = subVec({x:sx,y:sy},{x,y})
     let v2 = norm(subVec({x:mx,y:my},{x,y}))
     const rad = dist({x,y},{x:sx,y:sy})
-    if (linDist(rad, parseFloat(lwinp.value)*2+parseFloat(rinp.value)*2) <= 10){
-        rad = parseFloat(lwinp.value)*2+parseFloat(rinp.value)*2
-    }
     v2 = multVecCon(v2,rad)
     let ang = getAngleVec(v1,v2,cw)
 
@@ -496,9 +493,6 @@ function generateArcPrev(x,y,sx,sy,mx,my,w,cw){
     const v1 = subVec({x:sx,y:sy},{x,y})
     let v2 = norm(subVec({x:mx,y:my},{x,y}))
     const rad = dist({x,y},{x:sx,y:sy})
-    if (linDist(rad, parseFloat(lwinp.value)*2+parseFloat(rinp.value)*2) <= 10){
-        rad = parseFloat(lwinp.value)*2+parseFloat(rinp.value)*2
-    }
     v2 = multVecCon(v2,rad)
     let ang = getAngleVec(v1,v2,cw)
 
