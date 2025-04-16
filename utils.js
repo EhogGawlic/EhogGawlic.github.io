@@ -489,6 +489,12 @@ function generateArc(x,y,sx,sy,mx,my,w,cw){
     }
     lninp.max=lines.length-1
 }
+function logInForum(usrname, pword){
+    fetch("https://boxsandforum.onrender.com/gyat.html", {
+        method: "POST",
+        body: {username: usrname, password: pword}
+    })
+}
 function generateArcPrev(x,y,sx,sy,mx,my,w,cw){
     const v1 = subVec({x:sx,y:sy},{x,y})
     let v2 = norm(subVec({x:mx,y:my},{x,y}))
