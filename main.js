@@ -183,7 +183,7 @@ function run(){
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
 }
-setInterval(run, 1000/targetRate)
+const loop = setInterval(run, 1000/targetRate)
 abbtn.addEventListener("click", ()=>{
     addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio,
     parseFloat(rinp.value),parseFloat(binp.value),
