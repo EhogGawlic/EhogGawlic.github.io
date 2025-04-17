@@ -283,9 +283,9 @@ canvas.addEventListener("click", (e)=>{
     if (e.clientX>offX&&e.clientX<innerWidth-offX){
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
             addObj(mx,my,
-            parseFloat(rinp.value),parseFloat(binp.value),
-            HEXRGB(cinp.value),parseFloat(vxinp.value),
-            parseFloat(vyinp.value), parseFloat(winp.value))
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
             return
         }
         if (selecting && !ml && !av && !af && !deleting && !adding.ia){
