@@ -219,6 +219,21 @@ window.addEventListener("keypress", (e) => {
             ppbtn.style.backgroundColor = paused ? "red" : "green"
     }
 })
+getEl('post-content').addEventListener('change', function() {
+    const text = this.value
+    const title = document.getElementById("name").value
+    const file = document.getElementById("file").value
+    const filename = document.getElementById("filename").textContent
+    const user = document.getElementById('username').value
+    document.getElementById('post-preview').innerHTML = 
+    `
+    <h3>${title}</h3>
+    <p>By ${user}</p><br>
+    <p>${textToHTML(text)}</p>
+    ${
+        file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${encode()}">Download ${filename}</a>`: ``
+    }`
+});
 canvas.addEventListener("contextmenu", (e)=>{
     e.preventDefault()
     xinp.value = mx/meterPixRatio
