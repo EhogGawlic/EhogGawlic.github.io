@@ -91,7 +91,18 @@
                         <input id="username" name="username" type="text" placeholder="Username" required><br>
                         <label for="password">Password</label><br>
                         <input id="password" name="password" type="password" placeholder="Password" required><br>
-                        <button type="submit">Log in</button>
+                        <label for="name">Title</label><br>
+                        <input name="name" type="text" id="name" placeholder="Title" required><br>
+                        <label for="filename">File name</label><br>
+                        <input name="filename" type="text" value="save" id="filename" required><br>
+                        <label for="post-content">Content</label><br>
+                        <textarea id="post-content" name="data" rows="4" cols="50" placeholder="Write your post here..."></textarea><br>
+                        
+                        <label for="post-preview">Preview</label><br>
+                        <div id="post-preview" class="section2">Your post will appear here...</div><br>
+                        <label for="filehidden" style="display:none"></label>
+                        <input name="fileh" type="text" id="filehidden" style="display:none"><br>
+                        <button type="submit">Log in and post</button>
                     </form>
                     <button id="afbtn">Add fan</button><br>
                     <label for="fsinp">Fan strength</label><br>
