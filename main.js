@@ -280,7 +280,11 @@ canvas.addEventListener("click", (e)=>{
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
+    alert("click!")
+    
     if (e.clientX>offX&&e.clientX<innerWidth-offX){
+        
+    alert("click!2")
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
             try{
             addObj(mx,my,
