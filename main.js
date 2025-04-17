@@ -285,9 +285,9 @@ window.onclick = (e)=>{
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
             try{
             addObj(mx,my,
-            parseFloat(rinp.value),parseFloat(binp.value),
-            HEXRGB(cinp.value),parseFloat(vxinp.value),
-            parseFloat(vyinp.value), parseFloat(winp.value))
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
             }catch(e){alert(e)}
             return
         }
