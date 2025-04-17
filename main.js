@@ -218,7 +218,7 @@ window.addEventListener("keypress", (e) => {
             paused = paused ? false : true
             ppbtn.style.backgroundColor = paused ? "red" : "green"
     }
-})
+})/*
 getEl('post-content').addEventListener('change', function() {
     const text = this.value
     const title = document.getElementById("name").value
@@ -233,7 +233,7 @@ getEl('post-content').addEventListener('change', function() {
     ${
         file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${encode()}">Download ${filename}</a>`: ``
     }`
-});
+});*/
 canvas.addEventListener("contextmenu", (e)=>{
     e.preventDefault()
     xinp.value = mx/meterPixRatio
