@@ -85,7 +85,14 @@
                     <label for="saveinp">Save file</label><br>
                     <input type="file" id="saveinp" accept=".psave,.json" onchange = "processFile(this.files)"><br>
                     <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>
-                    <a href="https://boxsandforum.onrender.com">Share</a><br>
+                    <form action="https://boxsandforum.onrender.com/gyat.html" method="POST">
+                        <h4>Login to forum</h4>
+                        <label for="username">Username</label><br>
+                        <input id="username" name="username" type="text" placeholder="Username" required><br>
+                        <label for="password">Password</label><br>
+                        <input id="password" name="password" type="password" placeholder="Password" required><br>
+                        <button type="submit">Log in</button>
+                    </form>
                     <button id="afbtn">Add fan</button><br>
                     <label for="fsinp">Fan strength</label><br>
                     <input id="fsinp" type="number" value="10"><br>

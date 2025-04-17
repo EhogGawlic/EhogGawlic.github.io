@@ -37,10 +37,10 @@ function run(){
     if (autoc.checked && (!paused||ceinp.checked)){
         if (a >= parseInt(acs.value)){
             for (let i = 0; i < parseInt(swi.value); i++){
-                addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio+parseFloat(rinp.value)*meterPixRatio*i,
-                parseFloat(rinp.value),parseFloat(binp.value),
-                HEXRGB(cinp.value),parseFloat(vxinp.value),
-                parseFloat(vyinp.value), parseFloat(winp.value))
+                addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio+parseFloat(rinp.value)*meterPixRatio*i*4,
+                parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+                HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+                parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
             }
             a=0
         }
