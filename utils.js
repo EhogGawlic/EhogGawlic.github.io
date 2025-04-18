@@ -610,7 +610,7 @@ function processFile(files) {
     }
     reader.readAsText(file)
 }
-const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(', ');
+const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(',<br>');
 function log(text){
     const tt = typeof text
     switch(tt){
