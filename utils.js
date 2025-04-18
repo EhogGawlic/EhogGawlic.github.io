@@ -616,3 +616,6 @@ function log(text){
 function clearConsole(){
     getEl("result").innerText=""
 }
+function textToHTML(text){
+    return text.replace("\n", "<br>")
+}
