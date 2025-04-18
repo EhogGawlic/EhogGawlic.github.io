@@ -222,7 +222,7 @@ window.addEventListener("keypress", (e) => {
 getEl('text').addEventListener('change', function() {
     const text = getEl('text').value
     const title = document.getElementById("title").value
-    const file = document.getElementById("fileh").value
+    const file = encode()
     const filename = document.getElementById("filename").value
     const user = document.getElementById('username').value
     document.getElementById('post-preview').innerHTML = 
@@ -231,7 +231,7 @@ getEl('text').addEventListener('change', function() {
     <p>By ${user}</p><br>
     <p>${textToHTML(text)}</p>
     ${
-        file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${encode()}">Download ${filename}</a>`: ``
+        file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${file}">Download ${filename}</a>`: ``
     }`
 });
 canvas.addEventListener("contextmenu", (e)=>{
