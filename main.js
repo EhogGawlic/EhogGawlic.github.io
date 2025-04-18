@@ -220,7 +220,7 @@ window.addEventListener("keypress", (e) => {
     }
 })
 getEl('text').addEventListener('change', function() {
-    const text = getEl('text').textContent
+    const text = getEl('text').value
     const title = document.getElementById("title").value
     const file = document.getElementById("fileh").value
     const filename = document.getElementById("filename").value
