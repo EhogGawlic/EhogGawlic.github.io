@@ -186,9 +186,9 @@ function run(){
 const loop = setInterval(run, 1000/targetRate)
 abbtn.addEventListener("click", ()=>{
     addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio,
-    parseFloat(rinp.value),parseFloat(binp.value),
-    HEXRGB(cinp.value),parseFloat(vxinp.value),
-    parseFloat(vyinp.value), parseFloat(winp.value))
+    parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+    HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+    parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
 })
 window.addEventListener("keypress", (e) => {
     switch (e.key){
