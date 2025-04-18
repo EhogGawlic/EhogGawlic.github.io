@@ -625,6 +625,9 @@ function log(text){
             break
         case "array":
             getEl("result").innerText += "\n["+text+"]"
+            break
+        default:
+            getEl("result").innerText += "\n"+text
     }
     
 }
