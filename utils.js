@@ -610,8 +610,23 @@ function processFile(files) {
     }
     reader.readAsText(file)
 }
+const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(', ');
 function log(text){
-    getEl("result").innerText += "\n"+text
+    const tt = typeof text
+    switch(tt){
+        case "string":
+            getEl("result").innerText += "\n"+text
+            break
+        case "number":
+            getEl("result").innerText += "\n"+text
+            break
+        case "object":
+            getEl("result").innerText += "\n"+objToString(text)
+            break
+        case "array":
+            getEl("result").innerText += "\n["+text+"]"
+    }
+    
 }
 function clearConsole(){
     getEl("result").innerText=""
