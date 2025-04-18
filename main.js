@@ -225,6 +225,7 @@ getEl('text').addEventListener('change', function() {
     const file = encode()
     const filename = document.getElementById("filename").value
     const user = document.getElementById('username').value
+    getEl("fileh").value=file
     document.getElementById('post-preview').innerHTML = 
     `
     <h3>${title}</h3>
