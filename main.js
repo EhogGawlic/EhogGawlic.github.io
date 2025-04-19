@@ -671,10 +671,12 @@ cresinp.addEventListener("change", ()=>{
 })
 
 dsbtn.onclick=()=>{
+    console.log("TSON")
     clearInterval(loop)
     loop = setInterval(run, 333/targetRate)
 }
 tsbtn.onclick=()=>{
+    console.log("5SON")
     clearInterval(loop)
-    loop = setInterval(run, 1)
+    loop = setInterval(run, 200/250)
 }
