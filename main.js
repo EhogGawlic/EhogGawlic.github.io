@@ -672,9 +672,9 @@ cresinp.addEventListener("change", ()=>{
 
 dsbtn.onclick=()=>{
     clearInterval(loop)
-    loop = setInterval(run, 500/targetRate)
+    loop = setInterval(run, 333/targetRate)
 }
 tsbtn.onclick=()=>{
     clearInterval(loop)
-    loop = setInterval(run, 333/targetRate)
+    loop = setInterval(run, 1)
 }
