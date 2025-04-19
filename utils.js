@@ -377,7 +377,6 @@ function testEncode(){
         view.setFloat32(byte, f.md)
         byte += 4
     })
-    debugger;
     valves.forEach(v=>{
         //16 bytes
         view.setFloat32(byte, v.p.x)
@@ -402,8 +401,9 @@ function testEncode(){
         view.setFloat32(byte, t.y)
         byte += 4
     })
-    console.log(buf)
-    return buf
+    const uint8Array = new Uint8Array(buf)
+    const regularArray = Array.from(uint8Array)
+    return btoa(regularArray.join(''))
 }
 const pf = parseFloat
 function decode(str){
@@ -463,7 +463,83 @@ function decode(str){
         }
         loading=false
 }
-
+function testDecode(buf){
+    const view= new DataView(buf)
+    const linen = view.getUint16(0)
+    const valven = view.getUint16(2)
+    const fann = view.getUint16(4)
+    const tcann = view.getUint16(6)
+    let byte = 8
+    for (let i = 0; i < linen; i++){
+        const p1x = view.getFloat32(byte)
+        byte += 4
+        const p1y = view.getFloat32(byte)
+        byte += 4
+        const p2x = view.getFloat32(byte)
+        byte += 4
+        const p2y = view.getFloat32(byte)
+        byte += 4
+        const lw = view.getFloat32(byte)
+        byte += 4
+        const hm = view.getUint8(byte) ===0 ? false:true
+        byte ++
+        const mpx = view.getFloat32(byte)
+        byte += 4
+        const mpy = view.getFloat32(byte)
+        byte += 4
+        const mt = view.getFloat32(byte)
+        byte += 4
+        const ms = view.getFloat32(byte)
+        byte += 4
+        const p1 = v(p1x,p1y)
+        const p2 = v(p2x, p2y)
+        const mp = v(mpx, mpy)
+        lines.push({p1,p2,w:lw, m:{h:hm,p:mp,t:mt,s:ms},np1:p1,np2:p2,s:ms})
+    }
+    for (let i = 0; i < fann; i++){
+        const x = view.getFloat32(byte)
+        byte += 4
+        const y = view.getFloat32(byte)
+        byte += 4
+        const s = view.getFloat32(byte)
+        byte += 4
+        const dx = view.getFloat32(byte)
+        byte += 4
+        const dy = view.getFloat32(byte)
+        byte += 4
+        const md = view.getFloat32(byte)
+        byte += 4
+    }
+    for (let i = 0; i < valven; i++){
+        const px = view.getFloat32(byte)
+        byte += 4
+        const py = view.getFloat32(byte)
+        byte += 4
+        const r = view.getFloat32(byte)
+        byte += 4
+        const red = view.getUint8(byte)
+        byte ++
+        const green = view.getUint8(byte)
+        byte ++
+        const blue = view.getUint8(byte)
+        byte ++
+        const o = view.getUint8(byte) === 0 ? false : true
+        byte ++
+        valves.push({
+            p:v(px, py),
+            r,
+            c:[red,green,blue],
+            o
+        })
+    }
+    for (let i = 0; i < tcann; i++){
+        const x = view.getFloat32(byte)
+        byte += 4
+        const y = view.getFloat32(byte)
+        byte += 4
+        valves.push(v(x,y))
+    }
+}
 String.prototype.removeCharAt = function (i) {
     var tmp = this.split(''); // convert to an array
     tmp.splice(i - 1 , 1); // remove 1 element from the array (adjusting for non-zero-indexed counts)
