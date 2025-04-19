@@ -183,7 +183,7 @@ function run(){
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
 }
-const loop = setInterval(run, 1000/targetRate)
+let loop = setInterval(run, 1000/targetRate)
 abbtn.addEventListener("click", ()=>{
     addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio,
     parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
@@ -605,6 +605,8 @@ savebtn.addEventListener("click", ()=>{
 ppbtn.addEventListener("click", ()=>{
     paused = paused ? false : true
     ppbtn.style.backgroundColor = paused ? "red" : "green"
+    clearInterval(loop)
+    loop = setInterval(run, 1000/targetRate)
 })
 rstbtn.addEventListener("click", ()=>{
     
@@ -667,3 +669,12 @@ window.addEventListener("beforeunload", ()=>{
 cresinp.addEventListener("change", ()=>{
     cres = cresinp.value
 })
+
+dsbtn.onclick=()=>{
+    clearInterval(loop)
+    loop = setInterval(run, 500/targetRate)
+}
+tsbtn.onclick=()=>{
+    clearInterval(loop)
+    loop = setInterval(run, 333/targetRate)
+}
