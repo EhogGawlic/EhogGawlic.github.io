@@ -8,6 +8,7 @@ let objs = [],
 let selecting = false
 let selected
 let lines = [],
+    consolehist = [],
     flipP=[],
     flipR=[],
     flipW=[],
@@ -325,7 +326,84 @@ function encode(){
     })
     return str
 }
-
+function testEncode(){
+    const buf = new ArrayBuffer()
+    const view = new DataView(buf)
+    view.setInt16(0, lines.length)
+    view.setInt16(2, fans.length)
+    view.setInt16(4, valves.length)
+    view.setInt16(6, tcans.length)
+    let byte = 8
+    lines.forEach(l=>{
+        let s = l.s
+        if (l.m.s){
+            s = l.m.s
+        }
+        //73 bytes
+        view.setFloat32(byte, l.p1.x)
+        byte += 4
+        view.setFloat32(byte, l.p1.y)
+        byte += 4
+        view.setFloat32(byte, l.p2.x)
+        byte += 4
+        view.setFloat32(byte, l.p2.y)
+        byte += 4
+        view.setFloat32(byte, l.w)
+        byte += 4
+        view.setUint8(byte, l.m.h ? 0:1)
+        byte ++
+        view.setFloat32(byte, l.m.p.x)
+        byte += 4
+        view.setFloat32(byte, l.m.p.y)
+        byte += 4
+        view.setFloat32(byte, l.m.t)
+        byte += 4
+        view.setFloat32(byte, s)
+        byte += 4
+    })
+    fans.forEach(f=>{
+        // 48 bytes
+        
+        view.setFloat32(byte, f.p.x)
+        byte += 4
+        view.setFloat32(byte, f.p.y)
+        byte += 4
+        view.setFloat32(byte, f.s)
+        byte += 4
+        view.setFloat32(byte, f.dir.x)
+        byte += 4
+        view.setFloat32(byte, f.dir.y)
+        byte += 4
+        view.setFloat32(byte, f.md)
+        byte += 4
+    })
+    
+    valves.forEach(v=>{
+        //16 bytes
+        view.setFloat32(byte, v.p.x)
+        byte += 4
+        view.setFloat32(byte, v.p.y)
+        byte += 4
+        view.setFloat32(byte, v.r)
+        byte += 4
+        view.setInt8(byte, v.c[0])
+        byte ++
+        view.setInt8(byte, v.c[1])
+        byte ++
+        view.setInt8(byte, v.c[2])
+        byte ++
+        view.setInt8(byte, v.o ? 0:1)
+        byte ++
+    })
+    tcans.forEach(t=>{
+        // 8 bytes
+        view.setFloat32(byte, t.x)
+        byte += 4
+        view.setFloat32(byte, t.y)
+        byte += 4
+    })
+    console.log(buf)
+}
 const pf = parseFloat
 function decode(str){
     objs=[]

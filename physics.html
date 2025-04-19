@@ -146,6 +146,21 @@
                     <button id="okbtn1">OK</button><br>
                     <button id="dbtn">Delete (select)</button>
                 </div><br>
+                <div class="idk">
+                    <h3>Thing editing & deleting</h3>
+                    <div class="hidden" id="bl">
+                        <label for="bounce">Bounce</label><br>
+                        <input id="bounce" type="number" value="0.2"><br>
+                        <label for="weight">Weight</label><br>
+                        <input id="weight" type="number" value="1000"><br>
+                        <button id="bleok">OK</button><br>
+                        <button id="bldok">Delete/remove</button>
+                    </div><br>
+                    <div class="hidden" id="fn">
+                        <label for="fsped">Fan speed</label><br>
+                        <input id="fsped" type="number" value="10000">
+                    </div>
+                </div>
                 <!--<span id="console">text</span>-->
                 <img src="tcan.png" style="display: none;" id="tcansrc">
                 <button id="settingsbtn"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Gear_%2889033%29_-_The_Noun_Project.svg"></button>
@@ -175,7 +190,7 @@
             </div>
             <div id="console">
                 <h1>COLSOLE</h1>
-                <textarea rows="5" cols="50" id="consoletxt" onchange="try{eval(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
+                <textarea rows="5" cols="50" id="consoletxt" onchange="try{eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
                 <span id="result"></span><br>
                 <p>
                     FUNCTIONS & VARIABLES<br>
