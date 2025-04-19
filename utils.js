@@ -401,7 +401,7 @@ function testEncode(){
         view.setFloat32(byte, t.y)
         byte += 4
     })
-    const uint8Array = new Uint16Array(buf)
+    const uint8Array = new Uint8Array(buf)
     const regularArray = Array.from(uint8Array)
     return btoa(regularArray.join(''))
 }
