@@ -377,7 +377,7 @@ function testEncode(){
         view.setFloat32(byte, f.md)
         byte += 4
     })
-    
+    debugger;
     valves.forEach(v=>{
         //16 bytes
         view.setFloat32(byte, v.p.x)
