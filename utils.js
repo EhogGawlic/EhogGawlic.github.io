@@ -762,7 +762,7 @@ function processFile(files) {
             fans = saved.fans
             tcans = saved.tcans
         } else {
-            if (parseUint(e.target.result.charAt(0))){
+            if (parseInt(e.target.result.charAt(0))){
                 decode(e.target.result)
             }
             decode(atob(e.target.result))
