@@ -507,6 +507,12 @@ function testDecode(buf){
         byte += 4
         const md = view.getFloat32(byte)
         byte += 4
+        fans.push({
+            p: v(x,y),
+            s,
+            dir: v(dx,dy),
+            md
+        })
     }
     for (let i = 0; i < valven; i++){
         const px = view.getFloat32(byte)
