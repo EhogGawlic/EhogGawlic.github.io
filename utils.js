@@ -329,10 +329,10 @@ function encode(){
 function testEncode(){
     const buf = new ArrayBuffer(lines.length*73+fans.length*48+valves.length*16+tcans.length*8)
     const view = new DataView(buf)
-    view.setInt16(0, lines.length)
-    view.setInt16(2, fans.length)
-    view.setInt16(4, valves.length)
-    view.setInt16(6, tcans.length)
+    view.setUint16(0, lines.length)
+    view.setUint16(2, fans.length)
+    view.setUint16(4, valves.length)
+    view.setUint16(6, tcans.length)
     let byte = 8
     lines.forEach(l=>{
         let s = l.s
@@ -386,13 +386,13 @@ function testEncode(){
         byte += 4
         view.setFloat32(byte, v.r)
         byte += 4
-        view.setInt8(byte, v.c[0])
+        view.setUint8(byte, v.c[0])
         byte ++
-        view.setInt8(byte, v.c[1])
+        view.setUint8(byte, v.c[1])
         byte ++
-        view.setInt8(byte, v.c[2])
+        view.setUint8(byte, v.c[2])
         byte ++
-        view.setInt8(byte, v.o ? 0:1)
+        view.setUint8(byte, v.o ? 0:1)
         byte ++
     })
     tcans.forEach(t=>{
@@ -680,7 +680,7 @@ function processFile(files) {
             fans = saved.fans
             tcans = saved.tcans
         } else {
-            if (parseInt(e.target.result.charAt(0))){
+            if (parseUint(e.target.result.charAt(0))){
                 decode(e.target.result)
             }
             decode(atob(e.target.result))
