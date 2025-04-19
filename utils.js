@@ -403,6 +403,7 @@ function testEncode(){
         byte += 4
     })
     console.log(buf)
+    return buf
 }
 const pf = parseFloat
 function decode(str){
