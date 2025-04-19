@@ -8,6 +8,7 @@ let objs = [],
 let selecting = false
 let selected
 let lines = [],
+    ms=1,
     consolehist = [],
     flipP=[],
     flipR=[],

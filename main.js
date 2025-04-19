@@ -34,122 +34,124 @@ function run(){
             o.pp = subVec(o.p, o.vx)
         }
     }*/
-    if (autoc.checked && (!paused||ceinp.checked)){
-        if (a >= parseInt(acs.value)){
-            for (let i = 0; i < parseInt(swi.value); i++){
-                addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio+parseFloat(rinp.value)*meterPixRatio*i*4,
-                parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
-                HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
-                parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
-            }
-            a=0
-        }
-        a++
-    }
-    ctx.clearRect(0,0,innerHeight,innerHeight)
-    let dqueue = []
-    objs.forEach(obj => {
-        obj.draw()
-        
-        if (!paused){
-            
-            for (let i = 0; i < fans.length; i++){
-
-                const f = fans[i]
-                const p2 = addVec(f.p, f.dir)
-                const d = ( ((obj.p.x-f.p.x)*(p2.x-f.p.x)) + ((obj.p.y-f.p.y)*(p2.y-f.p.y)) ) / dist(f.p, p2)**2;
-                let cx = f.p.x + (d * (p2.x-f.p.x))
-                let cy = f.p.y + (d * (p2.y-f.p.y))
-                const dbcp = dist(obj.p, {x:cx,y:cy})
-                const dfcp = dist(f.p, {x:cx,y:cy})
-                /*try{
-                const rfd = {x:Math.round(f.dir.x*100)*0.01,y:Math.round(f.dir.y*100)*0.01}
-                const nbf = norm(subVec(f.p, {x:cx,y:cy}))
-                const cfd = {x:Math.round(nbf.x*100)*0.01,y:Math.round(nbf.y*100)*0.01}*/
-                if (dbcp <= 30 && dfcp <= f.md){// && rfd.x===cfd.x&&rfd.y===cfd.y){
-                    obj.addForce(10, multVecCon(f.dir,f.s*f.md/(dfcp*f.md)))
+    for (let i = 0; i < ms; i++){
+        if (autoc.checked && (!paused||ceinp.checked)){
+            if (a >= parseInt(acs.value)){
+                for (let i = 0; i < parseInt(swi.value); i++){
+                    addObj(parseFloat(xinp.value)*meterPixRatio, parseFloat(yinp.value)*meterPixRatio+parseFloat(rinp.value)*meterPixRatio*i*4,
+                    parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+                    HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+                    parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
                 }
-            //}catch(e){alert(e)}
+                a=0
             }
-            tcans.forEach(tc => {
+            a++
+        }
+        ctx.clearRect(0,0,innerHeight,innerHeight)
+        let dqueue = []
+        objs.forEach(obj => {
+            obj.draw()
+            
+            if (!paused){
                 
-                if (obj.p.y-obj.r >= tc.y-30 && obj.p.y+obj.r <= tc.y+40 && obj.p.x-obj.r >= tc.x-30 && obj.p.x+obj.r <= tc.x+30){
-                    dqueue.push(obj.n)
-                }
-            })
-            obj.phys()
-            
-        }
-    })
-    polys.forEach(p => {
-        p.phys()
+                for (let i = 0; i < fans.length; i++){
 
-    })
-    for (let n = dqueue.length-1; n >= 0; n--){
-        objs.splice(dqueue[n], 1)
-        for (let i = 0; i < objs.length; i++){
-            if (i>=dqueue[n]){
-                objs[i].n--
+                    const f = fans[i]
+                    const p2 = addVec(f.p, f.dir)
+                    const d = ( ((obj.p.x-f.p.x)*(p2.x-f.p.x)) + ((obj.p.y-f.p.y)*(p2.y-f.p.y)) ) / dist(f.p, p2)**2;
+                    let cx = f.p.x + (d * (p2.x-f.p.x))
+                    let cy = f.p.y + (d * (p2.y-f.p.y))
+                    const dbcp = dist(obj.p, {x:cx,y:cy})
+                    const dfcp = dist(f.p, {x:cx,y:cy})
+                    /*try{
+                    const rfd = {x:Math.round(f.dir.x*100)*0.01,y:Math.round(f.dir.y*100)*0.01}
+                    const nbf = norm(subVec(f.p, {x:cx,y:cy}))
+                    const cfd = {x:Math.round(nbf.x*100)*0.01,y:Math.round(nbf.y*100)*0.01}*/
+                    if (dbcp <= 30 && dfcp <= f.md){// && rfd.x===cfd.x&&rfd.y===cfd.y){
+                        obj.addForce(10, multVecCon(f.dir,f.s*f.md/(dfcp*f.md)))
+                    }
+                //}catch(e){alert(e)}
+                }
+                tcans.forEach(tc => {
+                    
+                    if (obj.p.y-obj.r >= tc.y-30 && obj.p.y+obj.r <= tc.y+40 && obj.p.x-obj.r >= tc.x-30 && obj.p.x+obj.r <= tc.x+30){
+                        dqueue.push(obj.n)
+                    }
+                })
+                obj.phys()
+                
+            }
+        })
+        polys.forEach(p => {
+            p.phys()
+
+        })
+        for (let n = dqueue.length-1; n >= 0; n--){
+            objs.splice(dqueue[n], 1)
+            for (let i = 0; i < objs.length; i++){
+                if (i>=dqueue[n]){
+                    objs[i].n--
+                }
             }
         }
-    }
-    
-    ctx.strokeStyle="black"
-    lines.forEach(l => {
-        let x1 = l.p1.x
-        let y1 = l.p1.y
-        let x2 = l.p2.x
-        let y2 = l.p2.y
-        if (l.m.h){
-            if(!paused){l.m.t+=l.m.s}
-            const sp1 = subVec(l.p1,l.m.p)
-            const sp2 = subVec(l.p2, l.m.p)
-            x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x
-            y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y
-            x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x
-            y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y
-        }
-        ctx.lineWidth = l.w
-        ctx.beginPath()
-        ctx.moveTo(x1, y1)
-        ctx.lineTo(x2, y2)
-        ctx.stroke()
-        ctx.lineWidth = 1
-    })
-    ctx.fillStyle="gray"
-    fans.forEach(f => {
+        
+        ctx.strokeStyle="black"
+        lines.forEach(l => {
+            let x1 = l.p1.x
+            let y1 = l.p1.y
+            let x2 = l.p2.x
+            let y2 = l.p2.y
+            if (l.m.h){
+                if(!paused){l.m.t+=l.m.s}
+                const sp1 = subVec(l.p1,l.m.p)
+                const sp2 = subVec(l.p2, l.m.p)
+                x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x
+                y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y
+                x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x
+                y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y
+            }
+            ctx.lineWidth = l.w
+            ctx.beginPath()
+            ctx.moveTo(x1, y1)
+            ctx.lineTo(x2, y2)
+            ctx.stroke()
+            ctx.lineWidth = 1
+        })
+        ctx.fillStyle="gray"
+        fans.forEach(f => {
 
-        drawFan(f)
-    })
-    tcans.forEach(tcan => {
-        ctx.drawImage(tcansrc, tcan.x-64, tcan.y-64, 128, 128)
-    })
-    let i = 0
-    valves.forEach(v =>{
-        if (i===parseInt(vninp.value)){
-            ctx.strokeStyle = "blue"
-            ctx.lineWidth = 2
-        } else {
-            ctx.strokeStyle = "black"
-            ctx.lineWidth =1
-        }
-        ctx.fillStyle=`rgba(${v.c[0]},${v.c[1]},${v.c[2]},${v.o?0:100})`
-        ctx.beginPath()
-        ctx.arc(v.p.x,v.p.y,v.r,0,2*Math.PI)
-        ctx.fill()
-        ctx.stroke()
-        i++
-    })
-    if (!paused || ceinp.checked){
-        for (let n = 0; n < parseInt(substeps.value); n++){
-            for (let i = 0; i < objs.length; i++){
-                const obj = objs[i]
-                obj.collall()
-                if (!infspace){
-                    obj.collwall()
+            drawFan(f)
+        })
+        tcans.forEach(tcan => {
+            ctx.drawImage(tcansrc, tcan.x-64, tcan.y-64, 128, 128)
+        })
+        let i = 0
+        valves.forEach(v =>{
+            if (i===parseInt(vninp.value)){
+                ctx.strokeStyle = "blue"
+                ctx.lineWidth = 2
+            } else {
+                ctx.strokeStyle = "black"
+                ctx.lineWidth =1
+            }
+            ctx.fillStyle=`rgba(${v.c[0]},${v.c[1]},${v.c[2]},${v.o?0:100})`
+            ctx.beginPath()
+            ctx.arc(v.p.x,v.p.y,v.r,0,2*Math.PI)
+            ctx.fill()
+            ctx.stroke()
+            i++
+        })
+        if (!paused || ceinp.checked){
+            for (let n = 0; n < parseInt(substeps.value); n++){
+                for (let i = 0; i < objs.length; i++){
+                    const obj = objs[i]
+                    obj.collall()
+                    if (!infspace){
+                        obj.collwall()
+                    }
+                    obj.surfTens()
+                    obj.tb=[]
                 }
-                obj.surfTens()
-                obj.tb=[]
             }
         }
     }
@@ -671,12 +673,8 @@ cresinp.addEventListener("change", ()=>{
 })
 
 dsbtn.onclick=()=>{
-    console.log("TSON")
-    clearInterval(loop)
-    loop = setInterval(run, 333/targetRate)
+    sm = 2
 }
 tsbtn.onclick=()=>{
-    console.log("5SON")
-    clearInterval(loop)
-    loop = setInterval(run, 200/250)
+    sm = 3
 }
