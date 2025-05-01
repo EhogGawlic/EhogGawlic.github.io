@@ -351,7 +351,7 @@ function testEncode(){
         byte += 4
         view.setFloat32(byte, l.w)
         byte += 4
-        view.setUint8(byte, l.m.h ? 0:1)
+        view.setUint8(byte, l.m.h ? 1:0)
         byte ++
         view.setFloat32(byte, l.m.p.x)
         byte += 4
@@ -480,7 +480,7 @@ function testDecode(buf){
         byte += 4
         const lw = view.getFloat32(byte)
         byte += 4
-        const hm = view.getUint8(byte) ===0 ? false:true
+        const hm = view.getUint8(byte) === 1
         byte ++
         const mpx = view.getFloat32(byte)
         byte += 4
