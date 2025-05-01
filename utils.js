@@ -328,7 +328,7 @@ function encode(){
     return str
 }
 function testEncode(){
-    const buf = new ArrayBuffer(lines.length*36+fans.length*24+valves.length*16+tcans.length*8+8)
+    const buf = new ArrayBuffer(lines.length*37+fans.length*24+valves.length*16+tcans.length*8+8)
     const view = new DataView(buf)
     view.setUint16(0, lines.length)
     view.setUint16(2, fans.length)
