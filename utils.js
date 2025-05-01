@@ -328,7 +328,7 @@ function encode(){
     return str
 }
 function testEncode(){
-    const buf = new ArrayBuffer(lines.length*73+fans.length*48+valves.length*16+tcans.length*8+8)
+    const buf = new ArrayBuffer(lines.length*36+fans.length*48+valves.length*16+tcans.length*8+8)
     const view = new DataView(buf)
     view.setUint16(0, lines.length)
     view.setUint16(2, fans.length)
@@ -340,7 +340,7 @@ function testEncode(){
         if (l.m.s){
             s = l.m.s
         }
-        //73 bytes
+        //36
         view.setFloat32(byte, l.p1.x)
         byte += 4
         view.setFloat32(byte, l.p1.y)
