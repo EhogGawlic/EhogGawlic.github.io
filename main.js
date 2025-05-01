@@ -193,32 +193,34 @@ abbtn.addEventListener("click", ()=>{
     parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
 })
 window.addEventListener("keypress", (e) => {
-    switch (e.key){
-        case "c"||"Escape":
-            selecting = false
-            av = false 
-            af = false 
-            ml = false
-            cn=0
-            deleting=false
-            ltype=0
-            break
-        case "l":
+    if (document.activeElement.id!=="consoletxt"){
+        switch (e.key){
+            case "c"||"Escape":
+                selecting = false
+                av = false 
+                af = false 
+                ml = false
+                cn=0
+                deleting=false
+                ltype=0
+                break
+            case "l":
 
-            ml = true
-            canvas.style.cursor="crosshair"
-            break
-        case "f":
-            af=true
-            canvas.style.cursor="crosshair"
-            break
-        case " ":
-            paused = paused ? false : true
-            ppbtn.style.backgroundColor = paused ? "red" : "green"
-            break
-        case "k":
-            paused = paused ? false : true
-            ppbtn.style.backgroundColor = paused ? "red" : "green"
+                ml = true
+                canvas.style.cursor="crosshair"
+                break
+            case "f":
+                af=true
+                canvas.style.cursor="crosshair"
+                break
+            case " ":
+                paused = paused ? false : true
+                ppbtn.style.backgroundColor = paused ? "red" : "green"
+                break
+            case "k":
+                paused = paused ? false : true
+                ppbtn.style.backgroundColor = paused ? "red" : "green"
+        }
     }
 })
 getEl('text').addEventListener('change', function() {

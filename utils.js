@@ -392,7 +392,7 @@ function testEncode(){
         byte ++
         view.setUint8(byte, v.c[2])
         byte ++
-        view.setUint8(byte, v.o ? 0:1)
+        view.setUint8(byte, v.o ? 1:0)
         byte ++
     })
     tcans.forEach(t=>{
