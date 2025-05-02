@@ -529,7 +529,7 @@ async function decode(str, typ){
                 y:pf(parts[1])
             })
         }
-    } else {testDecode(str)}
+    } else if(typ===2) {testDecode(str)}else{testDecode(base64ToArrayBuffer(str))}
         loading=false
 }
 function testDecode(buf){
