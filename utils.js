@@ -1,4 +1,3 @@
-const { default: test } = require("node:test");
 
 function isUTF8(str) {
     let i = 0;
