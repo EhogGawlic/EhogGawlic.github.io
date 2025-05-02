@@ -472,7 +472,7 @@ function encode(){
     return base64ArrayBuffer(buf)
 }
 const pf = parseFloat
-function decode(str, typ){
+async function decode(str, typ){
     objs=[]
     lines=[]
     valves=[]
@@ -528,7 +528,7 @@ function decode(str, typ){
                 y:pf(parts[1])
             })
         }
-    } else {testDecode(base64ArrayBuffer(str))}
+    } else {testDecode(base64ToArrayBuffer(str))}
         loading=false
 }
 function testDecode(buf){
