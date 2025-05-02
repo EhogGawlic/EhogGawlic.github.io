@@ -847,6 +847,7 @@ function processFile(files) {
     } else {
         const reader = new FileReader()
         reader.onload = function (e) {
+            console.log(e.target.result)
             testDecode(e.target.result)
         }
         reader.readAsArrayBuffer(file)
