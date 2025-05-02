@@ -1,3 +1,5 @@
+const { default: test } = require("node:test");
+
 function isUTF8(str) {
     let i = 0;
     while (i < str.length) {
@@ -806,41 +808,50 @@ function generateBezierPrev(x1,y1,x2,y2,cpx,cpy,w){
     lninp.max=lines.length-1
 }catch(e){alert(e)}
 }
+/**
+ * 
+ * @param {FileList} files 
+ */
 function processFile(files) {
     const file = files[0];
-
-    const reader = new FileReader()
-    reader.onload = function (e) {
-        if (e.target.result.charAt(0)==="{"){
-            saved = JSON.parse(e.target.result);
-            objs=[]
-            lines=[]
-            valves=[]
-            cn=0
-            ml =false
-            for (let i = 0; i < saved.objs.length; i++){
-                const o = saved.objs[i]
-                objs.push(new Obj(o.x, o.y, o.r, o.c, o.w, o.vx, o.vy, o.b, o.liquid, o.surftens))
-                objs[i].f = o.f
+    const t = new Date(file.lastModified)
+    if (t.getFullYear()<=2025&&t.getMonth()<=5&&t.getDate()<1){
+        const reader = new FileReader()
+        reader.onload = function (e) {
+            if (e.target.result.charAt(0)==="{"){
+                saved = JSON.parse(e.target.result);
+                objs=[]
+                lines=[]
+                valves=[]
+                cn=0
+                ml =false
+                for (let i = 0; i < saved.objs.length; i++){
+                    const o = saved.objs[i]
+                    objs.push(new Obj(o.x, o.y, o.r, o.c, o.w, o.vx, o.vy, o.b, o.liquid, o.surftens))
+                    objs[i].f = o.f
+                }
+                for (let i = 0; i < saved.valves.length; i++){
+                    const o = saved.valves[i]
+                    valves.push({p:o.p,r:o.r,c:o.c,o:o.o})
+                }
+                lines = saved.lines
+                fans = saved.fans
+                tcans = saved.tcans
+            } else {
+                if (parseInt(e.target.result.charAt(0))){
+                    decode(e.target.result, 1)
+                }
+                decode(atob(e.target.result),3)
             }
-            for (let i = 0; i < saved.valves.length; i++){
-                const o = saved.valves[i]
-                valves.push({p:o.p,r:o.r,c:o.c,o:o.o})
-            }
-            lines = saved.lines
-            fans = saved.fans
-            tcans = saved.tcans
-        } else {
-            if (parseInt(e.target.result.charAt(0))){
-                decode(e.target.result, 1)
-            }
-            if (!isUTF8(e.target.result)){
-                decode(e.target.result, 2)
-            }
-            decode(atob(e.target.result),3)
         }
+        reader.readAsText(file)
+    } else {
+        const reader = new FileReader()
+        reader.onload = function (e) {
+            testDecode(e.target.result)
+        }
+        reader.readAsArrayBuffer(file)
     }
-    reader.readAsText(file)
 }
 const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(',\n');
 function log(text){

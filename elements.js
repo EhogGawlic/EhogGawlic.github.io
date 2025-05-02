@@ -151,7 +151,7 @@ const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
 const savestr = getStorage("save")
 if (savestr){
-    decode(atob(savestr))
+    decode(savestr)
 } else {
     loading=false
 }
