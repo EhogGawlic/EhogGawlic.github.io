@@ -1,3 +1,95 @@
+function isUTF8(str) {
+    let i = 0;
+    while (i < str.length) {
+        let charCode = str.charCodeAt(i++);
+        if ((charCode & 0x80) === 0) continue; // 0xxxxxxx: one-byte character
+        if ((charCode & 0xE0) === 0xC0) { // 110xxxxx: two-byte character
+            if (i >= str.length || (str.charCodeAt(i++) & 0xC0) !== 0x80) return false;
+        } else if ((charCode & 0xF0) === 0xE0) { // 1110xxxx: three-byte character
+            if (i + 1 >= str.length || (str.charCodeAt(i++) & 0xC0) !== 0x80 || (str.charCodeAt(i++) & 0xC0) !== 0x80) return false;
+        } else if ((charCode & 0xF8) === 0xF0) { // 11110xxx: four-byte character
+             if (i + 2 >= str.length || (str.charCodeAt(i++) & 0xC0) !== 0x80 || (str.charCodeAt(i++) & 0xC0) !== 0x80 || (str.charCodeAt(i++) & 0xC0) !== 0x80) return false;
+        } else {
+            return false; // Invalid UTF-8
+        }
+    }
+    return true;
+}
+//yeah
+/*
+MIT LICENSE
+
+Copyright 2011 Jon Leighton
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+function base64ArrayBuffer(arrayBuffer) {
+    var base64    = ''
+    var encodings = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+  
+    var bytes         = new Uint8Array(arrayBuffer)
+    var byteLength    = bytes.byteLength
+    var byteRemainder = byteLength % 3
+    var mainLength    = byteLength - byteRemainder
+  
+    var a, b, c, d
+    var chunk
+  
+    // Main loop deals with bytes in chunks of 3
+    for (var i = 0; i < mainLength; i = i + 3) {
+        // Combine the three bytes into a single integer
+        chunk = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2]
+    
+        // Use bitmasks to extract 6-bit segments from the triplet
+        a = (chunk & 16515072) >> 18 // 16515072 = (2^6 - 1) << 18
+        b = (chunk & 258048)   >> 12 // 258048   = (2^6 - 1) << 12
+        c = (chunk & 4032)     >>  6 // 4032     = (2^6 - 1) << 6
+        d = chunk & 63               // 63       = 2^6 - 1
+    
+        // Convert the raw binary segments to the appropriate ASCII encoding
+        base64 += encodings[a] + encodings[b] + encodings[c] + encodings[d]
+    }
+  
+    // Deal with the remaining bytes and padding
+    if (byteRemainder == 1) {
+        chunk = bytes[mainLength]
+    
+        a = (chunk & 252) >> 2 // 252 = (2^6 - 1) << 2
+    
+        // Set the 4 least significant bits to zero
+        b = (chunk & 3)   << 4 // 3   = 2^2 - 1
+    
+        base64 += encodings[a] + encodings[b] + '=='
+    } else if (byteRemainder == 2) {
+        chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1]
+    
+        a = (chunk & 64512) >> 10 // 64512 = (2^6 - 1) << 10
+        b = (chunk & 1008)  >>  4 // 1008  = (2^6 - 1) << 4
+    
+        // Set the 2 least significant bits to zero
+        c = (chunk & 15)    <<  2 // 15    = 2^4 - 1
+    
+        base64 += encodings[a] + encodings[b] + encodings[c] + '='
+    }
+    
+    return base64
+}
+//more stuff from stack overflow
+
+function base64ToArrayBuffer(base64) {
+    var binaryString = atob(base64);
+    var bytes = new Uint8Array(binaryString.length);
+    for (var i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+//and from now on is my code :)
 let meterPixRatio = innerHeight/500
 let targetRate=250
 const filterS = 10
@@ -303,31 +395,6 @@ function getCookie(cname) {
 /// Compressed saves
 ///
 function encode(){
-    let str = ``
-    lines.forEach(l=>{
-        let s = l.s
-        if (l.m.s){
-            s = l.m.s
-        }
-        str += `${l.p1.x},${l.p1.y},${l.p2.x},${l.p2.y},${l.w},${l.m.h?"t":"f"},${l.m.p.x},${l.m.p.y},${l.m.t},${s}n`
-    })
-    
-    str+=";"
-    fans.forEach(f=>{
-        str += `${f.p.x},${f.p.y},${f.s},${f.dir.x},${f.dir.y},${f.md}n`
-    })
-    
-    str+=";"
-    valves.forEach(v=>{
-        str += `${v.p.x},${v.p.y},${v.r},${v.c[0]},${v.c[1]},${v.c[2]},${v.o?"t":"f"}n`
-    })
-    str+=";"
-    tcans.forEach(t=>{
-        str += `${t.x},${t.y}n`
-    })
-    return str
-}
-function testEncode(){
     const buf = new ArrayBuffer(lines.length*37+fans.length*24+valves.length*16+tcans.length*8+8)
     const view = new DataView(buf)
     view.setUint16(0, lines.length)
@@ -402,10 +469,10 @@ function testEncode(){
         view.setFloat32(byte, t.y)
         byte += 4
     })
-    return buf
+    return base64ArrayBuffer(buf)
 }
 const pf = parseFloat
-function decode(str){
+function decode(str, typ){
     objs=[]
     lines=[]
     valves=[]
@@ -415,6 +482,7 @@ function decode(str){
     ml =false
     deleting=false
     adding.ia=false
+    if (typ===1){
         const things = str.split(";")
 
         const ls = things[0].split("n")
@@ -460,6 +528,7 @@ function decode(str){
                 y:pf(parts[1])
             })
         }
+    } else {testDecode(base64ArrayBuffer(str))}
         loading=false
 }
 function testDecode(buf){
@@ -763,9 +832,12 @@ function processFile(files) {
             tcans = saved.tcans
         } else {
             if (parseInt(e.target.result.charAt(0))){
-                decode(e.target.result)
+                decode(e.target.result, 1)
             }
-            decode(atob(e.target.result))
+            if (!isUTF8(e.target.result)){
+                decode(e.target.result, 2)
+            }
+            decode(atob(e.target.result),3)
         }
     }
     reader.readAsText(file)

@@ -2,7 +2,7 @@
 let a = 0
 let t = 0
 setInterval(()=>{
-    saveData(btoa(encode()), 'save')
+    saveData(encode(), 'save')
 },sps.value*1000)
 function run(){
     if (loading){
@@ -603,7 +603,7 @@ asinp.onchange = function(){
     }
 }
 savebtn.addEventListener("click", ()=>{
-    savelnk.href="data:text/base64,"+btoa(encode())
+    savelnk.href="data:binary/dat;base64,"+encode()
     savelnk.click()
 })
 ppbtn.addEventListener("click", ()=>{
