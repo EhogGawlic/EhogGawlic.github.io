@@ -150,7 +150,7 @@ switch(getCookie("btype")){
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
 const savestr = getStorage("save")
-if (!localStorage.getItem("saveid")){
+if (!localStorage.getItem("saveid").startsWith("0")){
     localStorage.setItem("saveid", Math.random().toString())
 } else {
     /*(async function(){
