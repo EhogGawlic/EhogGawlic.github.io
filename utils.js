@@ -631,7 +631,7 @@ function saveData(data, name) {
 }
 async function setCloudData(data){
     const id = localStorage.getItem("saveid")
-    const res = await fetch("https://boxsandforum.onrender.com/setblob:id="+id, {
+    const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/setblob:id="+id, {
         method: "POST",
 
         body: data
@@ -729,7 +729,7 @@ function generateArc(x,y,sx,sy,mx,my,w,cw){
     lninp.max=lines.length-1
 }
 function logInForum(usrname, pword){
-    fetch("https://boxsandforum.onrender.com/gyat.html", {
+    fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/gyat.html", {
         method: "POST",
         body: {username: usrname, password: pword}
     })
