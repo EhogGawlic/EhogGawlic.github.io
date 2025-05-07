@@ -153,18 +153,15 @@ const savestr = getStorage("save")
 if (!localStorage.getItem("saveid")){
     localStorage.setItem("saveid", Math.random().toString())
 } else {
-    (async function(){
+    /*(async function(){
         const res = await fetch("https://boxsandforum.onrender.com/filedata:id="+localStorage.getItem("saveid"))
         if (!res.ok){
             throw new Error(res.status)
         }
         const data = await res.blob()
+        console.log(data)
         const buffer = await res.arrayBuffer()
+        console.log(buffer)
         testDecode(buffer)
-    }())
-}
-if (savestr){
-    decode(savestr,3)
-} else {
-    loading=false
+    }())*/
 }
