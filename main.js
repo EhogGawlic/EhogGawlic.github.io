@@ -2,7 +2,7 @@
 let a = 0
 let t = 0
 setInterval(()=>{
-    //setCloudData(base64ToArrayBuffer(encode()))
+    setCloudData(base64ToArrayBuffer(encab()))
 },sps.value*1000)
 function run(){
     if (loading){

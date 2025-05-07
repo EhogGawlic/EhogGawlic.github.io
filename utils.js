@@ -395,6 +395,83 @@ function getCookie(cname) {
 ///
 /// Compressed saves
 ///
+function encab(){
+    const buf = new ArrayBuffer(lines.length*37+fans.length*24+valves.length*16+tcans.length*8+8)
+    const view = new DataView(buf)
+    view.setUint16(0, lines.length)
+    view.setUint16(2, fans.length)
+    view.setUint16(4, valves.length)
+    view.setUint16(6, tcans.length)
+    let byte = 8
+    lines.forEach(l=>{
+        let s = l.s
+        if (l.m.s){
+            s = l.m.s
+        }
+        //36
+        view.setFloat32(byte, l.p1.x)
+        byte += 4
+        view.setFloat32(byte, l.p1.y)
+        byte += 4
+        view.setFloat32(byte, l.p2.x)
+        byte += 4
+        view.setFloat32(byte, l.p2.y)
+        byte += 4
+        view.setFloat32(byte, l.w)
+        byte += 4
+        view.setUint8(byte, l.m.h ? 1:0)
+        byte ++
+        view.setFloat32(byte, l.m.p.x)
+        byte += 4
+        view.setFloat32(byte, l.m.p.y)
+        byte += 4
+        view.setFloat32(byte, l.m.t)
+        byte += 4
+        view.setFloat32(byte, s)
+        byte += 4
+    })
+    fans.forEach(f=>{
+        // 24 bytes
+        
+        view.setFloat32(byte, f.p.x)
+        byte += 4
+        view.setFloat32(byte, f.p.y)
+        byte += 4
+        view.setFloat32(byte, f.s)
+        byte += 4
+        view.setFloat32(byte, f.dir.x)
+        byte += 4
+        view.setFloat32(byte, f.dir.y)
+        byte += 4
+        view.setFloat32(byte, f.md)
+        byte += 4
+    })
+    valves.forEach(v=>{
+        //16 bytes
+        view.setFloat32(byte, v.p.x)
+        byte += 4
+        view.setFloat32(byte, v.p.y)
+        byte += 4
+        view.setFloat32(byte, v.r)
+        byte += 4
+        view.setUint8(byte, v.c[0])
+        byte ++
+        view.setUint8(byte, v.c[1])
+        byte ++
+        view.setUint8(byte, v.c[2])
+        byte ++
+        view.setUint8(byte, v.o ? 1:0)
+        byte ++
+    })
+    tcans.forEach(t=>{
+        // 8 bytes
+        view.setFloat32(byte, t.x)
+        byte += 4
+        view.setFloat32(byte, t.y)
+        byte += 4
+    })
+    return buf
+}
 function encode(){
     const buf = new ArrayBuffer(lines.length*37+fans.length*24+valves.length*16+tcans.length*8+8)
     const view = new DataView(buf)
