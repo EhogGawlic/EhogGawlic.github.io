@@ -150,6 +150,19 @@ switch(getCookie("btype")){
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
 const savestr = getStorage("save")
+if (!localStorage.getItem("saveid")){
+    localStorage.setItem("saveid", Math.random().toString())
+} else {
+    (async function(){
+        const res = await fetch("https://boxsandforum.onrender.com/filedata:id="+localStorage.getItem("saveid"))
+        if (!res.ok){
+            throw new Error(res.status)
+        }
+        const data = await res.blob()
+        const buffer = await res.arrayBuffer()
+        testDecode(buffer)
+    }())
+}
 if (savestr){
     decode(savestr,3)
 } else {

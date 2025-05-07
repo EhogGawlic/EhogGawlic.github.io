@@ -629,6 +629,15 @@ function saveData(data, name) {
         localStorage.setItem(name, data);
     }
 }
+async function setCloudData(data){
+    const id = localStorage.getItem("saveid")
+    const res = await fetch("https://boxsandforum.onrender.com/setblob:id="+id, {
+        method: "POST",
+
+        body: data
+    })
+    console.log(res.ok,res.status)
+}
 function getStorage(name){
     if(localStorage.getItem(name) !== null){
         return localStorage.getItem(name)
