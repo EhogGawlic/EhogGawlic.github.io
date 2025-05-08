@@ -712,6 +712,7 @@ async function setCloudData(data){
     const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/setblob:id="+id, {
         method: "PUT",
 
+        headers: { 'Content-Type': 'application/octet-stream' },
         body: data
     })
     console.log(res.ok,res.status)
