@@ -165,3 +165,4 @@ if (!localStorage.getItem("saveid")){
         testDecode(buffer)
     }())*/
 }
+loading=false
