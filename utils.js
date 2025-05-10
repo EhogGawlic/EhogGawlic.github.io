@@ -1,4 +1,3 @@
-
 function isUTF8(str) {
     let i = 0;
     while (i < str.length) {
@@ -706,19 +705,40 @@ function saveData(data, name) {
         localStorage.setItem(name, data);
     }
 }
-async function setCloudData(data){
-    console.log(data)
-    const id = localStorage.getItem("saveid")
-    const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/setblob", {
-        method: "POST",
-        cors:true,
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: {
-            id,
-            data
-        }
-    })
-    console.log(res.ok,res.status)
+async function setCloudData(data) {
+    console.log(data);
+    if (db) {
+        const transaction = db.transaction(["saves"], "readwrite"); // Use "readwrite" to allow updates
+        const objectStore = transaction.objectStore("saves");
+
+        const getRequest = objectStore.get(1);
+
+        getRequest.onsuccess = function(event) {
+            const data = event.target.result;
+            if (data) {
+                console.log(data);
+                data.data = encab(); // Modify the data
+                console.log(data.data, data);
+
+                // Save the updated object back to the database
+                const putRequest = objectStore.put(data, 1); // Use the same key (1)
+
+                putRequest.onsuccess = function() {
+                    console.log("Data successfully updated in IndexedDB.");
+                };
+
+                putRequest.onerror = function() {
+                    console.error("Failed to update data in IndexedDB.");
+                };
+            } else {
+                console.warn("No data found for key 1.");
+            }
+        };
+
+        getRequest.onerror = function() {
+            console.error("Failed to retrieve data.");
+        };
+    }
 }
 function getStorage(name){
     if(localStorage.getItem(name) !== null){

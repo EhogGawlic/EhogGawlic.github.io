@@ -149,20 +149,40 @@ switch(getCookie("btype")){
 }
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
-const savestr = getStorage("save")
-if (!localStorage.getItem("saveid")){
-    localStorage.setItem("saveid", Math.random().toString())
-} else {
-    /*(async function(){
-        const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/filedata:id="+localStorage.getItem("saveid"))
-        if (!res.ok){
-            throw new Error(res.status)
-        }
-        const data = await res.blob()
-        console.log(data)
-        const buffer = await res.arrayBuffer()
-        console.log(buffer)
-        testDecode(buffer)
-    }())*/
+let db
+const req = window.indexedDB.open("saves")
+req.onerror = ()=>{
+    console.log(req.error)
 }
-loading=false
+req.onsuccess = ()=>{
+    db = req.result
+    const transaction = db.transaction(["saves"], "readonly")
+    const objectStore = transaction.objectStore("saves")
+
+    const getRequest = objectStore.get(1)
+
+    getRequest.onsuccess = function(event) {
+        const data = event.target.result
+        console.log(data)
+        testDecode(data.data)
+        loading=false
+    }
+
+    getRequest.onerror = function() {
+        console.error("Failed to retrieve data.")
+    }
+}
+req.onupgradeneeded = (event) => {
+    const db = event.target.result
+    const objectStore = db.createObjectStore("saves", {autoIncrement: true})
+  
+    objectStore.createIndex("data", "data", { unique: false })
+  
+    objectStore.transaction.oncomplete = (event) => {
+        const saveObjectStore = db
+            .transaction("saves", "readwrite")
+            .objectStore("saves")
+        saveObjectStore.add({data:new ArrayBuffer(0)})
+    }
+}
+
