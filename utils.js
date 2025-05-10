@@ -709,11 +709,14 @@ function saveData(data, name) {
 async function setCloudData(data){
     console.log(data)
     const id = localStorage.getItem("saveid")
-    const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/setblob:id="+id, {
+    const res = await fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/setblob", {
         method: "PUT",
         cors:true,
-        headers: { 'Content-Type': 'text/plain' },
-        body: "test"
+        headers: { 'Content-Type': 'application/json' },
+        body: {
+            id,
+            data
+        }
     })
     console.log(res.ok,res.status)
 }
