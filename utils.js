@@ -716,14 +716,15 @@ function saveData(data, name) {
     }
 }
 async function setCloudData() {
+    return new Promise((resolve, reject) => {
     if (db) {
-        const transaction = db.transaction(["saves"], "readwrite"); // Use "readwrite" to allow updates
-        const objectStore = transaction.objectStore("saves");
+        const transaction = db.transaction(["saves"], "readwrite")
+        const objectStore = transaction.objectStore("saves")
 
-        const getRequest = objectStore.get(saveslot);
+        const getRequest = objectStore.get(saveslot)
 
         getRequest.onsuccess = function(event) {
-            const data = event.target.result;
+            const data = event.target.result
             if (data) {
                 data.lines=lines
                 data.fans=fans
@@ -732,21 +733,24 @@ async function setCloudData() {
                 const putRequest = objectStore.put(data, saveslot)
 
                 putRequest.onsuccess = function() {
-                    console.log("Data successfully updated in IndexedDB.");
+                    console.log("Data successfully updated in IndexedDB.")
                 };
 
                 putRequest.onerror = function() {
-                    console.error("Failed to update data in IndexedDB.");
+                    console.error("Failed to update data in IndexedDB.")
                 };
             } else {
-                console.warn("No data found for key 1.");
+                console.warn("No data found for key 1.")
             }
-        };
+            resolve(1)
+        }
 
         getRequest.onerror = function() {
-            console.error("Failed to retrieve data.");
-        };
+            console.error("Failed to retrieve data.")
+            reject()
+        }
     }
+    })
 }
 function getStorage(name){
     if(localStorage.getItem(name) !== null){
@@ -993,7 +997,7 @@ function log(text){
     }
     
 }
-function clearConsole(){
+function clearConsole(){//1000 lines!!!!!!!!!!!!!!!!!!!
     getEl("result").innerText=""
 }
 function textToHTML(text){
@@ -1007,22 +1011,10 @@ function loadSave(slot){
 
     getRequest.onsuccess = function(event) {
         const data = event.target.result
-        console.log(data)
         lines = data.lines
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
-        console.log(lines)
-        if (typeof localStorage.getItem("save") == "string"){
-            /*try{decode(localStorage.getItem("save"), 1)}
-            catch(e){
-                console.log(e)
-            }
-            finally{
-                localStorage.removeItem("save")
-            }*/
-        }
-        loading=false
     }
 
     getRequest.onerror = function() {

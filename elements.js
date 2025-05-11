@@ -153,7 +153,7 @@ const fan2 = imgSrc("fan2.png")
 if (!localStorage.getItem("saveslot")){
     localStorage.setItem("saveslot", 1)
 }
-const saveslot = parseInt(localStorage.getItem("saveslot"))
+let saveslot = parseInt(localStorage.getItem("saveslot"))
 let db
 const req = window.indexedDB.open("saves")
 req.onerror = ()=>{
@@ -174,14 +174,14 @@ req.onsuccess = ()=>{
         valves = data.valves
         tcans = data.tcans
         console.log(lines)
-        if (typeof localStorage.getItem("save") == "string"){
-            /*try{decode(localStorage.getItem("save"), 1)}
+        if (localStorage.getItem("save").split(";").length==4){
+            try{decode(localStorage.getItem("save").toString(), 1)}
             catch(e){
                 console.log(e)
             }
             finally{
                 localStorage.removeItem("save")
-            }*/
+            }
         }
         loading=false
     }

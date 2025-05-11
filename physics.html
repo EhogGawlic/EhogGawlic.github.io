@@ -82,6 +82,8 @@
                     <button id="savebtn">Save as file</button><br>
                     <!--<button id="savebtnc" onclick="saveData(encode(), 'save')">Save as cookie</button><br>-->
                     <a id="savelnk" download="save.psave" style="display: none;" href="data:text.json,{'objs':[],'lines':[]}">Save</a><br>
+                    <label for="savename">File name</label><br>
+                    <input id="savename" type="text" value="save"><br>
                     <label for="saveinp">Save file</label><br>
                     <input type="file" id="saveinp" accept=".psave,.json" onchange = "processFile(this.files)"><br>
                     <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>

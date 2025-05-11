@@ -603,7 +603,9 @@ asinp.onchange = function(){
     }
 }
 savebtn.addEventListener("click", ()=>{
-    savelnk.href="data:binary/dat;base64,"+encode()
+    savelnk.href="data:application/octet-stream;base64,"+encode()
+    
+    savelnk.download = getEl("savename").value+".psave"
     savelnk.click()
 })
 ppbtn.addEventListener("click", ()=>{
@@ -680,8 +682,15 @@ dsbtn.onclick=()=>{
 tsbtn.onclick=()=>{
     sm = 3
 }
-saveslotinp.addEventListener("change", ()=>{
-    setCloudData()
+saveslotinp.addEventListener("change", async ()=>{
+    await setCloudData()
+    lines=[]
+    valves=[]
+    fans=[]
+    tcans=[]
     localStorage.setItem("saveslot", saveslotinp.value)
-    loadSave(saveslotinp.value)
+    saveslot = parseInt(saveslotinp.value)
+    saveData(saveslot, 'saveslot')
+    loadSave(saveslot)
+    console.log(lines)
 })
