@@ -80,7 +80,8 @@ const ctx = canvas.getContext("2d"),
       bcb = getEl("bcb"),
       cresinp = getEl("cres"),
       dsbtn = getEl("2sbtn"),
-      tsbtn = getEl("3sbtn")
+      tsbtn = getEl("3sbtn"),
+      saveslotinp = getEl("saveslot")
 lmenu.style.width = offX+"px"
 rmenu.style.width = offX+"px"
 ctx.lineCap = "round"
@@ -149,6 +150,10 @@ switch(getCookie("btype")){
 }
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
+if (!localStorage.getItem("saveslot")){
+    localStorage.setItem("saveslot", 1)
+}
+const saveslot = parseInt(localStorage.getItem("saveslot"))
 let db
 const req = window.indexedDB.open("saves")
 req.onerror = ()=>{
@@ -159,7 +164,7 @@ req.onsuccess = ()=>{
     const transaction = db.transaction(["saves"], "readonly")
     const objectStore = transaction.objectStore("saves")
 
-    const getRequest = objectStore.get(1)
+    const getRequest = objectStore.get(saveslot)
 
     getRequest.onsuccess = function(event) {
         const data = event.target.result
@@ -170,13 +175,13 @@ req.onsuccess = ()=>{
         tcans = data.tcans
         console.log(lines)
         if (typeof localStorage.getItem("save") == "string"){
-            try{decode(localStorage.getItem("save"), 1)}
+            /*try{decode(localStorage.getItem("save"), 1)}
             catch(e){
                 console.log(e)
             }
             finally{
                 localStorage.removeItem("save")
-            }
+            }*/
         }
         loading=false
     }
@@ -199,6 +204,7 @@ req.onupgradeneeded = (event) => {
             .transaction("saves", "readwrite")
             .objectStore("saves")
         saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
     }
 }
-

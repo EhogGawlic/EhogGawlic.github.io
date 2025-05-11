@@ -1,3 +1,4 @@
+
 function isUTF8(str) {
     let i = 0;
     while (i < str.length) {
@@ -714,23 +715,21 @@ function saveData(data, name) {
         localStorage.setItem(name, data);
     }
 }
-async function setCloudData(data) {
-    console.log(data);
+async function setCloudData() {
     if (db) {
         const transaction = db.transaction(["saves"], "readwrite"); // Use "readwrite" to allow updates
         const objectStore = transaction.objectStore("saves");
 
-        const getRequest = objectStore.get(1);
+        const getRequest = objectStore.get(saveslot);
 
         getRequest.onsuccess = function(event) {
             const data = event.target.result;
             if (data) {
-                console.log(data)
                 data.lines=lines
                 data.fans=fans
                 data.valves=valves
                 data.tcans=tcans
-                const putRequest = objectStore.put(data, 1)
+                const putRequest = objectStore.put(data, saveslot)
 
                 putRequest.onsuccess = function() {
                     console.log("Data successfully updated in IndexedDB.");
@@ -999,4 +998,34 @@ function clearConsole(){
 }
 function textToHTML(text){
     return text.replace("\n", "<br>")
+}
+function loadSave(slot){
+    const transaction = db.transaction(["saves"], "readonly")
+    const objectStore = transaction.objectStore("saves")
+
+    const getRequest = objectStore.get(slot)
+
+    getRequest.onsuccess = function(event) {
+        const data = event.target.result
+        console.log(data)
+        lines = data.lines
+        fans = data.fans
+        valves = data.valves
+        tcans = data.tcans
+        console.log(lines)
+        if (typeof localStorage.getItem("save") == "string"){
+            /*try{decode(localStorage.getItem("save"), 1)}
+            catch(e){
+                console.log(e)
+            }
+            finally{
+                localStorage.removeItem("save")
+            }*/
+        }
+        loading=false
+    }
+
+    getRequest.onerror = function() {
+        console.error("Failed to retrieve data.")
+    }
 }

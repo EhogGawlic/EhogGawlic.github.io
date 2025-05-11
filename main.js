@@ -2,7 +2,7 @@
 let a = 0
 let t = 0
 setInterval(()=>{
-    setCloudData(encab())
+    setCloudData()
 },sps.value*1000)
 function run(){
     if (loading){
@@ -680,3 +680,8 @@ dsbtn.onclick=()=>{
 tsbtn.onclick=()=>{
     sm = 3
 }
+saveslotinp.addEventListener("change", ()=>{
+    setCloudData()
+    localStorage.setItem("saveslot", saveslotinp.value)
+    loadSave(saveslotinp.value)
+})
