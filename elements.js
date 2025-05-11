@@ -164,7 +164,20 @@ req.onsuccess = ()=>{
     getRequest.onsuccess = function(event) {
         const data = event.target.result
         console.log(data)
-        testDecode(data.data)
+        lines = data.lines
+        fans = data.fans
+        valves = data.valves
+        tcans = data.tcans
+        console.log(lines)
+        if (typeof localStorage.getItem("save") == "string"){
+            try{decode(localStorage.getItem("save"), 1)}
+            catch(e){
+                console.log(e)
+            }
+            finally{
+                localStorage.removeItem("save")
+            }
+        }
         loading=false
     }
 
@@ -176,13 +189,16 @@ req.onupgradeneeded = (event) => {
     const db = event.target.result
     const objectStore = db.createObjectStore("saves", {autoIncrement: true})
   
-    objectStore.createIndex("data", "data", { unique: false })
+    objectStore.createIndex("lines", "lines", { unique: false })
+    objectStore.createIndex("fans", "fans", { unique: false })
+    objectStore.createIndex("valves", "valves", { unique: false })
+    objectStore.createIndex("tcans", "tcans", { unique: false })
   
     objectStore.transaction.oncomplete = (event) => {
         const saveObjectStore = db
             .transaction("saves", "readwrite")
             .objectStore("saves")
-        saveObjectStore.add({data:new ArrayBuffer(0)})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
     }
 }
 

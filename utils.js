@@ -611,9 +611,10 @@ async function decode(str, typ){
 function testDecode(buf){
     const view= new DataView(buf)
     const linen = view.getUint16(0)
-    const valven = view.getUint16(2)
-    const fann = view.getUint16(4)
+    const fann = view.getUint16(2)
+    const valven = view.getUint16(4)
     const tcann = view.getUint16(6)
+    console.log("Line count:", linen, "Fan count:", fann, "Valve count:", valven)
     let byte = 8
     for (let i = 0; i < linen; i++){
         const p1x = view.getFloat32(byte)
@@ -641,26 +642,33 @@ function testDecode(buf){
         const mp = v(mpx, mpy)
         lines.push({p1,p2,w:lw, m:{h:hm,p:mp,t:mt,s:ms},np1:p1,np2:p2,s:ms})
     }
-    for (let i = 0; i < fann; i++){
-        const x = view.getFloat32(byte)
-        byte += 4
-        const y = view.getFloat32(byte)
-        byte += 4
-        const s = view.getFloat32(byte)
-        byte += 4
-        const dx = view.getFloat32(byte)
-        byte += 4
-        const dy = view.getFloat32(byte)
-        byte += 4
-        const md = view.getFloat32(byte)
-        byte += 4
+    console.log(lines)
+    console.log(byte)
+    for (let i = 0; i < fann; i++) {
+        const x = view.getFloat32(byte);
+        byte += 4;
+        const y = view.getFloat32(byte);
+        byte += 4;
+        const s = view.getFloat32(byte);
+        byte += 4;
+        const dx = view.getFloat32(byte);
+        byte += 4;
+        const dy = view.getFloat32(byte);
+        byte += 4;
+        const md = view.getFloat32(byte);
+        byte += 4;
+
+        console.log("Decoded fan:", x, y, s, dx, dy, md);
+
         fans.push({
-            p: v(x,y),
+            p: v(x, y),
             s,
-            dir: v(dx,dy),
-            md
-        })
+            dir: v(dx, dy),
+            md,
+        });
     }
+    console.log(fans)
+    console.log(byte)
     for (let i = 0; i < valven; i++){
         const px = view.getFloat32(byte)
         byte += 4
@@ -690,6 +698,7 @@ function testDecode(buf){
         byte += 4
         valves.push(v(x,y))
     }
+    console.log("Fan count:", fann, "Valve count:", valven);
 }
 String.prototype.removeCharAt = function (i) {
     var tmp = this.split(''); // convert to an array
@@ -716,12 +725,12 @@ async function setCloudData(data) {
         getRequest.onsuccess = function(event) {
             const data = event.target.result;
             if (data) {
-                console.log(data);
-                data.data = encab(); // Modify the data
-                console.log(data.data, data);
-
-                // Save the updated object back to the database
-                const putRequest = objectStore.put(data, 1); // Use the same key (1)
+                console.log(data)
+                data.lines=lines
+                data.fans=fans
+                data.valves=valves
+                data.tcans=tcans
+                const putRequest = objectStore.put(data, 1)
 
                 putRequest.onsuccess = function() {
                     console.log("Data successfully updated in IndexedDB.");
