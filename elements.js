@@ -174,6 +174,12 @@ req.onsuccess = ()=>{
         valves = data.valves
         tcans = data.tcans
         console.log(lines)
+        if (!lines){
+            lines = []
+            fans = []
+            valves = []
+            tcans = []
+        }
         if (localStorage.getItem("save").split(";").length==4){
             try{decode(localStorage.getItem("save").toString(), 1)}
             catch(e){
