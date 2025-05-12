@@ -688,6 +688,7 @@ saveslotinp.addEventListener("change", async ()=>{
     valves=[]
     fans=[]
     tcans=[]
+    balls=[]
     localStorage.setItem("saveslot", saveslotinp.value)
     saveslot = parseInt(saveslotinp.value)
     saveData(saveslot, 'saveslot')
