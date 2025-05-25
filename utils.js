@@ -843,7 +843,7 @@ function generateArc(x,y,sx,sy,mx,my,w,cw){
     lninp.max=lines.length-1
 }
 function logInForum(usrname, pword){
-    fetch("https://mn4zqn4t-3000.usw3.devtunnels.ms/gyat.html", {
+    fetch("https://mn4zqn4t-4000.usw3.devtunnels.ms/gyat.html", {
         method: "POST",
         body: {username: usrname, password: pword}
     })
