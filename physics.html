@@ -194,7 +194,7 @@
             </div>
             <div id="console">
                 <h1>COLSOLE</h1>
-                <textarea rows="5" cols="50" id="consoletxt" onchange="try{eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
+                <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl("result").innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
                 <span id="result"></span><br>
                 <p>
                     FUNCTIONS & VARIABLES<br>
