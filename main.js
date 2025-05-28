@@ -97,6 +97,11 @@ function run(){
         
         ctx.strokeStyle="black"
         lines.forEach(l => {
+            if (l.color){
+                ctx.strokeStyle=`rgb(${l.colors[0]},${l.colors[1]},${l.colors[2]})`
+            } else {
+                ctx.strokeStyle="black"
+            }
             let x1 = l.p1.x
             let y1 = l.p1.y
             let x2 = l.p2.x
