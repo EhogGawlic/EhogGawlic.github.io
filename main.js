@@ -220,6 +220,11 @@ window.addEventListener("keypress", (e) => {
             case "k":
                 paused = paused ? false : true
                 ppbtn.style.backgroundColor = paused ? "red" : "green"
+                break
+            case "t":
+                adding.ia=true
+                adding.t=1
+                
         }
     }
 })
