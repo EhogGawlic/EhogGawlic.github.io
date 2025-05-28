@@ -99,6 +99,7 @@ function run(){
         lines.forEach(l => {
             if (l.color){
                 ctx.strokeStyle=`rgb(${l.colors[0]},${l.colors[1]},${l.colors[2]})`
+                log (`rgb(${l.colors[0]},${l.colors[1]},${l.colors[2]})`)
             } else {
                 ctx.strokeStyle="black"
             }
