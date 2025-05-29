@@ -226,7 +226,7 @@ function selectTCan(x, y){
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 function addLine(w){
-    lines.push({p1:c1p,p2:c2p,w:w, m:{h:false,p:{x:0,y:0},t:0},np1:c1p,np2:c2p,s:0.05, color:HEXRGB(cinp.value)})
+    lines.push({p1:c1p,p2:c2p,w:w, m:{h:false,p:{x:0,y:0},t:0},np1:c1p,np2:c2p,s:0.05, color:HEXRGB(clinp.value)})
     lninp.max=lines.length-1
     cn=0
     ml =false
