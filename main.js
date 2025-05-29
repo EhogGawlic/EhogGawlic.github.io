@@ -98,8 +98,7 @@ function run(){
         ctx.strokeStyle="black"
         lines.forEach(l => {
             if (l.color){
-                ctx.strokeStyle=`rgb(${l.colors[0]},${l.colors[1]},${l.colors[2]})`
-                log (`rgb(${l.colors[0]},${l.colors[1]},${l.colors[2]})`)
+                ctx.strokeStyle=`rgb(${l.color[0]},${l.color[1]},${l.color[2]})`
             } else {
                 ctx.strokeStyle="black"
             }
