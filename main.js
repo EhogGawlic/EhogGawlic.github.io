@@ -720,7 +720,7 @@ saveslotinp.addEventListener("change", async ()=>{
 bldok.addEventListener("click", ()=>{
     const color = HEXRGB(btypeinp.value)
     let dqueue = []
-    balls.forEach(ball => {
+    objs.forEach(ball => {
         if (compareArr(color, ball.c)){
 
             dqueue.push(ball.n)
