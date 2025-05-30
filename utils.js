@@ -99,13 +99,14 @@ let fric = 1.001
 let objs = [],
     polys= []
 let selecting = false
-let selected
+let selected, drawing;
 let lines = [],
     ms=1,
     consolehist = [],
     flipP=[],
     flipR=[],
     flipW=[],
+    motor2s=[],                                                                                                                                                
     cellsize = 4,
     ltype=0,
     cres=20,

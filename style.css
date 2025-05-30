@@ -38,6 +38,7 @@ p{
 button{
     width: 100px;
     cursor: pointer;
+    background-color: lightgray;
 }
 #FPS{
     position: absolute;
@@ -149,4 +150,23 @@ h1{
 }
 .hidden{
     display: none;
+}
+#bottommenu{
+    position: absolute;
+    bottom: 0;
+    left: 300px;
+    right: 300px;
+    height: 54px;
+    background-color: rgb(215, 225, 255);
+}
+#bottommenu button{
+    width: 150px;
+    height: 50px;
+    margin: 2px;
+    background-color: white;
+}
+#bottommenu img{
+    width: 46px;
+    height: 46px;
+    cursor: pointer;
 }

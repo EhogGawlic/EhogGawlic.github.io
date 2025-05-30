@@ -253,11 +253,14 @@ canvas.addEventListener("mousedown", ()=>{
 canvas.addEventListener("mouseup", ()=>{
     clicking = false
 })
+let pmx;
+let pmy;
 canvas.addEventListener("mousemove", (e)=>{
     mx = Math.round((e.clientX-offX)*ma)
     my = Math.round(e.clientY*ma)
     if (clicking){
-
+        if (!drawing)
+        {
         const p = selectLinePoint(mx, my)
 
         p.forEach(point => {
@@ -278,6 +281,15 @@ canvas.addEventListener("mousemove", (e)=>{
             }
         }
     }
+        else
+        {
+            c1p = {x:pmx,y:pmy}
+            c2p = {x:mx,y:my}
+            addLine(parseInt(lwinp.value))
+        }
+    }
+    pmy = my
+    pmx = mx
 })
 window.onclick = (e)=>{
     //

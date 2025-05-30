@@ -72,6 +72,7 @@
                     <button id="clearbtn">Clear</button><br>
                     <button id="clearufbtn" style="font-size: x-small;">Clear unfixed</button><br>
                     <button id="albtn">Add line</button><br>
+                    <button onclick="drawing=!drawing;this.style.backgroundColor = drawing ? 'green':'lightgray';">Draw</button><br>
                     <label for="lwinp">Line width</label><br>
                     <input id="lwinp" type="number" value="20"><br>
                     <button id="avbtn">Add valve</button><br>
@@ -194,7 +195,7 @@
             </div>
             <div id="console">
                 <h1>COLSOLE</h1>
-                <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl("result").innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
+                <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl('result').innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
                 <span id="result"></span><br>
                 <p>
                     FUNCTIONS & VARIABLES<br>
@@ -208,6 +209,9 @@
                     fans: All the fans<br>
                     bye:)
                 </p>
+            </div>
+            <div id="bottommenu">
+                <button id="bombbtn">BOM<img src="bom.png" id="bombsrc"></button>
             </div>
         </div>
         <img id="lbg" src="loadingbgr.jpg">
