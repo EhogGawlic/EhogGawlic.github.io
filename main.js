@@ -455,17 +455,17 @@ window.onclick = (e)=>{
         if (disec){
             switch(cn){
                 case 0:
-                    c1p = {x:mx,y:my}
+                    d1p = {x:mx,y:my}
                     cn=1
                     break
                 case 1:
-                    c2p = {x:mx,y:my}
+                    d2p = {x:mx,y:my}
                     cn=2
                     break
                 case 2:
                     let i = 0
                     lines.forEach(l=>{
-                        if (pointInBox(c1p.x,c1p.y,c2p.x,c2p.y,l.p1) && pointInBox(c1p.x,c1p.y,c2p.x,c2p.y,l.p2)){
+                        if (pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p1) && pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p2)){
                             lines.splice(i,1)
                             
                         } else{

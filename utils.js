@@ -142,7 +142,9 @@ let lines = [],
     fliprows = 500/cellsize+1,
     flipcols = fliprows+1,
     waterBlur=1,
-    disec = false
+    disec = false,
+    d1p = {x:0,y:0},
+    d2p = {x:0,y:0}
 for (let y = 0; y < fliprows; y++){
     flipP.push([])
     for (let x = 0; x < flipcols; x++){
