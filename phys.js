@@ -242,12 +242,12 @@ class Obj {
             ctx.stroke()
             ctx.fillStyle = `rgba(${this.c[0]},${this.c[1]},${this.c[2]}, 0.66)`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r*(wtrblur/2+1) 0, 2 * Math.PI)
+            ctx.arc(this.p.x, this.p.y, this.r*(waterBlur/2+1), 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
             ctx.fillStyle = `rgba(${this.c[0]},${this.c[1]},${this.c[2]}, 0.33)`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r*(wtrblur+1), 0, 2 * Math.PI)
+            ctx.arc(this.p.x, this.p.y, this.r*(waterBlur+1), 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
         }catch(err){alert(err)}
