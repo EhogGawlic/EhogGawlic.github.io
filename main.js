@@ -97,6 +97,11 @@ function run(){
         
         ctx.strokeStyle="black"
         lines.forEach(l => {
+            if (l.color){
+                ctx.strokeStyle=`rgb(${l.color[0]},${l.color[1]},${l.color[2]})`
+            } else {
+                ctx.strokeStyle="black"
+            }
             let x1 = l.p1.x
             let y1 = l.p1.y
             let x2 = l.p2.x
@@ -220,6 +225,11 @@ window.addEventListener("keypress", (e) => {
             case "k":
                 paused = paused ? false : true
                 ppbtn.style.backgroundColor = paused ? "red" : "green"
+                break
+            case "t":
+                adding.ia=true
+                adding.t=1
+                
         }
     }
 })
