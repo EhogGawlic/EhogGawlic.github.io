@@ -329,6 +329,7 @@ window.onclick = (e)=>{
 
     canvas.style.cursor="crosshair"
             }  
+            return
         }
         if (ml && !selecting && !av && !af && !deleting && !adding.ia){
             switch(ltype){
@@ -381,11 +382,13 @@ window.onclick = (e)=>{
                             ml=false
                     }
             }
+            return
         }
         if (av && !selecting && !af && !ml && !deleting && !adding.ia){
             valves.push({p:{x:mx, y:my},r:parseFloat(rinp.value)*meterPixRatio,c:HEXRGB(cinp.value),o:false})
             vninp.max = valves.length-1
             av=false
+            return
         }
         if (af && !selecting && !av && !ml && !deleting && !adding.ia){
             switch(cn){
@@ -398,6 +401,7 @@ window.onclick = (e)=>{
                     cn=0
                     af=false
             }
+            return
         }
         if (deleting && !selecting && !av && !ml && !af && !adding.ia){
             let selecteda
@@ -435,6 +439,7 @@ window.onclick = (e)=>{
             }
             deleting=false
             selecttype="none"
+            return
         }
         if (!deleting && !selecting && !av && !ml && !af && adding.ia){
             switch(adding.t){
@@ -445,7 +450,32 @@ window.onclick = (e)=>{
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
             }
             adding.ia=false
-
+            return
+        }
+        if (disec){
+            switch(cn){
+                case 0:
+                    c1p = {x:mx,y:my}
+                    cn=1
+                    break
+                case 1:
+                    c2p = {x:mx,y:my}
+                    cn=2
+                    break
+                case 2:
+                    let i = 0
+                    lines.forEach(l=>{
+                        if (pointInBox(c1p.x,c1p.y,c2p.x,c2p.y,l.p1) && pointInBox(c1p.x,c1p.y,c2p.x,c2p.y,l.p2)){
+                            lines.splice(i,1)
+                            
+                        } else{
+                            i++
+                        }
+                    })
+                    cn=0
+                    disec=false
+                    return
+            }
         }
     }
     //

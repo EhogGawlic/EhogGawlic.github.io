@@ -141,7 +141,8 @@ let lines = [],
     cs,
     fliprows = 500/cellsize+1,
     flipcols = fliprows+1,
-    waterBlur=1
+    waterBlur=1,
+    disec = false
 for (let y = 0; y < fliprows; y++){
     flipP.push([])
     for (let x = 0; x < flipcols; x++){
@@ -1034,4 +1035,7 @@ function compareArr(arr1, arr2){
         i++
     });
     return isMatch
+}
+function pointInBox(p1x, p1y, p2x, p2y, p){
+    return p.x>p1x&&p.y>p1y&&p.x<p2x&&p2y<p2y
 }
