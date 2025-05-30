@@ -717,3 +717,21 @@ saveslotinp.addEventListener("change", async ()=>{
     loadSave(saveslot)
     console.log(lines)
 })
+bldok.addEventListener("click", ()=>{
+    const color = HEXRGB(btypeinp.value)
+    let dqueue = []
+    balls.forEach(ball => {
+        if (compareArr(color, ball.c)){
+
+            dqueue.push(ball.n)
+        }
+    })
+    for (let n = dqueue.length-1; n >= 0; n--){
+        objs.splice(dqueue[n], 1)
+        for (let i = 0; i < objs.length; i++){
+            if (i>=dqueue[n]){
+                objs[i].n--
+            }
+        }
+    }
+})

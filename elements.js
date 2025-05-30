@@ -83,8 +83,9 @@ const ctx = canvas.getContext("2d"),
       tsbtn = getEl("3sbtn"),
       clinp = getEl("lcolinp"),
       saveslotinp = getEl("saveslot"),
-      bottommenu = getEl("bottommenu")
-
+      bottommenu = getEl("bottommenu"),
+      btypeinp = getEl("btypeinp"),
+      bldok = getEl("bldok")
 lmenu.style.width = offX+"px"
 rmenu.style.width = offX+"px"
 bottommenu.style.left = offX+"px"

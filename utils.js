@@ -1022,3 +1022,15 @@ function loadSave(slot){
         console.error("Failed to retrieve data.")
     }
 }
+
+function compareArr(arr1, arr2){
+    let isMatch = arr1.length===arr2.length
+    let i = 0
+    arr1.forEach(el => {
+        if (el !== arr2[i]){
+            isMatch=false
+        }
+        i++
+    });
+    return isMatch
+}
