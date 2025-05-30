@@ -140,7 +140,8 @@ let lines = [],
     cc,
     cs,
     fliprows = 500/cellsize+1,
-    flipcols = fliprows+1
+    flipcols = fliprows+1,
+    wtrblur=1
 for (let y = 0; y < fliprows; y++){
     flipP.push([])
     for (let x = 0; x < flipcols; x++){
