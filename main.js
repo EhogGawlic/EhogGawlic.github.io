@@ -307,6 +307,32 @@ window.onclick = (e)=>{
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
+        if (disec){
+            switch(cn){
+                case 0:
+                    d1p = {x:mx,y:my}
+                    cn=1
+                    break
+                case 1:
+                    d2p = {x:mx,y:my}
+                    cn=2
+                    break
+                case 2:
+                    let i = 0
+                    lines.forEach(l=>{
+                        if (pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p1) && pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p2)){
+                            lines.splice(i,1)
+                            
+                        } else{
+                            i++
+                        }
+                    })
+                    cn=0
+                    disec=false
+                    return
+            }
+            return
+        }
     
     if (e.clientX>offX&&e.clientX<innerWidth-offX){
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
@@ -451,31 +477,6 @@ window.onclick = (e)=>{
             }
             adding.ia=false
             return
-        }
-        if (disec){
-            switch(cn){
-                case 0:
-                    d1p = {x:mx,y:my}
-                    cn=1
-                    break
-                case 1:
-                    d2p = {x:mx,y:my}
-                    cn=2
-                    break
-                case 2:
-                    let i = 0
-                    lines.forEach(l=>{
-                        if (pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p1) && pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p2)){
-                            lines.splice(i,1)
-                            
-                        } else{
-                            i++
-                        }
-                    })
-                    cn=0
-                    disec=false
-                    return
-            }
         }
     }
     //
