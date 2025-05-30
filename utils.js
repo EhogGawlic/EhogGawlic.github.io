@@ -1036,6 +1036,6 @@ function compareArr(arr1, arr2){
     });
     return isMatch
 }
-function pointInBox(p1x, p1y, p2x, p2y, p){
-    return p.x>p1x&&p.y>p1y&&p.x<p2x&&p2y<p2y
+function pointInBox(x1, y1, x2, y2, p){
+    return p.x>x1&&p.y>y1&&p.x<x2&&p.y<y2
 }
