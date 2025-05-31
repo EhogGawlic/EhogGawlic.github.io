@@ -140,7 +140,11 @@ let lines = [],
     cc,
     cs,
     fliprows = 500/cellsize+1,
-    flipcols = fliprows+1
+    flipcols = fliprows+1,
+    waterBlur=1,
+    disec = false,
+    d1p = {x:0,y:0},
+    d2p = {x:0,y:0}
 for (let y = 0; y < fliprows; y++){
     flipP.push([])
     for (let x = 0; x < flipcols; x++){
@@ -1021,4 +1025,19 @@ function loadSave(slot){
     getRequest.onerror = function() {
         console.error("Failed to retrieve data.")
     }
+}
+
+function compareArr(arr1, arr2){
+    let isMatch = arr1.length===arr2.length
+    let i = 0
+    arr1.forEach(el => {
+        if (el !== arr2[i]){
+            isMatch=false
+        }
+        i++
+    });
+    return isMatch
+}
+function pointInBox(x1, y1, x2, y2, p){
+    return p.x>x1&&p.y>y1&&p.x<x2&&p.y<y2
 }

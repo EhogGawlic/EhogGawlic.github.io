@@ -307,6 +307,32 @@ window.onclick = (e)=>{
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
+        if (disec){
+            switch(cn){
+                case 0:
+                    d1p = {x:mx,y:my}
+                    cn=1
+                    break
+                case 1:
+                    d2p = {x:mx,y:my}
+                    cn=2
+                    break
+                case 2:
+                    let i = 0
+                    lines.forEach(l=>{
+                        if (pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p1) && pointInBox(d1p.x,d1p.y,d2p.x,d2p.y,l.p2)){
+                            lines.splice(i,1)
+                            
+                        } else{
+                            i++
+                        }
+                    })
+                    cn=0
+                    disec=false
+                    return
+            }
+            return
+        }
     
     if (e.clientX>offX&&e.clientX<innerWidth-offX){
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
@@ -329,6 +355,7 @@ window.onclick = (e)=>{
 
     canvas.style.cursor="crosshair"
             }  
+            return
         }
         if (ml && !selecting && !av && !af && !deleting && !adding.ia){
             switch(ltype){
@@ -381,11 +408,13 @@ window.onclick = (e)=>{
                             ml=false
                     }
             }
+            return
         }
         if (av && !selecting && !af && !ml && !deleting && !adding.ia){
             valves.push({p:{x:mx, y:my},r:parseFloat(rinp.value)*meterPixRatio,c:HEXRGB(cinp.value),o:false})
             vninp.max = valves.length-1
             av=false
+            return
         }
         if (af && !selecting && !av && !ml && !deleting && !adding.ia){
             switch(cn){
@@ -398,6 +427,7 @@ window.onclick = (e)=>{
                     cn=0
                     af=false
             }
+            return
         }
         if (deleting && !selecting && !av && !ml && !af && !adding.ia){
             let selecteda
@@ -435,6 +465,7 @@ window.onclick = (e)=>{
             }
             deleting=false
             selecttype="none"
+            return
         }
         if (!deleting && !selecting && !av && !ml && !af && adding.ia){
             switch(adding.t){
@@ -445,7 +476,7 @@ window.onclick = (e)=>{
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
             }
             adding.ia=false
-
+            return
         }
     }
     //
@@ -717,4 +748,22 @@ saveslotinp.addEventListener("change", async ()=>{
     saveData(saveslot, 'saveslot')
     loadSave(saveslot)
     console.log(lines)
+})
+bldok.addEventListener("click", ()=>{
+    const color = HEXRGB(btypeinp.value)
+    let dqueue = []
+    objs.forEach(ball => {
+        if (compareArr(color, ball.c)){
+
+            dqueue.push(ball.n)
+        }
+    })
+    for (let n = dqueue.length-1; n >= 0; n--){
+        objs.splice(dqueue[n], 1)
+        for (let i = 0; i < objs.length; i++){
+            if (i>=dqueue[n]){
+                objs[i].n--
+            }
+        }
+    }
 })

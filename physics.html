@@ -149,16 +149,20 @@
                         </button>
                     </div>
                     <button id="okbtn1">OK</button><br>
-                    <button id="dbtn">Delete (select)</button>
+                    <button id="dbtn">Delete (select)</button><br>
+                    <button onclick="disec=!disec">Delete 2 (select)</button>
                 </div><br>
                 <div class="idk">
                     <h3>Thing editing & deleting</h3>
+                    <button onclick="getEl('bl').style.display = getEl('bl').style.display === 'block' ? 'none':'block'">Edit balls</button>
                     <div class="hidden" id="bl">
                         <label for="bounce">Bounce</label><br>
                         <input id="bounce" type="number" value="0.2"><br>
                         <label for="weight">Weight</label><br>
                         <input id="weight" type="number" value="1000"><br>
                         <button id="bleok">OK</button><br>
+                        <label for="dtypeinp">Delete all of color</label><br>
+                        <input id="dtypeinp" type="color"><br>
                         <button id="bldok">Delete/remove</button>
                     </div><br>
                     <div class="hidden" id="fn">
