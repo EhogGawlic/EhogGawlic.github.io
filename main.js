@@ -568,6 +568,7 @@ clearbtn.addEventListener("click", ()=>{
     ml =false
     deleting=false
     adding.ia=false
+    drawing=false
 })
 albtn.addEventListener("click", ()=>{
     ml = true
