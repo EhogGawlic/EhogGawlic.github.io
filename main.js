@@ -133,7 +133,7 @@ function run(){
             drawFan(f)
         })
         tcans.forEach(tcan => {
-            ctx.drawImage(tcansrc, tcan.x-64, tcan.y-64, 128, 128)
+            ctx.drawImage(tcansrc, tcan.x-64+emv.x, tcan.y-64+emv.y, 128, 128)
         })
 
     inf = getEl("infcheck").checked
@@ -191,6 +191,10 @@ function run(){
                 }
         }
     }
+    bombs.forEach(bomb=>{
+        ctx.fillStyle="red"
+        ctx.drawImage(bomsrc, bomb.x-16+emv.x, bomb.y-16+emv.y, 32, 32)
+    })
     //
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
@@ -360,8 +364,9 @@ window.onclick = (e)=>{
             return
         }
     
-    if (e.clientX>offX&&e.clientX<innerWidth-offX){
-        if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
+    if (e.clientX>offX&&e.clientX<innerWidth-offX && e.clientY>0&&e.clientY<innerHeight-50){
+
+        if (!selecting && !ml && !av && !af && !deleting && !adding.ia && !abomb){
             try{
             addObj(mx,my,
             parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
@@ -370,7 +375,7 @@ window.onclick = (e)=>{
             }catch(e){alert(e)}
             return
         }
-        if (selecting && !ml && !av && !af && !deleting && !adding.ia){
+        if (selecting && !ml && !av && !af && !deleting && !adding.ia && !abomb){
             const s = select(mx, my)
             if (s!==false){
                 if (sil===false){
@@ -383,7 +388,7 @@ window.onclick = (e)=>{
             }  
             return
         }
-        if (ml && !selecting && !av && !af && !deleting && !adding.ia){
+        if (ml && !selecting && !av && !af && !deleting && !adding.ia && !abomb){
             switch(ltype){
                 case 0:
                     switch(cn){
@@ -436,13 +441,13 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (av && !selecting && !af && !ml && !deleting && !adding.ia){
+        if (av && !selecting && !af && !ml && !deleting && !adding.ia && !abomb){
             valves.push({p:{x:mx, y:my},r:parseFloat(rinp.value)*meterPixRatio,c:HEXRGB(cinp.value),o:false})
             vninp.max = valves.length-1
             av=false
             return
         }
-        if (af && !selecting && !av && !ml && !deleting && !adding.ia){
+        if (af && !selecting && !av && !ml && !deleting && !adding.ia && !abomb){
             switch(cn){
                 case 0:
                     fp = {x:mx,y:my}
@@ -455,7 +460,7 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (deleting && !selecting && !av && !ml && !af && !adding.ia){
+        if (deleting && !selecting && !av && !ml && !af && !adding.ia && !abomb){
             let selecteda
             const sb = selectBall(mx, my)
             if (sb!==undefined){ selecteda = sb; selecttype="ball" }
@@ -493,7 +498,7 @@ window.onclick = (e)=>{
             selecttype="none"
             return
         }
-        if (!deleting && !selecting && !av && !ml && !af && adding.ia){
+        if (!deleting && !selecting && !av && !ml && !af && adding.ia && !abomb){
             switch(adding.t){
                 case 1:
                     tcans.push({x:mx, y:my})
@@ -504,6 +509,26 @@ window.onclick = (e)=>{
             adding.ia=false
             return
         }
+    }   
+    if (!deleting && !selecting && !av && !ml && !af && !adding.ia && abomb && e.clientY < innerHeight-50){
+        bombs.push({x:mx,y:my})
+        const bi = bombs.length-1
+        const bom = bombs[bi]
+        abomb=false
+        
+        setTimeout(()=>{
+            objs.forEach(obj=>{
+
+                const d = dist(bom, obj.p)
+                if (d <= 50){
+                    const force = 500000/d/obj.w
+                    const nforce = multVecCon(norm(subVec(obj.p, bom)),force)
+                    obj.pp.x -= nforce.x
+                    obj.pp.y -= nforce.y
+                }
+            })
+                bombs.splice(bi, 1)
+        }, 5000)
     }
     //
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
@@ -613,6 +638,9 @@ rbbtn.addEventListener("click", ()=>{
             }
         }
     }
+})
+abmbtn.addEventListener("click", ()=>{
+    abomb=true
 })
 clearbtn.addEventListener("click", ()=>{
     objs=[]

@@ -85,7 +85,8 @@ const ctx = canvas.getContext("2d"),
       saveslotinp = getEl("saveslot"),
       bottommenu = getEl("bottommenu"),
       btypeinp = getEl("dtypeinp"),
-      bldok = getEl("bldok")
+      bldok = getEl("bldok"),
+      abmbtn = getEl("bombbtn")
 lmenu.style.width = offX+"px"
 rmenu.style.width = offX+"px"
 bottommenu.style.left = offX+"px"
@@ -156,6 +157,7 @@ switch(getCookie("btype")){
 }
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
+const bomsrc = imgSrc('bom.png')
 if (!localStorage.getItem("saveslot")){
     localStorage.setItem("saveslot", 1)
 }
