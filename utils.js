@@ -101,6 +101,8 @@ let objs = [],
 let selecting = false
 let selected, drawing;
 let lines = [],
+    inf = false,
+    emv = {x:0,y:0},
     ms=1,
     consolehist = [],
     flipP=[],
@@ -371,7 +373,7 @@ function drawImage(image, x, y, scale, rotation){
 } 
 function drawFan(fan){
     const a = getAngle(fan.dir)+1.57079633
-    drawImage(t%2===0?fan1:fan2,fan.p.x,fan.p.y,40/(innerHeight-52),a)
+    drawImage(t%2===0?fan1:fan2,fan.p.x+emv.x,fan.p.y+emv.y,40/(innerHeight-52),a)
     
 }
 function notInArray(ar,n){
@@ -877,9 +879,9 @@ function generateArcPrev(x,y,sx,sy,mx,my,w,cw){
         }
     ctx.beginPath()
     ctx.lineWidth = w
-    ctx.moveTo(curve[0].x,curve[0].y)
+    ctx.moveTo(curve[0].x+emv.x,curve[0].y+emv.y)
     for (let i = 1; i < curve.length-1; i++){
-        ctx.lineTo(curve[i].x,curve[i].y)
+        ctx.lineTo(curve[i].x+emv.x,curve[i].y+emv.y)
     }
     ctx.stroke()
     lninp.max=lines.length-1
@@ -1025,6 +1027,8 @@ function loadSave(slot){
     getRequest.onerror = function() {
         console.error("Failed to retrieve data.")
     }
+    const infs = getStorage("infspace")
+    getEl("infspace").checked = infs === "true" ? true : false
 }
 
 function compareArr(arr1, arr2){

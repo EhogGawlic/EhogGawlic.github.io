@@ -1,8 +1,10 @@
 
 let a = 0
 let t = 0
+
 setInterval(()=>{
     setCloudData()
+    saveData(getEl("infcheck").checked ? "true" : "", "infspace")
 },sps.value*1000)
 function run(){
     if (loading){
@@ -78,6 +80,9 @@ function run(){
                         dqueue.push(obj.n)
                     }
                 })
+                if (obj.p.y >= 6700*meterPixRatio){
+                    dqueue.push(obj.n)
+                }
                 obj.phys()
                 
             }
@@ -117,8 +122,8 @@ function run(){
             }
             ctx.lineWidth = l.w
             ctx.beginPath()
-            ctx.moveTo(x1, y1)
-            ctx.lineTo(x2, y2)
+            ctx.moveTo(x1+emv.x, y1+emv.y)
+            ctx.lineTo(x2+emv.x, y2+emv.y)
             ctx.stroke()
             ctx.lineWidth = 1
         })
@@ -130,6 +135,8 @@ function run(){
         tcans.forEach(tcan => {
             ctx.drawImage(tcansrc, tcan.x-64, tcan.y-64, 128, 128)
         })
+
+    inf = getEl("infcheck").checked
         let i = 0
         valves.forEach(v =>{
             if (i===parseInt(vninp.value)){
@@ -141,7 +148,7 @@ function run(){
             }
             ctx.fillStyle=`rgba(${v.c[0]},${v.c[1]},${v.c[2]},${v.o?0:100})`
             ctx.beginPath()
-            ctx.arc(v.p.x,v.p.y,v.r,0,2*Math.PI)
+            ctx.arc(v.p.x+emv.x,v.p.y+emv.y,v.r,0,2*Math.PI)
             ctx.fill()
             ctx.stroke()
             i++
@@ -167,8 +174,8 @@ function run(){
                     const snapped = snapLines(mx, my)
                     ctx.lineWidth = parseInt(lwinp.value)
                     ctx.beginPath()
-                    ctx.moveTo(c1p.x,c1p.y)
-                    ctx.lineTo(snapped.x,snapped.y)
+                    ctx.moveTo(c1p.x + emv.x, c1p.y + emv.y)
+                    ctx.lineTo(snapped.x + emv.x, snapped.y + emv.y)
                     ctx.stroke()
                     ctx.lineWidth = 1
                 }
@@ -199,6 +206,7 @@ abbtn.addEventListener("click", ()=>{
 })
 window.addEventListener("keypress", (e) => {
     if (document.activeElement.id!=="consoletxt"){
+        
         switch (e.key){
             case "c"||"Escape":
                 selecting = false
@@ -259,15 +267,33 @@ canvas.addEventListener("dblclick", ()=>{
 })
 canvas.addEventListener("mousedown", ()=>{
     clicking = true
+    document.activeElement = canvas
 })
 canvas.addEventListener("mouseup", ()=>{
     clicking = false
 })
+window.addEventListener("keydown", (e)=>{
+    if (inf){
+        switch(e.key){
+            case 'ArrowLeft':
+                emv.x+=5
+                break
+            case 'ArrowRight':
+                emv.x-=5
+                break
+            case 'ArrowUp':
+                emv.y+=5
+                break
+            case 'ArrowDown':
+                emv.y-=5
+        }
+    }
+})
 let pmx;
 let pmy;
 canvas.addEventListener("mousemove", (e)=>{
-    mx = Math.round((e.clientX-offX)*ma)
-    my = Math.round(e.clientY*ma)
+    mx = Math.round((e.clientX-offX)*ma) - emv.x
+    my = Math.round(e.clientY*ma) - emv.y
     if (clicking){
         if (!drawing)
         {
