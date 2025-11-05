@@ -108,6 +108,7 @@ let lines = [],
     flipP=[],
     flipR=[],
     flipW=[],
+    bars=[],
     motor2s=[],                                                                                                                                                
     cellsize = 4,
     ltype=0,
@@ -118,6 +119,7 @@ let lines = [],
     cn = 0,
     c1p,
     c2p,
+    ropes=[],
     ml = false,
     valves = [],
     cv = false,
@@ -126,6 +128,8 @@ let lines = [],
     sobjs = [],
     slines=[],
     av=false,
+    s1b,
+    s2b,
     mx,
     my,
     mol = false,
@@ -140,6 +144,7 @@ let lines = [],
     tcans=[],
     abomb = false,
     adding={ia:false,t:0},
+    arope = false,
     cc,
     cs,
     bombs=[],
@@ -203,6 +208,12 @@ function selectBall(x, y){
     }
     return undefined 
     
+}
+function addRope(b1,b2){
+    ropes.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+}
+function addBar(b1,b2){
+    bars.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
 }
 function selectValve(x, y){
     for (let i = 0; i < valves.length; i++){

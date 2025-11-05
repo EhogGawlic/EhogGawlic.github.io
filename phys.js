@@ -33,6 +33,19 @@ class Obj {
     phys(){
         if (!this.f){
             this.v=divVecCon(addVec(subVec(this.p, this.pp), this.a), 1)//fric)
+            // clamp extreme velocities to avoid numerical blow-up
+            const maxVel = 500 // pixels per frame (tune as needed)
+            const vmag = Math.hypot(this.v.x, this.v.y)
+            if (vmag > maxVel){
+                const s = maxVel / vmag
+                this.v.x *= s
+                this.v.y *= s
+            }
+            // slight damping to dissipate energy from constraint corrections
+            const damp = 0.995
+            this.v.x *= damp
+            this.v.y *= damp
+
             this.pp=this.p
             this.p=addVec(this.p, this.v)
             
@@ -166,7 +179,7 @@ class Obj {
 
                 if (!this.f && !b.f){
                     const collNorm = norm(subVec(this.p, b.p))
-                    const adjdist = d-(this.r+this.r)
+                    const adjdist = d-(this.r+b.r)
                     //const adc = nw2/nw1
                     const b1b = this.r>b.r
                     let nw1 = 0
