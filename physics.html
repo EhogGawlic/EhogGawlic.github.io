@@ -173,7 +173,14 @@
                 </div><br>
                 <div class="idk">
                     <h3>ropes and stuff</h3>
-                    <button id="arbtn">AdD rOpE (sElEcT 2 bAlLs</button>
+                    <button id="arbtn">AdD rOpE (sElEcT 2 bAlLs</button><br>
+                    <button onclick="
+                    for (let i = 0; i < objs.length; i++){
+                        if (i != 0){
+                            addRope(i-1, i)
+                        }
+                    }
+                    ">chain all</button>
                 </div>
                 <!--<span id="console">text</span>-->
                 <img src="tcan.png" style="display: none;" id="tcansrc">

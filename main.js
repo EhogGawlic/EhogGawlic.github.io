@@ -185,7 +185,7 @@ function run(){
                     obj.tb=[]
                 }
                 // relax constraints iteratively to improve stability
-                const constraintIters = 2
+                const constraintIters = parseInt(substeps.value)
                 for (let iter = 0; iter < constraintIters; iter++){
                     ropes.forEach(rope=>{
                         const b1 = objs[rope.b1]
