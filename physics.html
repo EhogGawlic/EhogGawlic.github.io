@@ -178,6 +178,30 @@
     arope.ia=true
     arope.t=2">AdD sPrInG (sElEcT 2 bAlLs)</button><br>
                     <button onclick="
+                        const sx = 10
+                        const sy = 6
+                        for (let x = 0; x < sx; x++){
+                            for (let y = 0; y < sy; y++){
+                                
+                                addObj(x*40+100,y*40+100,
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
+            const b = objs[objs.length-1]
+                                if (x > 0){
+                                    addSpring(objs.length-sy, objs.length-1)
+                                    addSpring(objs.length -sy -1, objs.length-1)
+                                }
+                                if (y > 0){
+                                    addSpring(objs.length -2, objs.length-1)
+                                }
+                                if (x>0 && y > 0){
+                                    addSpring(objs.length -sy -2, objs.length-1)
+                                }
+                            }
+                        }
+                    ">add jiggly thing</button><br>
+                    <button onclick="
                     for (let i = 0; i < objs.length; i++){
                         if (i != 0){
                             addRope(i-1, i)
