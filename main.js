@@ -145,7 +145,17 @@ function run(){
             ctx.stroke()
             ctx.lineWidth=1
         })
-
+springs.forEach(rope=>{
+            const b1 = objs[rope.b1]
+            const b2 = objs[rope.b2]
+            ctx.strokeStyle="yellow"
+            ctx.lineWidth=2
+            ctx.beginPath()
+        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
+            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
+            ctx.stroke()
+            ctx.lineWidth=1
+        })
         bars.forEach(rope=>{
             const b1 = objs[rope.b1]
             const b2 = objs[rope.b2]
@@ -215,6 +225,24 @@ function run(){
                             b1.pp = addVec(b1.pp, dp1)
                             b2.pp = addVec(b2.pp, dp2)
                         }
+                    })
+
+                    springs.forEach(rope=>{
+                        const b1 = objs[rope.b1]
+                        const b2 = objs[rope.b2]
+                        const d = dist(b1.p, b2.p)
+                        const diff = rope.l - d
+                        const dir = norm(subVec(b2.p, b1.p))
+                        
+                        // Add velocity damping
+                        const relativeVel = subVec(b2.v || {x:0,y:0}, b1.v || {x:0,y:0})
+                        const dampingForce = multVecCon(dir, dot(relativeVel, dir) * 0.1)
+                        
+                        const springForce = multVecCon(dir, diff * 0.0001)
+                        const totalForce = springForce//subVec(springForce, dampingForce)
+                        
+                        b1.pp = addVec(b1.pp, totalForce)
+                        b2.pp = subVec(b2.pp, totalForce)
                     })
                     // handle bars constraints (inelastic/limited-bounce)
                     bars.forEach(rope=>{
@@ -315,7 +343,7 @@ window.addEventListener("keypress", (e) => {
                 af = false 
                 ml = false
                 abomb = false
-                arope = false
+                arope.ia = false
                 cn=0
                 deleting=false
                 ltype=0
@@ -340,6 +368,10 @@ window.addEventListener("keypress", (e) => {
             case "t":
                 adding.ia=true
                 adding.t=1
+                break
+            case "r":
+                arope.ia = true
+                arope.t=1
                 
         }
     }
@@ -465,7 +497,7 @@ window.onclick = (e)=>{
     
     if (e.clientX>offX&&e.clientX<innerWidth-offX && e.clientY>0&&e.clientY<innerHeight-50){
 
-        if (!selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope){
+        if (!selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             try{
             addObj(mx,my,
             parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
@@ -474,7 +506,7 @@ window.onclick = (e)=>{
             }catch(e){alert(e)}
             return
         }
-        if (selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope){
+        if (selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             const s = select(mx, my)
             if (s!==false){
                 if (sil===false){
@@ -487,7 +519,7 @@ window.onclick = (e)=>{
             }  
             return
         }
-        if (ml && !selecting && !av && !af && !deleting && !adding.ia&& !abomb && !arope){
+        if (ml && !selecting && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             switch(ltype){
                 case 0:
                     switch(cn){
@@ -540,13 +572,13 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (av && !selecting && !af && !ml && !deleting && !adding.ia&& !abomb && !arope){
+        if (av && !selecting && !af && !ml && !deleting && !adding.ia&& !abomb && !arope.ia){
             valves.push({p:{x:mx, y:my},r:parseFloat(rinp.value)*meterPixRatio,c:HEXRGB(cinp.value),o:false})
             vninp.max = valves.length-1
             av=false
             return
         }
-        if (af && !selecting && !av && !ml && !deleting && !adding.ia&& !abomb && !arope){
+        if (af && !selecting && !av && !ml && !deleting && !adding.ia&& !abomb && !arope.ia){
             switch(cn){
                 case 0:
                     fp = {x:mx,y:my}
@@ -559,7 +591,7 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && !arope){
+        if (deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && !arope.ia){
             let selecteda
             const sb = selectBall(mx, my)
             if (sb!==undefined){ selecteda = sb; selecttype="ball" }
@@ -597,19 +629,20 @@ window.onclick = (e)=>{
             selecttype="none"
             return
         }
-        if (!deleting && !selecting && !av && !ml && !af && adding.ia&& !abomb && !arope){
+        if (!deleting && !selecting && !av && !ml && !af && adding.ia&& !abomb && !arope.ia){
             switch(adding.t){
                 case 1:
                     tcans.push({x:mx, y:my})
                     break
                 case 2:
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
+                    break
             }
             adding.ia=false
             return
         }
     }   
-    if (!deleting && !selecting && !av && !ml && !af && !adding.ia && abomb && e.clientY < innerHeight-50 && !arope){
+    if (!deleting && !selecting && !av && !ml && !af && !adding.ia && abomb && e.clientY < innerHeight-50 && !arope.ia){
         bombs.push({x:mx,y:my})
         const bi = bombs.length-1
         const bom = bombs[bi]
@@ -629,7 +662,7 @@ window.onclick = (e)=>{
                 bombs.splice(bi, 1)
         }, 5000)
     }
-    if (!deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && arope){
+    if (!deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && arope.ia){
         switch(cn){
             case 0:
                 s1b = selectBall(mx, my)
@@ -640,8 +673,13 @@ window.onclick = (e)=>{
             case 1:
                 s2b = selectBall(mx, my)
                 if (s2b!==undefined && s2b!==s1b){
+                    if (arope.t==1){
                     addRope(s1b, s2b)
-                    arope=false
+                    }
+                    if (arope.t==2){
+                        addSpring(s1b, s2b)
+                    }
+                    arope.ia=false
                     cn=0
                 }
         }
@@ -765,6 +803,8 @@ clearbtn.addEventListener("click", ()=>{
     fans=[]
     tcans=[]
     ropes = []
+    springs=[]
+    bars=[]
     ltype=0
     cn=0
     ml =false
@@ -789,6 +829,8 @@ clearufbtn.addEventListener("click", ()=>{
         objs.splice(deleted[d-1], 1)
     }
     ropes=[]
+    springs=[]
+    bars=[]
 })
 okbtn.addEventListener("click", ()=>{
     switch(asinp.value){
@@ -940,5 +982,6 @@ bldok.addEventListener("click", ()=>{
     }
 })
 arbtn.addEventListener("click", ()=>{
-    arope=true
+    arope.ia=true
+    arope.t=1
 })

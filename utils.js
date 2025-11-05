@@ -130,6 +130,7 @@ let lines = [],
     av=false,
     s1b,
     s2b,
+    springs=[],
     mx,
     my,
     mol = false,
@@ -144,7 +145,7 @@ let lines = [],
     tcans=[],
     abomb = false,
     adding={ia:false,t:0},
-    arope = false,
+    arope = {ia:false,t:0},
     cc,
     cs,
     bombs=[],
@@ -214,6 +215,9 @@ function addRope(b1,b2){
 }
 function addBar(b1,b2){
     bars.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+}
+function addSpring(b1,b2){
+    springs.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
 }
 function selectValve(x, y){
     for (let i = 0; i < valves.length; i++){
