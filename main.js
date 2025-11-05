@@ -238,11 +238,11 @@ springs.forEach(rope=>{
                         const relativeVel = subVec(b2.v || {x:0,y:0}, b1.v || {x:0,y:0})
                         const dampingForce = multVecCon(dir, dot(relativeVel, dir) * 0.1)
                         
-                        const springForce = multVecCon(dir, diff * 0.0001)
+                        const springForce = multVecCon(dir, diff * 0.5)
                         const totalForce = springForce//subVec(springForce, dampingForce)
                         
-                        b1.pp = addVec(b1.pp, totalForce)
-                        b2.pp = subVec(b2.pp, totalForce)
+                        b1.pp = addVec(b1.pp, multVecCon(totalForce,1/b1.w))
+                        b2.pp = subVec(b2.pp, multVecCon(totalForce,1/b2.w))
                     })
                     // handle bars constraints (inelastic/limited-bounce)
                     bars.forEach(rope=>{
@@ -372,6 +372,10 @@ window.addEventListener("keypress", (e) => {
             case "r":
                 arope.ia = true
                 arope.t=1
+                break
+            case "s":
+                arope.ia=true
+                arope.t=2
                 
         }
     }
@@ -708,7 +712,7 @@ presets.addEventListener("change", ()=>{
             break
         case "pla":
             dinp.value=12.5
-            cinp.value="#F0F0F0"
+            cinp.value="#c9c9c9"
             binp.value=0.8
             liq = false
             stinp.value=0
