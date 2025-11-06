@@ -189,15 +189,16 @@
             parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
             const b = objs[objs.length-1]
                                 if (x > 0){
-                                    addSpring(objs.length-sy, objs.length-1)
-                                    addSpring(objs.length -sy -1, objs.length-1)
+                                    addSpring(objs.length-1, objs.length -1 - sy)
                                 }
                                 if (y > 0){
                                     addSpring(objs.length -2, objs.length-1)
                                 }
                                 if (x>0 && y > 0){
-                                    addSpring(objs.length -sy -2, objs.length-1)
+                                    addSpring(objs.length-2-sy,objs.length-1)
+                                    addSpring(objs.length-1-sy,objs.length-2)
                                 }
+
                             }
                         }
                     ">add jiggly thing</button><br>
@@ -258,8 +259,8 @@
                 </p>
             </div>
             <div id="bottommenu">
-                <button id="bombbtn">BOM<img src="bom.png" id="bombsrc"></button>
-                <button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>
+                <button id="bombbtn">BoMb</button>
+                <!--<button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>-->
             </div>
             <div id="polycreate" class="popup">
                 <h1>Polygon creator</h1>
