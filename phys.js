@@ -33,6 +33,19 @@ class Obj {
     phys(){
         if (!this.f){
             this.v=divVecCon(addVec(subVec(this.p, this.pp), this.a), 1)//fric)
+            // clamp extreme velocities to avoid numerical blow-up
+            const maxVel = 500 // pixels per frame (tune as needed)
+            const vmag = Math.hypot(this.v.x, this.v.y)
+            if (vmag > maxVel){
+                const s = maxVel / vmag
+                this.v.x *= s
+                this.v.y *= s
+            }
+            // slight damping to dissipate energy from constraint corrections
+            const damp = 0.995
+            this.v.x *= damp
+            this.v.y *= damp
+
             this.pp=this.p
             this.p=addVec(this.p, this.v)
             
@@ -89,17 +102,19 @@ class Obj {
         }
     }
     collwall(){
-        if (this.p.y>=innerHeight-this.r){
-            this.p.y=innerHeight-this.r
-            this.pp.y = this.p.y+this.v.y*this.b
-        }
-        if (this.p.x>=innerHeight-this.r){
-            this.p.x=innerHeight-this.r
-            this.pp.x = this.p.x+this.v.x*this.b
-        }
-        if (this.p.x<=this.r){
-            this.p.x=this.r
-            this.pp.x = this.p.x+this.v.x*this.b
+        if (!inf){
+            if (this.p.y>=innerHeight-this.r){
+                this.p.y=innerHeight-this.r
+                this.pp.y = this.p.y+this.v.y*this.b
+            }
+            if (this.p.x>=innerHeight-this.r){
+                this.p.x=innerHeight-this.r
+                this.pp.x = this.p.x+this.v.x*this.b
+            }
+            if (this.p.x<=this.r){
+                this.p.x=this.r
+                this.pp.x = this.p.x+this.v.x*this.b
+            }
         }
         lines.forEach(l => {
             this.collline(l)
@@ -164,7 +179,7 @@ class Obj {
 
                 if (!this.f && !b.f){
                     const collNorm = norm(subVec(this.p, b.p))
-                    const adjdist = d-(this.r+this.r)
+                    const adjdist = d-(this.r+b.r)
                     //const adc = nw2/nw1
                     const b1b = this.r>b.r
                     let nw1 = 0
@@ -237,24 +252,24 @@ class Obj {
             ctx.strokeStyle = "rgba(1,1,1,0)"
             ctx.fillStyle = `rgb(${this.c[0]},${this.c[1]},${this.c[2]})`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r, 0, 2 * Math.PI)
+            ctx.arc(this.p.x+emv.x,this.p.y+emv.y, this.r, 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
             ctx.fillStyle = `rgba(${this.c[0]},${this.c[1]},${this.c[2]}, 0.66)`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r*(waterBlur/2+1), 0, 2 * Math.PI)
+            ctx.arc(this.p.x+emv.x,this.p.y+emv.y, this.r*(waterBlur/2+1), 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
             ctx.fillStyle = `rgba(${this.c[0]},${this.c[1]},${this.c[2]}, 0.33)`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r*(waterBlur+1), 0, 2 * Math.PI)
+            ctx.arc(this.p.x+emv.x,this.p.y+emv.y, this.r*(waterBlur+1), 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
         }catch(err){alert(err)}
         } else {
             ctx.fillStyle=`rgb(${this.c[0]},${this.c[1]},${this.c[2]})`
             ctx.beginPath()
-            ctx.arc(this.p.x, this.p.y, this.r, 0, 2 * Math.PI)
+            ctx.arc(this.p.x+emv.x,this.p.y+emv.y, this.r, 0, 2 * Math.PI)
             ctx.stroke()
             ctx.fill()
         }
@@ -293,12 +308,12 @@ function runFLIP(){
             for (let x = 0; x < flipcols; x++){
                 const cell = flipP[y][x]
                 const r1 = flipR[y][x]
-                const q1 = flipP[y][x]
-                const q2 = flipP[y][x+1]
+                let q1 = flipP[y][x]
+                let q2 = flipP[y][x+1]
                 const r2 = flipR[y][x+1]
-                const q4 = flipP[y+1][x]
+                let q4 = flipP[y+1][x]
                 const r4 = flipR[y+1][x]
-                const q3 = flipP[y+1][x+1]
+                let q3 = flipP[y+1][x+1]
                 const r3 = flipR[y+1][x+1]
                 q1 = divVecCon(q1, r1)
                 q2 = divVecCon(q2, r2)

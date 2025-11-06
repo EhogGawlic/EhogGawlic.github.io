@@ -86,6 +86,8 @@ const ctx = canvas.getContext("2d"),
       bottommenu = getEl("bottommenu"),
       btypeinp = getEl("dtypeinp"),
       bldok = getEl("bldok"),
+      abmbtn = getEl("bombbtn"),
+      arbtn = getEl("arbtn"),
       //polys,
       pcol = getEl("pcol"),
       pdens = getEl("pdens"),
@@ -163,6 +165,7 @@ switch(getCookie("btype")){
 }
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
+const bomsrc = imgSrc('bom.png')
 if (!localStorage.getItem("saveslot")){
     localStorage.setItem("saveslot", 1)
 }

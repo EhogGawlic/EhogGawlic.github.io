@@ -1,7 +1,9 @@
 let a = 0
 let t = 0
+
 setInterval(()=>{
     setCloudData()
+    saveData(getEl("infcheck").checked ? "true" : "", "infspace")
 },sps.value*1000)
 function run(){
     if (loading){
@@ -77,6 +79,9 @@ function run(){
                         dqueue.push(obj.n)
                     }
                 })
+                if (obj.p.y >= 6700*meterPixRatio){
+                    dqueue.push(obj.n)
+                }
                 obj.phys()
                 
             }
@@ -113,8 +118,8 @@ function run(){
             }
             ctx.lineWidth = l.w
             ctx.beginPath()
-            ctx.moveTo(x1, y1)
-            ctx.lineTo(x2, y2)
+            ctx.moveTo(x1+emv.x, y1+emv.y)
+            ctx.lineTo(x2+emv.x, y2+emv.y)
             ctx.stroke()
             ctx.lineWidth = 1
         })
@@ -124,8 +129,43 @@ function run(){
             drawFan(f)
         })
         tcans.forEach(tcan => {
-            ctx.drawImage(tcansrc, tcan.x-64, tcan.y-64, 128, 128)
+            ctx.drawImage(tcansrc, tcan.x-64+emv.x, tcan.y-64+emv.y, 128, 128)
         })
+        ropes.forEach(rope=>{
+            const b1 = objs[rope.b1]
+            const b2 = objs[rope.b2]
+            ctx.strokeStyle="brown"
+            ctx.lineWidth=2
+            ctx.beginPath()
+        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
+            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
+            ctx.stroke()
+            ctx.lineWidth=1
+        })
+springs.forEach(rope=>{
+            const b1 = objs[rope.b1]
+            const b2 = objs[rope.b2]
+            ctx.strokeStyle="yellow"
+            ctx.lineWidth=2
+            ctx.beginPath()
+        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
+            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
+            ctx.stroke()
+            ctx.lineWidth=1
+        })
+        bars.forEach(rope=>{
+            const b1 = objs[rope.b1]
+            const b2 = objs[rope.b2]
+            ctx.strokeStyle="gray"
+            ctx.lineWidth=2
+            ctx.beginPath()
+        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
+            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
+            ctx.stroke()
+            ctx.lineWidth=1
+        })
+
+    inf = getEl("infcheck").checked
         let i = 0
         valves.forEach(v =>{
             if (i===parseInt(vninp.value)){
@@ -137,7 +177,7 @@ function run(){
             }
             ctx.fillStyle=`rgba(${v.c[0]},${v.c[1]},${v.c[2]},${v.o?0:100})`
             ctx.beginPath()
-            ctx.arc(v.p.x,v.p.y,v.r,0,2*Math.PI)
+            ctx.arc(v.p.x+emv.x,v.p.y+emv.y,v.r,0,2*Math.PI)
             ctx.fill()
             ctx.stroke()
             i++
@@ -147,11 +187,104 @@ function run(){
                 for (let i = 0; i < objs.length; i++){
                     const obj = objs[i]
                     obj.collall()
-                    if (!infspace){
-                        obj.collwall()
-                    }
+                    obj.collwall()
                     obj.surfTens()
                     obj.tb=[]
+                }
+                // relax constraints iteratively to improve stability
+                const constraintIters = parseInt(substeps.value)
+                for (let iter = 0; iter < constraintIters; iter++){
+                    ropes.forEach(rope=>{
+                        const b1 = objs[rope.b1]
+                        const b2 = objs[rope.b2]
+                        const d = dist(b1.p, b2.p)
+                        const diff = Math.min(0,rope.l - d)
+                        const dir = norm(subVec(b2.p, b1.p))
+                        const force = multVecCon(dir, diff*0.5)
+                        b1.pp = addVec(b1.pp, force)
+                        b2.pp = subVec(b2.pp, force)
+                        if (diff === 0) return
+
+                        // remove any inward relative velocity introduced by the correction
+                        // so the rope doesn't cause a rebound (make the constraint inelastic)
+                        const v1 = subVec(b1.p, b1.pp)
+                        const v2 = subVec(b2.p, b2.pp)
+                        const relVel = (v2.x - v1.x) * dir.x + (v2.y - v1.y) * dir.y
+                        if (relVel < 0){
+                            const m1 = (b1.m !== undefined) ? b1.m : 1
+                            const m2 = (b2.m !== undefined) ? b2.m : 1
+                            const invSum = 1 / (m1 + m2)
+                            // maximum allowed rebound velocity (pixels/frame) derived from gravity
+                            const maxBounce = Math.abs(grav)// * meterPixRatio / targetRate
+                            const correctionVel = Math.min(-relVel, maxBounce)
+                            const dp1 = multVecCon(dir, correctionVel * (m2 * invSum))
+                            const dp2 = multVecCon(dir, -correctionVel * (m1 * invSum))
+                            b1.pp = addVec(b1.pp, dp1)
+                            b2.pp = addVec(b2.pp, dp2)
+                        }
+                    })
+
+                    springs.forEach(rope=>{
+                        const b1 = objs[rope.b1]
+                        const b2 = objs[rope.b2]
+                        const d = dist(b1.p, b2.p)
+                        const diff = rope.l - d
+                        const dir = norm(subVec(b2.p, b1.p))
+                        
+                        // Add velocity damping
+                        const relativeVel = subVec(b2.v || {x:0,y:0}, b1.v || {x:0,y:0})
+                        const dampingForce = multVecCon(dir, dot(relativeVel, dir) * 0.1)
+                        
+                        const springForce = multVecCon(dir, diff * 0.5)
+                        const totalForce = springForce//subVec(springForce, dampingForce)
+                        
+                        b1.pp = addVec(b1.pp, multVecCon(totalForce,1/b1.w))
+                        b2.pp = subVec(b2.pp, multVecCon(totalForce,1/b2.w))
+                    })
+                    // handle bars constraints (inelastic/limited-bounce)
+                    bars.forEach(rope=>{
+                        const b1 = objs[rope.b1]
+                        const b2 = objs[rope.b2]
+                        const delta = subVec(b2.p, b1.p)
+                        const d = Math.max(1e-6, Math.hypot(delta.x, delta.y))
+                        const diff = d - rope.l
+                        if (Math.abs(diff) < 1e-6) return
+                        const dir = { x: delta.x / d, y: delta.y / d }
+
+                        const m1 = (b1.m !== undefined) ? b1.m : 1
+                        const m2 = (b2.m !== undefined) ? b2.m : 1
+                        const invSum = 1 / (m1 + m2)
+
+                        const correction = multVecCon(dir, diff)
+                        const corr1 = multVecCon(correction, - (m2 * invSum))
+                        const corr2 = multVecCon(correction,   (m1 * invSum))
+                        const maxCorrection = 4
+                        const clamp = v => {
+                            const L = Math.hypot(v.x, v.y)
+                            if (L > maxCorrection) {
+                                const s = maxCorrection / L
+                                return { x: v.x * s, y: v.y * s }
+                            }
+                            return v
+                        }
+                        const c1 = clamp(corr1)
+                        const c2 = clamp(corr2)
+                        b1.pp = addVec(b1.pp, c1)
+                        b2.pp = subVec(b2.pp, c2)
+
+                        // limit bounce along the link to at most gravity-derived speed
+                        const v1 = subVec(b1.p, b1.pp)
+                        const v2 = subVec(b2.p, b2.pp)
+                        const relVel = (v2.x - v1.x) * dir.x + (v2.y - v1.y) * dir.y
+                        if (relVel < 0){
+                            const maxBounce = Math.abs(grav) * meterPixRatio / targetRate
+                            const correctionVel = Math.min(-relVel, maxBounce)
+                            const dp1 = multVecCon(dir, correctionVel * (m2 * invSum))
+                            const dp2 = multVecCon(dir, -correctionVel * (m1 * invSum))
+                            b1.pp = addVec(b1.pp, dp1)
+                            b2.pp = addVec(b2.pp, dp2)
+                        }
+                    })
                 }
             }
         }
@@ -163,8 +296,8 @@ function run(){
                     const snapped = snapLines(mx, my)
                     ctx.lineWidth = parseInt(lwinp.value)
                     ctx.beginPath()
-                    ctx.moveTo(c1p.x,c1p.y)
-                    ctx.lineTo(snapped.x,snapped.y)
+                    ctx.moveTo(c1p.x + emv.x, c1p.y + emv.y)
+                    ctx.lineTo(snapped.x + emv.x, snapped.y + emv.y)
                     ctx.stroke()
                     ctx.lineWidth = 1
                 }
@@ -180,6 +313,10 @@ function run(){
                 }
         }
     }
+    bombs.forEach(bomb=>{
+        ctx.fillStyle="red"
+        ctx.drawImage(bomsrc, bomb.x-16+emv.x, bomb.y-16+emv.y, 32, 32)
+    })
     //
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
@@ -195,12 +332,15 @@ abbtn.addEventListener("click", ()=>{
 })
 window.addEventListener("keypress", (e) => {
     if (document.activeElement.id!=="consoletxt"){
+        
         switch (e.key){
             case "c"||"Escape":
                 selecting = false
                 av = false 
                 af = false 
                 ml = false
+                abomb = false
+                arope.ia = false
                 cn=0
                 deleting=false
                 ltype=0
@@ -225,6 +365,14 @@ window.addEventListener("keypress", (e) => {
             case "t":
                 adding.ia=true
                 adding.t=1
+                break
+            case "r":
+                arope.ia = true
+                arope.t=1
+                break
+            case "s":
+                arope.ia=true
+                arope.t=2
                 
         }
     }
@@ -255,15 +403,33 @@ canvas.addEventListener("dblclick", ()=>{
 })
 canvas.addEventListener("mousedown", ()=>{
     clicking = true
+    document.activeElement = canvas
 })
 canvas.addEventListener("mouseup", ()=>{
     clicking = false
 })
+window.addEventListener("keydown", (e)=>{
+    if (inf){
+        switch(e.key){
+            case 'ArrowLeft':
+                emv.x+=5
+                break
+            case 'ArrowRight':
+                emv.x-=5
+                break
+            case 'ArrowUp':
+                emv.y+=5
+                break
+            case 'ArrowDown':
+                emv.y-=5
+        }
+    }
+})
 let pmx;
 let pmy;
 canvas.addEventListener("mousemove", (e)=>{
-    mx = Math.round((e.clientX-offX)*ma)
-    my = Math.round(e.clientY*ma)
+    mx = Math.round((e.clientX-offX)*ma) - emv.x
+    my = Math.round(e.clientY*ma) - emv.y
     if (clicking){
         if (!drawing)
         {
@@ -301,7 +467,7 @@ window.onclick = (e)=>{
     //
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-    // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
+    // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
     //
         if (disec){
             switch(cn){
@@ -330,8 +496,9 @@ window.onclick = (e)=>{
             return
         }
     
-    if (e.clientX>offX&&e.clientX<innerWidth-offX){
-        if (!selecting && !ml && !av && !af && !deleting && !adding.ia){
+    if (e.clientX>offX&&e.clientX<innerWidth-offX && e.clientY>0&&e.clientY<innerHeight-50){
+
+        if (!selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             try{
             addObj(mx,my,
             parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
@@ -340,7 +507,7 @@ window.onclick = (e)=>{
             }catch(e){alert(e)}
             return
         }
-        if (selecting && !ml && !av && !af && !deleting && !adding.ia){
+        if (selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             const s = select(mx, my)
             if (s!==false){
                 if (sil===false){
@@ -353,7 +520,7 @@ window.onclick = (e)=>{
             }  
             return
         }
-        if (ml && !selecting && !av && !af && !deleting && !adding.ia){
+        if (ml && !selecting && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             switch(ltype){
                 case 0:
                     switch(cn){
@@ -406,13 +573,13 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (av && !selecting && !af && !ml && !deleting && !adding.ia){
+        if (av && !selecting && !af && !ml && !deleting && !adding.ia&& !abomb && !arope.ia){
             valves.push({p:{x:mx, y:my},r:parseFloat(rinp.value)*meterPixRatio,c:HEXRGB(cinp.value),o:false})
             vninp.max = valves.length-1
             av=false
             return
         }
-        if (af && !selecting && !av && !ml && !deleting && !adding.ia){
+        if (af && !selecting && !av && !ml && !deleting && !adding.ia&& !abomb && !arope.ia){
             switch(cn){
                 case 0:
                     fp = {x:mx,y:my}
@@ -425,7 +592,7 @@ window.onclick = (e)=>{
             }
             return
         }
-        if (deleting && !selecting && !av && !ml && !af && !adding.ia){
+        if (deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && !arope.ia){
             let selecteda
             const sb = selectBall(mx, my)
             if (sb!==undefined){ selecteda = sb; selecttype="ball" }
@@ -463,16 +630,59 @@ window.onclick = (e)=>{
             selecttype="none"
             return
         }
-        if (!deleting && !selecting && !av && !ml && !af && adding.ia){
+        if (!deleting && !selecting && !av && !ml && !af && adding.ia&& !abomb && !arope.ia){
             switch(adding.t){
                 case 1:
                     tcans.push({x:mx, y:my})
                     break
                 case 2:
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
+                    break
             }
             adding.ia=false
             return
+        }
+    }   
+    if (!deleting && !selecting && !av && !ml && !af && !adding.ia && abomb && e.clientY < innerHeight-50 && !arope.ia){
+        bombs.push({x:mx,y:my})
+        const bi = bombs.length-1
+        const bom = bombs[bi]
+        abomb=false
+        
+        setTimeout(()=>{
+            objs.forEach(obj=>{
+
+                const d = dist(bom, obj.p)
+                if (d <= 50){
+                    const force = 500000/d/obj.w
+                    const nforce = multVecCon(norm(subVec(obj.p, bom)),force)
+                    obj.pp.x -= nforce.x
+                    obj.pp.y -= nforce.y
+                }
+            })
+                bombs.splice(bi, 1)
+        }, 5000)
+    }
+    if (!deleting && !selecting && !av && !ml && !af && !adding.ia&& !abomb && arope.ia){
+        switch(cn){
+            case 0:
+                s1b = selectBall(mx, my)
+                if (s1b!==undefined){
+                    cn++
+                }
+                break
+            case 1:
+                s2b = selectBall(mx, my)
+                if (s2b!==undefined && s2b!==s1b){
+                    if (arope.t==1){
+                    addRope(s1b, s2b)
+                    }
+                    if (arope.t==2){
+                        addSpring(s1b, s2b)
+                    }
+                    arope.ia=false
+                    cn=0
+                }
         }
     }
     //
@@ -499,7 +709,7 @@ presets.addEventListener("change", ()=>{
             break
         case "pla":
             dinp.value=12.5
-            cinp.value="#F0F0F0"
+            cinp.value="#c9c9c9"
             binp.value=0.8
             liq = false
             stinp.value=0
@@ -584,12 +794,18 @@ rbbtn.addEventListener("click", ()=>{
         }
     }
 })
+abmbtn.addEventListener("click", ()=>{
+    abomb=true
+})
 clearbtn.addEventListener("click", ()=>{
     objs=[]
     lines=[]
     valves=[]
     fans=[]
     tcans=[]
+    ropes = []
+    springs=[]
+    bars=[]
     ltype=0
     cn=0
     ml =false
@@ -613,6 +829,9 @@ clearufbtn.addEventListener("click", ()=>{
     for (let d = deleted.length; d > 0; d--){
         objs.splice(deleted[d-1], 1)
     }
+    ropes=[]
+    springs=[]
+    bars=[]
 })
 okbtn.addEventListener("click", ()=>{
     switch(asinp.value){

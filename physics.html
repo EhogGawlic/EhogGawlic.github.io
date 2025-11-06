@@ -58,7 +58,8 @@
                 <label for="fixed">Fixed</label><br>
                 <input type="checkbox" id="fixed"><br>
                 Want 3D? Check this out: <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a><br>
-                <a href="./index.html">Main page</a>
+                <a href="./index.html">Main page</a><br>
+                <a href="https://w-chat-pht6.onrender.com/">W Chat</a>
             </div>
             <div id="rightmenu">
                 <span id="FPS"></span>
@@ -169,6 +170,44 @@
                         <label for="fsped">Fan speed</label><br>
                         <input id="fsped" type="number" value="10000">
                     </div>
+                </div><br>
+                <div class="idk">
+                    <h3>ropes and stuff</h3>
+                    <button id="arbtn">AdD rOpE (sElEcT 2 bAlLs)</button><br>
+                    <button onclick="
+    arope.ia=true
+    arope.t=2">AdD sPrInG (sElEcT 2 bAlLs)</button><br>
+                    <button onclick="
+                        const sx = 10
+                        const sy = 6
+                        for (let x = 0; x < sx; x++){
+                            for (let y = 0; y < sy; y++){
+                                
+                                addObj(x*40+100,y*40+100,
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
+            const b = objs[objs.length-1]
+                                if (x > 0){
+                                    addSpring(objs.length-sy, objs.length-1)
+                                    addSpring(objs.length -sy -1, objs.length-1)
+                                }
+                                if (y > 0){
+                                    addSpring(objs.length -2, objs.length-1)
+                                }
+                                if (x>0 && y > 0){
+                                    addSpring(objs.length -sy -2, objs.length-1)
+                                }
+                            }
+                        }
+                    ">add jiggly thing</button><br>
+                    <button onclick="
+                    for (let i = 0; i < objs.length; i++){
+                        if (i != 0){
+                            addRope(i-1, i)
+                        }
+                    }
+                    ">chain all</button>
                 </div>
                 <!--<span id="console">text</span>-->
                 <img src="tcan.png" style="display: none;" id="tcansrc">
@@ -190,6 +229,8 @@
                 <input id="cres" type="number" value="20"><br>
                 <label for="saveslot">Save slot # (1-3)</label><br>
                 <input id="saveslot" type="number" value="1" min="1" max="3"><br>
+                <label for="inf">Infinite (use arrow keys to move)</label><br>
+                <input id="infcheck" type="checkbox" value="false"><br>
                 <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a>
 
                 <button id="xstbtn" onclick="
