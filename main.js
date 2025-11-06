@@ -88,12 +88,38 @@ function run(){
         })
 
         for (let n = dqueue.length-1; n >= 0; n--){
-            objs.splice(dqueue[n], 1)
-            for (let i = 0; i < objs.length; i++){
-                if (i>=dqueue[n]){
-                    objs[i].n--
+            const rem = dqueue[n]
+            // remove ropes referencing the removed object (iterate backwards to avoid skipping after splice)
+            for (let i = ropes.length - 1; i >= 0; i--){
+                if (ropes[i].b1 === rem || ropes[i].b2 === rem){
+                    ropes.splice(i, 1)
                 }
             }
+            // remove springs referencing the removed object (iterate backwards to avoid skipping after splice)
+            for (let i = springs.length - 1; i >= 0; i--){
+                if (springs[i].b1 === rem || springs[i].b2 === rem){
+                    springs.splice(i, 1)
+                }
+            }
+            objs.splice(rem, 1)
+            for (let i = 0; i < objs.length; i++){
+                if (i >= rem){
+                    objs[i].n--
+                    // shift all rope/spring/bar indices down for objects after the removed one
+                }
+            }
+                    for (let j = 0; j < ropes.length; j++){
+                        if (ropes[j].b1 > rem) ropes[j].b1--
+                        if (ropes[j].b2 > rem) ropes[j].b2--
+                    }
+                    for (let j = 0; j < springs.length; j++){
+                        if (springs[j].b1 > rem) springs[j].b1--
+                        if (springs[j].b2 > rem) springs[j].b2--
+                    }
+                    for (let j = 0; j < bars.length; j++){
+                        if (bars[j].b1 > rem) bars[j].b1--
+                        if (bars[j].b2 > rem) bars[j].b2--
+                    }
         }
         
         ctx.strokeStyle="black"
@@ -607,12 +633,37 @@ window.onclick = (e)=>{
             if (selecttype!=="none"){
                 switch(selecttype){
                     case "ball":
-                        objs.splice(selecteda, 1)
-                        for (let i = 0; i < objs.length; i++){
-                            if (i>=selecteda){
-                                objs[i].n--
-                            }
-                        }
+            // selectedaove ropes referencing the selectedaoved object (iterate backwards to avoid skipping after splice)
+            for (let i = ropes.length - 1; i >= 0; i--){
+                if (ropes[i].b1 === selecteda || ropes[i].b2 === selecteda){
+                    ropes.splice(i, 1)
+                }
+            }
+            // selectedaove springs referencing the selectedaoved object (iterate backwards to avoid skipping after splice)
+            for (let i = springs.length - 1; i >= 0; i--){
+                if (springs[i].b1 === selecteda || springs[i].b2 === selecteda){
+                    springs.splice(i, 1)
+                }
+            }
+            objs.splice(selecteda, 1)
+            for (let i = 0; i < objs.length; i++){
+                if (i >= selecteda){
+                    objs[i].n--
+                    // shift all rope/spring/bar indices down for objects after the selectedaoved one
+                }
+            }
+                    for (let j = 0; j < ropes.length; j++){
+                        if (ropes[j].b1 > selecteda) ropes[j].b1--
+                        if (ropes[j].b2 > selecteda) ropes[j].b2--
+                    }
+                    for (let j = 0; j < springs.length; j++){
+                        if (springs[j].b1 > selecteda) springs[j].b1--
+                        if (springs[j].b2 > selecteda) springs[j].b2--
+                    }
+                    for (let j = 0; j < bars.length; j++){
+                        if (bars[j].b1 > selecteda) bars[j].b1--
+                        if (bars[j].b2 > selecteda) bars[j].b2--
+                    }
                         break
                     case "valve":
                         valves.splice(selecteda, 1)
