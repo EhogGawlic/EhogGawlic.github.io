@@ -101,6 +101,7 @@ let objs = [],
 let selecting = false
 let selected, drawing;
 let lines = [],
+    curp = [],
     ms=1,
     consolehist = [],
     flipP=[],
@@ -735,6 +736,7 @@ async function setCloudData() {
                 data.fans=fans
                 data.valves=valves
                 data.tcans=tcans
+                data.polys=polys
                 const putRequest = objectStore.put(data, saveslot)
 
                 putRequest.onsuccess = function() {
@@ -1020,6 +1022,12 @@ function loadSave(slot){
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
+        // Example for loading:
+polys = data.polys.map(p =>
+    (p instanceof Polygon)
+        ? p
+        : new Polygon(p.vertices, p.color, p.position, p.angle, p.angularVelocity, p.velocity)
+);
     }
 
     getRequest.onerror = function() {

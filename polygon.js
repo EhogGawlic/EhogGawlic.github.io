@@ -1,71 +1,80 @@
-
-function projPoly(poly, norm){
-    const low = Infinity
-    const high = -Infinity
-    for (let i = 0; i < poly.pts.length; i++) {
-        const d = dot(norm, poly.pts[i]);
-        low = Math.min(d, low);
-        high = Math.max(d, high);
-    }
-    return {low,high};
-}
+const square = [
+    {x:-10,y:-10},
+    {x:-10,y:10},
+    {x:10,y:10},
+    {x:10,y:-10}
+]
 class Polygon{
-    pts = []
-    pos
-    ppos
-    vel
-    acc
-    c=[]
-    w
-    theta = 0
-    omega = 0
-
-    constructor(pts, c, w, x, y){
-        this.pts = pts
-        this.c=c
-        this.w=w
-        this.pos = {x,y}
-        this.ppos=this.pos
-        this.vel={x:0,y:0}
+    constructor(verts,p,v,r,rv,mass){
+        this.verts=verts
+        this.p=p
+        this.v=v
+        this.r=r
+        this.a={x:0,y:0}
+        this.rv=rv
+        this.mass=mass
     }
-    phys(){
-        this.vel=divVecCon(addVec(subVec(this.pos, this.ppos), this.acc), 1)//fric)
-        this.ppos=this.ppos
-        this.pos=addVec(this.p, this.v)
-        
-        this.acc={x:0,y:(meterPixRatio*9.8)/targetRate}
-
-        this.theta += this.omega
+    getTransformedVertices() {
+        const cos = Math.cos(this.angle)
+        const sin = Math.sin(this.angle)
+        return this.vertices.map(v => ({
+            x: this.position.x + v.x * cos - v.y * sin,
+            y: this.position.y + v.x * sin + v.y * cos
+        }));
     }
-    draw(){
-        ctx.beginPath()
-        this.pts.forEach(pt => {
-            const np = {
-                x: Math.cos(this.theta)*pt.x*-Math.sin(theta)+this.pos.x,
-                y: Math.sin(this.theta)*pt.y*Math.cos(this.theta)+this.pos.y
+    integrate(){
+        this.verts = this.getTransformedVertices()
+        this.v = addVec(this.v, this.a)
+        this.p = addVec(this.v, this.p)
+        this.a = {x:0, y:grav}
+        this.r+=this.rv
+    }
+    testSAT(p2){
+        const axes = this.verts.map((v,i)=>{
+            const nextV = this.verts[(i + 1) % this.verts.length]
+            return {
+                x: v.y - nextV.y,
+                y: nextV.x - v.x
             }
-            
         })
-    }
-    SATCollisonDetect(p){
-        for (let i = 0; i < p.pts.length; i++){
-            let a
-            let b = p.pts[i]
-            if (i === 0){
-                a = p.pts[p.pts.length-1]
-            } else {
-                a = p.pts[i-1]
-            }
-            const norm = RotR(norm(subVec(b, a)))
-            const d = dot(norm, b)
-            low = Math.min(low, d)
-            high = Math.max(high, d)
-            const pa = projPoly(this, norm)
-            const pb = projPoly(p, norm)
-            if (pa.high > pb.low && pb.high > pa.low){
-                return true
+        for (let i = 0; i < axes.length; i++) {
+            const axis = axes[i];
+            // project both shapes onto the axis
+            const p1 = this.project(axis)
+            const p2 = p2.project(axis)
+            if (!p1.overlap(p2)) {
+                return false // No overlap on this axis, so no collision
             }
         }
-        return false
+        //mtv
+        return {p1,p2, mtv: p1.min < p2.min ? {x: p2.min - p1.max, y: 0} : {x: p1.min - p2.max, y: 0}} // Overlap found
+    }
+    doMTV(mtv,poly2){
+        const mtvLength = Math.sqrt(mtv.x * mtv.x + mtv.y * mtv.y)
+        if (mtvLength === 0) return
+        const normalizedMTV = { x: mtv.x / mtvLength, y: mtv.y / mtvLength }
+        
+        // Move the polygon by the MTV
+        this.p.x += normalizedMTV.x
+        this.p.y += normalizedMTV.y
+        poly2.p.x -= normalizedMTV.x
+        poly2.p.y -= normalizedMTV.y
+        
+        // Update vertices after moving
+        this.verts = this.getTransformedVertices()
+    }
+    doAllColl(){
+
+    }
+    project(axis) {
+        const min = this.verts.reduce((min, v) => Math.min(min, dot(v, axis)), Infinity)
+        const max = this.verts.reduce((max, v) => Math.max(max, dot(v, axis)), -Infinity)
+        return {
+            min: min,
+            max: max,
+            overlap: function(other) {
+                return !(this.max < other.min || this.min > other.max)
+            }
+        }
     }
 }

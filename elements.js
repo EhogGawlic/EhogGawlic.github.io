@@ -85,7 +85,14 @@ const ctx = canvas.getContext("2d"),
       saveslotinp = getEl("saveslot"),
       bottommenu = getEl("bottommenu"),
       btypeinp = getEl("dtypeinp"),
-      bldok = getEl("bldok")
+      bldok = getEl("bldok"),
+      //polys,
+      pcol = getEl("pcol"),
+      pdens = getEl("pdens"),
+      pcanv = getEl("polycanvas"),
+      pctx = pcanv.getContext("2d")
+      pcanv.width=parseInt(pcanv.style.width)
+      pcanv.height=parseInt(pcanv.style.height)
 lmenu.style.width = offX+"px"
 rmenu.style.width = offX+"px"
 bottommenu.style.left = offX+"px"
@@ -179,12 +186,19 @@ req.onsuccess = ()=>{
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
+        polys= data.polys ? data.polys : []
+        polys = data.polys.map(p =>
+            (p instanceof Polygon)
+                ? p
+                : new Polygon(p.vertices, p.color, p.position, p.angle, p.angularVelocity, p.velocity)
+        );
         console.log(lines)
         if (!lines){
             lines = []
             fans = []
             valves = []
             tcans = []
+            polys=[]
         }
         if (localStorage.getItem("save").split(";").length==4){
             try{decode(localStorage.getItem("save").toString(), 1)}
@@ -210,13 +224,18 @@ req.onupgradeneeded = (event) => {
     objectStore.createIndex("fans", "fans", { unique: false })
     objectStore.createIndex("valves", "valves", { unique: false })
     objectStore.createIndex("tcans", "tcans", { unique: false })
-  
+    objectStore.createIndex("polys", "polys", { unique: false })
     objectStore.transaction.oncomplete = (event) => {
         const saveObjectStore = db
             .transaction("saves", "readwrite")
             .objectStore("saves")
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
     }
+}
+
+function toggleDisp(el){
+    const dis = getEl(el).style.display
+    getEl(el).style.display = dis === "none" ? "block" : "none"
 }

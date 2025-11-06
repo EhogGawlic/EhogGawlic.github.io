@@ -1,4 +1,3 @@
-
 let a = 0
 let t = 0
 setInterval(()=>{
@@ -82,10 +81,7 @@ function run(){
                 
             }
         })
-        polys.forEach(p => {
-            p.phys()
 
-        })
         for (let n = dqueue.length-1; n >= 0; n--){
             objs.splice(dqueue[n], 1)
             for (let i = 0; i < objs.length; i++){
@@ -742,12 +738,12 @@ saveslotinp.addEventListener("change", async ()=>{
     valves=[]
     fans=[]
     tcans=[]
-    balls=[]
+    objs=[]
+    polys=[]
     localStorage.setItem("saveslot", saveslotinp.value)
     saveslot = parseInt(saveslotinp.value)
     saveData(saveslot, 'saveslot')
     loadSave(saveslot)
-    console.log(lines)
 })
 bldok.addEventListener("click", ()=>{
     const color = HEXRGB(btypeinp.value)
@@ -765,5 +761,27 @@ bldok.addEventListener("click", ()=>{
                 objs[i].n--
             }
         }
+    }
+})
+
+pcanv.addEventListener("click", e=>{
+    const x = e.offsetX
+    const y = e.offsetY
+    curp.push({x,y})
+})
+pcanv.addEventListener("mousemove", (e)=>{
+    const tmx = e.offsetX
+    const tmy = e.offsetY
+    pctx.clearRect(0,0,pcanv.width,pcanv.height)
+    pctx.beginPath()
+    console.log(curp)
+    if (curp.length>0){
+        pctx.moveTo(curp[0].x,curp[0].y)
+        curp.forEach(p=>{
+            pctx.lineTo(p.x,p.y)
+        })
+        pctx.lineTo(tmx,tmy)
+        pctx.stroke()
+        pctx.fill()
     }
 })

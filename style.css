@@ -170,3 +170,25 @@ h1{
     height: 46px;
     cursor: pointer;
 }
+.popup{
+    display: none;
+    position: absolute;
+    left: 30%;
+    right: 30%;
+    top: 30%;
+    bottom: 30%;
+    background-color: gray;
+    border: 5px solid black;
+    border-radius: 10px;
+    overflow-y: scroll;
+}
+.popup canvas{
+    width: 90%;
+
+    position: relative;
+    left: 5%;
+    top: 5%;
+    bottom: 5%;
+    cursor: crosshair;
+    border-radius: 10px;
+}

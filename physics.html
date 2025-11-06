@@ -218,6 +218,19 @@
             </div>
             <div id="bottommenu">
                 <button id="bombbtn">BOM<img src="bom.png" id="bombsrc"></button>
+                <button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>
+            </div>
+            <div id="polycreate" class="popup">
+                <h1>Polygon creator</h1>
+                <label for="pcol">Color</label><br>
+                <input type="color" id="pcol" value="#000000"><br>
+                <label for="pdens">DENsItY</label><br>
+                <input type="number" id="pdens" value="12.5"><br>
+                
+                <canvas id="polycanvas">UR CANVAS (loading)</canvas><br>
+                <span>Click to add points. <s>Right click to delete.</s></span><br>
+                <button id="pcbtn">Create polygon</button><br>
+                <button id="pcancelbtn">Cancel</button>
             </div>
         </div>
         <img id="lbg" src="loadingbgr.jpg">

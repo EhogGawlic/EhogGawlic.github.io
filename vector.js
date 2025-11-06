@@ -25,6 +25,9 @@ function mag(v){
 function norm(v){
     return divVecCon(v, mag(v))
 }
+function getdist(a,b){
+    return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2)
+}
 function v(x,y){return{x,y}}
 function dot(a,b){
     return a.x*b.x+a.y*b.y
@@ -109,6 +112,11 @@ function linDist(x1,x2){return Math.abs(x2-x1)}
 function RotR(v){
     v.x=v.y
     v.y=-v.x
+    return v
+}
+function nrotr(v){
+    v.x=-v.y
+    v.y=v.x
     return v
 }
 function dot(a,b){
