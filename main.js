@@ -432,6 +432,7 @@ canvas.addEventListener("mousedown", ()=>{
     document.activeElement = canvas
 })
 canvas.addEventListener("mouseup", ()=>{
+    dragging = null
     clicking = false
 })
 window.addEventListener("keydown", (e)=>{
@@ -470,14 +471,28 @@ canvas.addEventListener("mousemove", (e)=>{
                 lines[point.n].p2 = {x:mx,y:my}
             }
         })
-        if (!p.length){
+        if (p.length == 0){
             const sball = selectBall(mx, my)
             if (sball){
-                const b = balls[sball]
+                const b = objs[sball]
                 b.p.x=mx
                 b.p.y=my
+                b.pp.x = mx
+                b.pp.y=my
+                dragging = sball
+            } else {
+                if (dragging){
+                    const b = objs[dragging]
+                b.p.x=mx
+                b.p.y=my
+                b.pp.x = mx
+                b.pp.y=my
+                    
+                }
             }
         }
+
+        
     }
         else
         {
