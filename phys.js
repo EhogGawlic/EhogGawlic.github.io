@@ -1,3 +1,4 @@
+let fric = 0.995
 class Obj {
     p
     pp
@@ -42,7 +43,7 @@ class Obj {
                 this.v.y *= s
             }
             // slight damping to dissipate energy from constraint corrections
-            const damp = 0.995
+            const damp = fric
             this.v.x *= damp
             this.v.y *= damp
 
