@@ -53,6 +53,13 @@ class Obj {
             this.rot+=this.rotv
             this.rotv+=this.rota
             this.rota=0
+            for (const speedo of speedos){
+                const d = dist(this.p, speedo)
+                if (d < this.r+10){
+                    const totVel = Math.hypot(this.v.x, this.v.y)
+                    speedo.v = totVel
+                }
+            }
         }
     }
     addForce(m, f){

@@ -157,6 +157,14 @@ function run(){
         tcans.forEach(tcan => {
             ctx.drawImage(tcansrc, tcan.x-64+emv.x, tcan.y-64+emv.y, 128, 128)
         })
+        //4,28
+        speedos.forEach(speedo=>{
+            ctx.drawImage(speedosrc, speedo.x-32+emv.x, speedo.y-32+emv.y, 64,64)
+            ctx.fillStyle = "black"
+            ctx.font = "16px Arial"
+            ctx.fillText(Math.round(speedo.v*meterPixRatio*targetRate*0.25), speedo.x-24+emv.x, speedo.y+14+emv.y)
+        })
+
         ropes.forEach(rope=>{
             const b1 = objs[rope.b1]
             const b2 = objs[rope.b2]
@@ -704,6 +712,8 @@ window.onclick = (e)=>{
                 case 2:
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
                     break
+                case 3:
+                    addSpeedo({x:mx,y:my})
             }
             adding.ia=false
             return
@@ -920,7 +930,14 @@ okbtn.addEventListener("click", ()=>{
             canvas.style.cursor = "crosshair"
             getEl("crv").style.display="block"
             getEl("mtr").style.display="none"
+            break
+        case "speedo":
+            adding.ia=true
+            adding.t=3
+            getEl("crv").style.display="none"
+            getEl("mtr").style.display="none"
     }
+
 })
 asinp.onchange = function(){
     switch(asinp.value){

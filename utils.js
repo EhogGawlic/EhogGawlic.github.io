@@ -128,6 +128,7 @@ let lines = [],
     sil = false,
     sobjs = [],
     slines=[],
+    speedos = [],
     av=false,
     s1b,
     dragging,
@@ -220,6 +221,9 @@ function addBar(b1,b2){
 }
 function addSpring(b1,b2){
     springs.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+}
+function addSpeedo(pos){
+    speedos.push({x:pos.x,y:pos.y,v:0})
 }
 function selectValve(x, y){
     for (let i = 0; i < valves.length; i++){
@@ -757,6 +761,7 @@ async function setCloudData() {
                 data.valves=valves
                 data.tcans=tcans
                 data.polys=polys
+                data.speedos=speedos
                 const putRequest = objectStore.put(data, saveslot)
 
                 putRequest.onsuccess = function() {
@@ -1048,6 +1053,9 @@ polys = data.polys.map(p =>
         ? p
         : new Polygon(p.vertices, p.color, p.position, p.angle, p.angularVelocity, p.velocity)
 );
+if (data.speedos){
+    speedos = data.speedos
+}
     }
 
     getRequest.onerror = function() {

@@ -166,6 +166,7 @@ switch(getCookie("btype")){
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
 const bomsrc = imgSrc('bom.png')
+const speedosrc = imgSrc('speedo.png')
 if (!localStorage.getItem("saveslot")){
     localStorage.setItem("saveslot", 1)
 }
@@ -232,9 +233,11 @@ req.onupgradeneeded = (event) => {
         const saveObjectStore = db
             .transaction("saves", "readwrite")
             .objectStore("saves")
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
     }
 }
 
