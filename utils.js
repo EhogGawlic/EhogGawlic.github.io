@@ -326,32 +326,36 @@ function snapLines(x, y){
     //}else{return{x,y}}
 }
 function cpol(l,p){
-    const x1 = l.p1.x
-    const x2 = l.p2.x
-    const y1 = l.p1.y
-    const y2 =l.p2.y
-    const d = ( ((p.x-x1)*(x2-x1)) + ((p.y-y1)*(y2-y1)) ) / dist(v1, v2)**2;
+    const sp1 = subVec(l.p1,l.m.p)
+    const sp2 = subVec(l.p2, l.m.p)
+    const x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x
+    const y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y
+    const x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x
+    const y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y
+    const v1 = {x:x1,y:y1}
+    const v2 = {x:x2,y:y2}
+    const d = ( ((p.x-x1)*(x2-x1)) + ((p.x-y1)*(y2-y1)) ) / dist(v1, v2)**2;
     let cx = x1 + (d * (x2-x1))
     let cy = y1 + (d * (y2-y1))
-    
     const os = linePoint(v1, v2, {x:cx,y:cy})
     if (os !== "EE"){
         cx = os.x
         cy = os.y
     }
-    return {x:cx,y:cy}
+    return{x:cx,y:cy}
 }
 function selectLine(x, y){
     let i = 0
+    let r = undefined
     lines.forEach(line =>{
         let c = cpol(line, {x,y})
-        if (dist(c, {x,y}) <= line.w){
-            alert(dist(c,{x,y}))
-            return i
+        
+        if (dist(c, {x,y}) <= Math.max(40,line.w)){
+            r=i
         }
         i++
     })
-    return undefined
+    return r
 }
 function select(x, y){
     const bs = selectBall(x, y)

@@ -651,42 +651,39 @@ window.onclick = (e)=>{
             if (sf!==undefined){ selecteda = sf; selecttype="fan" }
             const stc = selectTCan(mx, my)
             if (stc!==undefined){ selecteda = stc; selecttype="tcan" }
-            //const sli = selectLine(mx, my)
-            //if (sli!==undefined){ selecteda = sli; selecttype="line"}
+            const sli = selectLine(mx, my)
+            if (sli!==undefined){ selecteda = sli; selecttype="line"}
             if (selecttype!=="none"){
                 switch(selecttype){
                     case "ball":
-            // selectedaove ropes referencing the selectedaoved object (iterate backwards to avoid skipping after splice)
-            for (let i = ropes.length - 1; i >= 0; i--){
-                if (ropes[i].b1 === selecteda || ropes[i].b2 === selecteda){
-                    ropes.splice(i, 1)
-                }
-            }
-            // selectedaove springs referencing the selectedaoved object (iterate backwards to avoid skipping after splice)
-            for (let i = springs.length - 1; i >= 0; i--){
-                if (springs[i].b1 === selecteda || springs[i].b2 === selecteda){
-                    springs.splice(i, 1)
-                }
-            }
-            objs.splice(selecteda, 1)
-            for (let i = 0; i < objs.length; i++){
-                if (i >= selecteda){
-                    objs[i].n--
-                    // shift all rope/spring/bar indices down for objects after the selectedaoved one
-                }
-            }
-                    for (let j = 0; j < ropes.length; j++){
-                        if (ropes[j].b1 > selecteda) ropes[j].b1--
-                        if (ropes[j].b2 > selecteda) ropes[j].b2--
+                for (let i = ropes.length - 1; i >= 0; i--){
+                    if (ropes[i].b1 === selecteda || ropes[i].b2 === selecteda){
+                        ropes.splice(i, 1)
                     }
-                    for (let j = 0; j < springs.length; j++){
-                        if (springs[j].b1 > selecteda) springs[j].b1--
-                        if (springs[j].b2 > selecteda) springs[j].b2--
+                }
+                for (let i = springs.length - 1; i >= 0; i--){
+                    if (springs[i].b1 === selecteda || springs[i].b2 === selecteda){
+                        springs.splice(i, 1)
                     }
-                    for (let j = 0; j < bars.length; j++){
-                        if (bars[j].b1 > selecteda) bars[j].b1--
-                        if (bars[j].b2 > selecteda) bars[j].b2--
+                }
+                objs.splice(selecteda, 1)
+                for (let i = 0; i < objs.length; i++){
+                    if (i >= selecteda){
+                        objs[i].n--
                     }
+                }
+                        for (let j = 0; j < ropes.length; j++){
+                            if (ropes[j].b1 > selecteda) ropes[j].b1--
+                            if (ropes[j].b2 > selecteda) ropes[j].b2--
+                        }
+                        for (let j = 0; j < springs.length; j++){
+                            if (springs[j].b1 > selecteda) springs[j].b1--
+                            if (springs[j].b2 > selecteda) springs[j].b2--
+                        }
+                        for (let j = 0; j < bars.length; j++){
+                            if (bars[j].b1 > selecteda) bars[j].b1--
+                            if (bars[j].b2 > selecteda) bars[j].b2--
+                        }
                         break
                     case "valve":
                         valves.splice(selecteda, 1)
@@ -697,7 +694,9 @@ window.onclick = (e)=>{
                         break
                     case "tcan":
                         tcans.splice(selecteda, 1)
-                        //break
+                        break
+                    case "line":
+                        lines.splice(selecteda, 1)
                 }
             }
             deleting=false
@@ -882,6 +881,7 @@ clearbtn.addEventListener("click", ()=>{
     ropes = []
     springs=[]
     bars=[]
+    speedos=[]
     ltype=0
     cn=0
     ml =false
