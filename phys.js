@@ -1,3 +1,4 @@
+let frict = 0.995
 class Obj {
     p
     pp
@@ -42,9 +43,9 @@ class Obj {
                 this.v.y *= s
             }
             // slight damping to dissipate energy from constraint corrections
-            const damp = 0.995
-            this.v.x *= damp
-            this.v.y *= damp
+            
+            this.v.x *= frict
+            this.v.y *= frict
 
             this.pp=this.p
             this.p=addVec(this.p, this.v)
