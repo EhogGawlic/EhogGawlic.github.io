@@ -645,14 +645,14 @@ window.onclick = (e)=>{
             let selecteda
             const sb = selectBall(mx, my)
             if (sb!==undefined){ selecteda = sb; selecttype="ball" }
+            const sli = selectLine(mx, my)
+            if (sli!==undefined){ selecteda = sli; selecttype="line"}
             const sv = selectValve(mx, my)
             if (sv!==undefined){ selecteda = sv; selecttype="valve" }
             const sf = selectFan(mx, my)
             if (sf!==undefined){ selecteda = sf; selecttype="fan" }
             const stc = selectTCan(mx, my)
             if (stc!==undefined){ selecteda = stc; selecttype="tcan" }
-            const sli = selectLine(mx, my)
-            if (sli!==undefined){ selecteda = sli; selecttype="line"}
             if (selecttype!=="none"){
                 switch(selecttype){
                     case "ball":
