@@ -100,6 +100,7 @@ rmenu.style.width = offX+"px"
 bottommenu.style.left = offX+"px"
 bottommenu.style.right = offX+"px"
 ctx.lineCap = "round"
+const fanthingsrc = imgSrc("fanthing.png")
 switch(getCookie("btype")){
     case "\"sm\"":
         dinp.value=78.3

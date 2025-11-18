@@ -346,6 +346,19 @@ springs.forEach(rope=>{
                     generateBezierPrev(cc.x,cc.y,cs.x,cs.y,mx,my,parseFloat(lwinp.value))
                 }
         }
+        
+    }
+    if (fp && af && cn==1){
+const dir = norm(subVec({x:mx,y:my},fp))
+    const a = getAngle(dir)+1.57079633
+    drawImage(t%2===0?fan1:fan2,fp.x+emv.x,fp.y+emv.y,40/(innerHeight-52),a)
+    ctx.setTransform(1, 0, 0, 1, fp.x, fp.y);
+    ctx.rotate(a+Math.PI)
+    ctx.drawImage(fanthingsrc, -30,0,60,dist({x:mx,y:my},fp))
+    ctx.rotate(Math.PI)
+
+    ctx.drawImage(fanthingsrc, -30,0,60,dist({x:mx,y:my},fp))
+    ctx.setTransform(1,0,0,1,0,0)
     }
     bombs.forEach(bomb=>{
         ctx.fillStyle="red"

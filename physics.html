@@ -126,6 +126,7 @@
                         <option value="tc">Trash can</option>
                         <option value="curve">Curve</option>
                         <option value="speedo">Speed tester thing</option>
+                        <option value="ov">Other type of valve (not ready yet)</option>
                     </select><br>Line #<br>
                     <input id="lni" type="number" value="0" max="0" min="0"><br>
                     <div id="mtr">
@@ -278,7 +279,7 @@
                 <input id="saveslot" type="number" value="1" min="1" max="3"><br>
                 <label for="inf">Infinite (use arrow keys to move)</label><br>
                 <input id="infcheck" type="checkbox" value="false"><br>
-                <label for="hcontrast">Hight contrast</label><br>
+                <label for="hcontrast">High contrast</label><br>
                 <input id="hcontrast" type="checkbox" value="false" onchange="canvas.style.backgroundColor = this.checked ? 'black' : 'white'"><br>
                 <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a>
 
@@ -290,7 +291,7 @@
 
             </div>
             <div id="console">
-                <h1>COLSOLE</h1>
+                <h1>CONSOLE</h1>
                 <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl('result').innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
                 <span id="result"></span><br>
                 <p>
