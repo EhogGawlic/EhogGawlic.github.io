@@ -540,7 +540,7 @@ canvas.addEventListener("mousemove", (e)=>{
                 }
             }
         }
-        if (hshift){
+        if (hshift && (inf || infspace)){
             const np = addVec(semv,subVec({x:mx,y:my}, sclick))
             emv = np
         }
