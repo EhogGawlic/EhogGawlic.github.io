@@ -477,9 +477,7 @@ canvas.addEventListener("mouseup", ()=>{
     clicking = false
 })
 window.addEventListener("keyup", (e)=>{
-    if (e.shiftKey){
         hshift = false
-    }
 })
 window.addEventListener("keydown", (e)=>{
     if (inf){
