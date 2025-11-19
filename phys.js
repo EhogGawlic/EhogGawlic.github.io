@@ -89,7 +89,7 @@ class Obj {
     collline(l){
         
             let np = {x:0,y:0}
-            if (l.rail.has && l.rail.kfs.length){
+            if (l.rail && l.rail.has && l.rail.kfs.length){
                 let rl = 0
                 l.rail.kfs.forEach(kf=>{
                     rl += dist(kf.sp,kf.ep)
