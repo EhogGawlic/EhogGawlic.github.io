@@ -87,12 +87,23 @@ class Obj {
         }*/
     }
     collline(l){
-        const sp1 = subVec(l.p1,l.m.p)
-        const sp2 = subVec(l.p2, l.m.p)
-        const x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x
-        const y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y
-        const x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x
-        const y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y
+        
+            let np = {x:0,y:0}
+            if (l.rail.has && l.rail.kfs.length){
+                let rl = 0
+                l.rail.kfs.forEach(kf=>{
+                    rl += dist(kf.sp,kf.ep)
+                })
+                const td = l.rail.t / rl
+                np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
+                
+            }
+            const sp1 = subVec(l.p1,addVec(l.m.p,np))
+        const sp2 = subVec(l.p2, addVec(l.m.p,np))
+        const x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x+np.x
+        const y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y+np.y
+        const x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x+np.x
+        const y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y+np.y
         const v1 = {x:x1,y:y1}
         const v2 = {x:x2,y:y2}
         const d = ( ((this.p.x-x1)*(x2-x1)) + ((this.p.y-y1)*(y2-y1)) ) / dist(v1, v2)**2;

@@ -157,7 +157,10 @@ let lines = [],
     waterBlur=1,
     disec = false,
     d1p = {x:0,y:0},
-    d2p = {x:0,y:0}
+    d2p = {x:0,y:0},
+    hshift = false,
+    semv = {x:0,y:0},
+    sclick = {x:0,y:0}
 for (let y = 0; y < fliprows; y++){
     flipP.push([])
     for (let x = 0; x < flipcols; x++){
@@ -256,7 +259,7 @@ function selectTCan(x, y){
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 function addLine(w){
-    lines.push({p1:c1p,p2:c2p,w:w, m:{h:false,p:{x:0,y:0},t:0},np1:c1p,np2:c2p,s:0.05, color:HEXRGB(clinp.value)})
+    lines.push({p1:c1p,p2:c2p,w:w, m:{h:false,p:{x:0,y:0},t:0},np1:c1p,np2:c2p,s:0.05, color:HEXRGB(clinp.value),rail:{has:false,kfs:[{sp:v(67,67),ep:v(100,67)}],t:0}})
     lninp.max=lines.length-1
     cn=0
     ml =false
@@ -1051,6 +1054,15 @@ function loadSave(slot){
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
+        lines.forEach(l=>{
+            if (!l.rail){
+                l.rail={
+                    has:false,
+                    kfs:[],
+                    t:0
+                }
+            }
+        })
         // Example for loading:
 polys = data.polys.map(p =>
     (p instanceof Polygon)

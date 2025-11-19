@@ -35,6 +35,7 @@ function run(){
             o.pp = subVec(o.p, o.vx)
         }
     }*/
+
     for (let i = 0; i < ms; i++){
         if (autoc.checked && (!paused||ceinp.checked)){
             if (a >= parseInt(acs.value)){
@@ -124,23 +125,35 @@ function run(){
         
         ctx.strokeStyle="black"
         lines.forEach(l => {
+            let np = v(0,0)
+            if (l.rail.kfs.length){
+                
+                l.rail.t++
+                let rl = 0
+                l.rail.kfs.forEach(kf=>{
+                    rl += dist(kf.sp,kf.ep)
+                })
+                const td = l.rail.t / rl * 0.01
+                np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
+                
+            }
             if (l.color){
                 ctx.strokeStyle=`rgb(${l.color[0]},${l.color[1]},${l.color[2]})`
             } else {
                 ctx.strokeStyle="black"
             }
-            let x1 = l.p1.x
-            let y1 = l.p1.y
-            let x2 = l.p2.x
-            let y2 = l.p2.y
+            let x1 = l.p1.x+np.x
+            let y1 = l.p1.y+np.y
+            let x2 = l.p2.x+np.x
+            let y2 = l.p2.y+np.y
             if (l.m.h){
                 if(!paused){l.m.t+=l.m.s}
-                const sp1 = subVec(l.p1,l.m.p)
-                const sp2 = subVec(l.p2, l.m.p)
-                x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x
-                y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y
-                x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x
-                y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y
+                const sp1 = subVec(l.p1,addVec(l.m.p,np))
+                const sp2 = subVec(l.p2, addVec(l.m.p,np))
+                x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x+np.x
+                y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y+np.y
+                x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x+np.x
+                y2 = sp2.x*Math.sin(l.m.t)+sp2.y*Math.cos(l.m.t)+l.m.p.y+np.y
             }
             ctx.lineWidth = l.w
             ctx.beginPath()
@@ -352,7 +365,7 @@ springs.forEach(rope=>{
 const dir = norm(subVec({x:mx,y:my},fp))
     const a = getAngle(dir)+1.57079633
     drawImage(t%2===0?fan1:fan2,fp.x+emv.x,fp.y+emv.y,40/(innerHeight-52),a)
-    ctx.setTransform(1, 0, 0, 1, fp.x, fp.y);
+    ctx.setTransform(1, 0, 0, 1, fp.x+emv.x, fp.y+emv.y);
     ctx.rotate(a+Math.PI)
     ctx.drawImage(fanthingsrc, -30,0,60,dist({x:mx,y:my},fp))
     ctx.rotate(Math.PI)
@@ -420,6 +433,9 @@ window.addEventListener("keypress", (e) => {
             case "s":
                 arope.ia=true
                 arope.t=2
+                break
+            case "d":
+                deleting = true
                 
         }
     }
@@ -449,12 +465,21 @@ canvas.addEventListener("dblclick", ()=>{
     seperateLines(mx,my)
 })
 canvas.addEventListener("mousedown", ()=>{
+    if (!clicking){
+        sclick = {x:mx,y:my}
+        semv = emv
+    }
     clicking = true
     document.activeElement = canvas
 })
 canvas.addEventListener("mouseup", ()=>{
     dragging = null
     clicking = false
+})
+window.addEventListener("keyup", (e)=>{
+    if (e.shiftKey){
+        hshift = false
+    }
 })
 window.addEventListener("keydown", (e)=>{
     if (inf){
@@ -470,6 +495,9 @@ window.addEventListener("keydown", (e)=>{
                 break
             case 'ArrowDown':
                 emv.y-=5
+        }
+        if (e.shiftKey){
+            hshift = true
         }
     }
 })
@@ -512,7 +540,10 @@ canvas.addEventListener("mousemove", (e)=>{
                 }
             }
         }
-
+        if (hshift){
+            const np = addVec(semv,subVec({x:mx,y:my}, sclick))
+            emv = np
+        }
         
     }
         else
