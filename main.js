@@ -126,7 +126,7 @@ function run(){
         ctx.strokeStyle="black"
         lines.forEach(l => {
             let np = v(0,0)
-            if (l.rail && l.rail.kfs.length){
+            if (l.rail && l.rail.has && l.rail.kfs.length){
                 
                 l.rail.t++
                 let rl = 0
