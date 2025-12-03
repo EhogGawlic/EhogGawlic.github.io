@@ -255,7 +255,31 @@
                             addRope(i-1, i)
                         }
                     }
-                    ">chain all</button>
+                    ">chain all</button><br>
+                    <button onclick="
+                    try{
+                    for (let i = 0; i < objs.length; i++){
+                        const tdists = []
+                        for (let j = 0; j < objs.length; j++){
+                            if (i != j){
+                                const tdist = dist(objs[i].p, objs[j].p)
+                                tdists.push({index: j, distance: tdist})
+                            }
+                        }
+                        tdists.sort((a,b) => a.distance - b.distance)
+                        for (let k = 0; k < snsi.value; k++){
+                            addSpring(i, tdists[k].index)
+                        }
+                    }
+                }catch(e){alert(e)}
+                    ">Connect all balls with their <select id="snsi">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8" selected>8</option>
+                    </select> closest ones</button>
                 </div>
                 <!--<span id="console">text</span>-->
                 <img src="tcan.png" style="display: none;" id="tcansrc">
