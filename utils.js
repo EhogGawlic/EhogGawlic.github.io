@@ -1,3 +1,6 @@
+Array.prototype.contains = function(item){
+    return this.indexOf(item) > -1;
+}
 
 function isUTF8(str) {
     let i = 0;
@@ -122,6 +125,7 @@ let lines = [],
     c2p,
     ropes=[],
     ml = false,
+    dragline = [],
     valves = [],
     cv = false,
     paused = false,

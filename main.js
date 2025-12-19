@@ -474,6 +474,7 @@ canvas.addEventListener("mousedown", ()=>{
 })
 canvas.addEventListener("mouseup", ()=>{
     dragging = null
+    dragline = []
     clicking = false
 })
 window.addEventListener("keyup", (e)=>{
@@ -507,10 +508,14 @@ canvas.addEventListener("mousemove", (e)=>{
     if (clicking){
         if (!drawing)
         {
-        const p = selectLinePoint(mx, my)
-
+        let p = selectLinePoint(mx, my)
+        dragline.forEach(pt=>{
+            p.push(pt)
+        })
         p.forEach(point => {
-            
+            if (!dragline.contains(point)){
+                dragline.push(point)
+            } 
             if (point.pn===0){
                 lines[point.n].p1 = {x:mx,y:my}
             }
