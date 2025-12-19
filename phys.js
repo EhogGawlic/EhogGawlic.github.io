@@ -27,7 +27,7 @@ class Obj {
         this.r=r
         this.b=b
         this.n=objs.length
-        this.f=fixed.checked
+        this.f=f || fixed.checked
         this.liquid = l
         this.surftens = st/this.w
     }
