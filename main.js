@@ -1,12 +1,14 @@
 let a = 0
 let t = 0
-
+let tsl = 0.1
 setInterval(()=>{
     setCloudData()
     saveData(getEl("infcheck").checked ? "true" : "", "infspace")
 },sps.value*1000)
 function run(){
-    if (loading){
+        
+            
+        getEl("main").style.display="block"
         const div = getEl("lrt")
         const r = t*200/250
         div.style.webkitTransform = 'rotate('+r+'deg)'; 
@@ -14,10 +16,17 @@ function run(){
         div.style.msTransform     = 'rotate('+r+'deg)'; 
         div.style.oTransform      = 'rotate('+r+'deg)'; 
         div.style.transform       = 'rotate('+r+'deg)'; 
+    if (loading){
     } else {
-        getEl("main").style.display="block"
+        tsl+= Math.sin(tsl/targetRate*Math.PI*0.5)*3
+        console.log(tsl)
+        if (tsl >= targetRate){
         getEl("lbg").style.display="none"
         getEl("lrt").style.display="none"
+        } else {
+            const d = getEl("loadingdiv")
+            d.style.top = (tsl*(innerHeight/targetRate))+"px"
+        }
     }
     t++
     const ft = (thisLoop=Date.now()) - lastLoop
