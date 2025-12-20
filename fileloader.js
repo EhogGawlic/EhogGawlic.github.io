@@ -88,7 +88,7 @@ function downloadFile(arr){
     console.log(url)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'pSave.psv'
+    a.download = savename.value+'.psv'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

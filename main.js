@@ -929,21 +929,7 @@ abmbtn.addEventListener("click", ()=>{
     abomb=true
 })
 clearbtn.addEventListener("click", ()=>{
-    objs=[]
-    lines=[]
-    valves=[]
-    fans=[]
-    tcans=[]
-    ropes = []
-    springs=[]
-    bars=[]
-    speedos=[]
-    ltype=0
-    cn=0
-    ml =false
-    deleting=false
-    adding.ia=false
-    drawing=false
+    clear()
 })
 albtn.addEventListener("click", ()=>{
     ml = true
@@ -1025,8 +1011,18 @@ ppbtn.addEventListener("click", ()=>{
     loop = setInterval(run, 1000/targetRate)
 })
 rstbtn.addEventListener("click", ()=>{
-    
-    decode(atob(saved))
+    clear()
+    const reader = new FileReader()
+    /**
+     * 
+     * @param {{target: {result: ArrayBuffer}}} e 
+     */
+    reader.onload = (e) => {
+        console.log(e.target.result)
+        const arrayBuffer = e.target.result
+        decodeNewFile(arrayBuffer)
+    }
+    reader.readAsArrayBuffer(saveinp.files[0])
 })
 avbtn.addEventListener("click", ()=>{
     av = true

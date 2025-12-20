@@ -988,6 +988,7 @@ function generateBezierPrev(x1,y1,x2,y2,cpx,cpy,w){
  */
 
 function processFile(files) {
+    clear()
     const reader = new FileReader()
     /**
      * 
@@ -999,6 +1000,23 @@ function processFile(files) {
         decodeNewFile(arrayBuffer)
     }
     reader.readAsArrayBuffer(files[0])
+}
+function clear(){
+    objs=[]
+    lines=[]
+    valves=[]
+    fans=[]
+    tcans=[]
+    ropes = []
+    springs=[]
+    bars=[]
+    speedos=[]
+    ltype=0
+    cn=0
+    ml =false
+    deleting=false
+    adding.ia=false
+    drawing=false
 }
 const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(',\n');
 function log(text){
