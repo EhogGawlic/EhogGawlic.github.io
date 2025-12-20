@@ -29,6 +29,7 @@ function getdist(a,b){
     return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2)
 }
 function v(x,y){return{x,y}}
+function vec(x,y){return{x,y}}
 function dot(a,b){
     return a.x*b.x+a.y*b.y
 }

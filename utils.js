@@ -1,3 +1,12 @@
+Float32Array.prototype.push = function(...items){
+    let length = this.length
+    let newLength = length + items.length
+    let newArray = new Float32Array(newLength)
+    newArray.set(this)
+    for (let i = 0; i < items.length; i++){
+        newArray[length + i] = items[i]
+    }
+}
 Array.prototype.contains = function(item){
     return this.indexOf(item) > -1;
 }
@@ -980,12 +989,14 @@ function generateBezierPrev(x1,y1,x2,y2,cpx,cpy,w){
 
 function processFile(files) {
     const reader = new FileReader()
-    
+    /**
+     * 
+     * @param {{target: {result: ArrayBuffer}}} e 
+     */
     reader.onload = (e) => {
+        console.log(e.target.result)
         const arrayBuffer = e.target.result
-        const f32arr = new Float32Array(arrayBuffer)
-        console.log(f32arr)
-
+        decodeNewFile(arrayBuffer)
     }
     reader.readAsArrayBuffer(files[0])
 }

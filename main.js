@@ -1002,10 +1002,12 @@ asinp.onchange = function(){
     }
 }
 savebtn.addEventListener("click", ()=>{
-    savelnk.href="data:application/octet-stream;base64,"+encode()
-    
-    savelnk.download = getEl("savename").value+".psave"
-    savelnk.click()
+    try {
+    downloadFile(encodeNewFile())
+        
+    } catch (error) {
+        alert(error)
+    }
 })
 ppbtn.addEventListener("click", ()=>{
     paused = paused ? false : true
