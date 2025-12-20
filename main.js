@@ -18,7 +18,7 @@ function run(){
         div.style.transform       = 'rotate('+r+'deg)'; 
     if (loading){
     } else {
-        tsl+= Math.sin(tsl/targetRate*Math.PI*0.5)*3
+        tsl+= Math.sin(tsl/targetRate*Math.PI*0.5)*3+0.35
         console.log(tsl)
         if (tsl >= targetRate){
         getEl("lbg").style.display="none"
