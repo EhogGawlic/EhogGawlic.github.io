@@ -7,7 +7,7 @@ const ITEM = -999998;
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0000)
+    data.push(0x0001)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -81,6 +81,15 @@ function encodeNewFile(){
         data.push(SEP)
     })
     data.push(ITEM)
+    data.push(parseFloat(xinp.value))
+    data.push(parseFloat(yinp.value))
+    data.push(parseFloat(rinp.value))
+    data.push(parseFloat(dinp.value))
+    data.push(parseFloat(vxinp.value))
+    data.push(parseFloat(vyinp.value))
+    data.push(parseFloat(dinp.value))
+    data.push(parseFloat(substeps.value))
+    data.push(inf ? 1 : 0)
     return data
 }
 function downloadFile(arr){
@@ -100,8 +109,8 @@ function downloadFile(arr){
 function decodeNewFile(data){
     const arr = Array.from(new Float32Array(data))
     console.log(arr)
-    if (arr[0] == 0){
         let idx = 1
+    if (arr[0] == 0 || arr[0] == 0x0001){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -246,14 +255,28 @@ function decodeNewFile(data){
                 springs.push({b1:s[0],b2:s[1],l:s[2]})
             })
         }
-        /*
-    data.push(ITEM)
-    springs.forEach(s=>{
-        //springs.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
-        data.push(s.b1)
-        data.push(s.b2)
-        data.push(s.l)
-        data.push(SEP)
-    })*/
-}
+    }
+    if (arr[0] == 0x0001){
+        const metaEnd = arr.indexOf(ITEM, idx)
+        const mdata = arr.slice(idx, metaEnd)
+        idx = metaEnd + 1
+        xinp.value = mdata[0]
+        yinp.value = mdata[1]
+        rinp.value = mdata[2]
+        dinp.value = mdata[3]
+        vxinp.value = mdata[4]
+        vyinp.value = mdata[5]
+        dinp.value = mdata[6]
+        if (mdata[7]){
+            substeps.value = mdata[7]
+        }
+        if (mdata[8] == 1){
+            inf = true
+            getEl("infcheck").checked = true
+        }
+        else{
+            inf = false
+            getEl("infcheck").checked = false
+        }
+    }
 }

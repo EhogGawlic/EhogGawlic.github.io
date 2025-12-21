@@ -23,6 +23,7 @@ function run(){
         if (tsl >= targetRate){
         getEl("lbg").style.display="none"
         getEl("lrt").style.display="none"
+        getEl("loadingdiv").style.display="none"
         } else {
             const d = getEl("loadingdiv")
             d.style.top = (tsl*(innerHeight/targetRate))+"px"
@@ -256,7 +257,7 @@ springs.forEach(rope=>{
                         const d = dist(b1.p, b2.p)
                         const diff = Math.min(0,rope.l - d)
                         const dir = norm(subVec(b2.p, b1.p))
-                        const force = multVecCon(dir, diff*0.5)
+                        const force = multVecCon(dir, diff*0.5*(16/constraintIters**2))
                         b1.pp = addVec(b1.pp, force)
                         b2.pp = subVec(b2.pp, force)
                         if (diff === 0) return
@@ -280,13 +281,17 @@ springs.forEach(rope=>{
                         }
                     })
 
-                    springs.forEach(rope=>{
+                    springs.forEach((rope,idx)=>{
                         const b1 = objs[rope.b1]
                         const b2 = objs[rope.b2]
                         const d = dist(b1.p, b2.p)
                         const diff = rope.l - d
                         const dir = norm(subVec(b2.p, b1.p))
-                        
+                        if (sbreak.checked){
+                            if (diff < -50){
+                                springs.splice(idx,1)
+                            }
+                        }
                         // Add velocity damping
                         const relativeVel = subVec(b2.v || {x:0,y:0}, b1.v || {x:0,y:0})
                         const dampingForce = multVecCon(dir, dot(relativeVel, dir) * 0.1)

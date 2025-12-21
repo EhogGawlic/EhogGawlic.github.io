@@ -94,6 +94,7 @@ button{
     background-color: gray;
     border: 5px solid black;
     border-radius: 10px;
+    overflow-y: scroll;
 }
 #console{
     display: none;
@@ -105,6 +106,7 @@ button{
     background-color: gray;
     border: 5px solid black;
     border-radius: 10px;
+    overflow-y: scroll;
 }
 h1{
     font-size: xx-large;
