@@ -270,13 +270,11 @@ function decodeNewFile(data){
         if (mdata[7]){
             substeps.value = mdata[7]
         }
-        if (mdata[8] == 1){
-            inf = true
-            getEl("infcheck").checked = true
-        }
-        else{
-            inf = false
-            getEl("infcheck").checked = false
-        }
+        objs.forEach(o=>{
+            if (o.p.y > 500*meterPixRatio){
+                inf = true
+                getEl("infcheck").checked = true
+            }
+        })
     }
 }
