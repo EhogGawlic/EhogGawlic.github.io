@@ -108,19 +108,15 @@ function downloadFile(arr){
  */
 function decodeNewFile(data){
     const arr = Array.from(new Float32Array(data))
-    console.log(arr)
         let idx = 1
     if (arr[0] == 0 || arr[0] == 0x0001){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
             idx = ballsEnd + 1
-
-            console.log(balls)
             let ballReadArr = [[]]
             let last = ballReadArr[0]
             for (let i = 0; i < balls.length; i++){
-                console.log(balls[i])
                 if (balls[i] == SEP){
                     ballReadArr.push([])
                     last = ballReadArr[ballReadArr.length-1]
@@ -131,7 +127,6 @@ function decodeNewFile(data){
             }
             
             ballReadArr.pop()
-            console.log(ballReadArr)
             ballReadArr.forEach(b=>{
                 const nb = new Obj(
                     b[1],b[2],b[7],[b[13],b[14],b[15]],b[8],b[3]/(meterPixRatio/targetRate),b[4]/(meterPixRatio/targetRate),b[9],b[11] ==1 ? true:false,b[12],b[10]
@@ -156,7 +151,6 @@ function decodeNewFile(data){
                 }
             }
             lineReadArr.pop()
-            console.log(lineReadArr)
             lineReadArr.forEach(l=>{
                 lines.push({p1:vec(l[0],l[1]),p2:vec(l[2],l[3]),w:l[4], m:{h:l[5] == 1 ? true:false,p:vec(l[6],l[7]),t:l[8]},np1:vec(l[9],l[10]),np2:vec(l[11],l[12]),s:l[13], color:[l[14],l[15],l[16]],rail:{has:false,kfs:[{sp:v(67,67),ep:v(100,67)}],t:0}})
             })
@@ -178,7 +172,6 @@ function decodeNewFile(data){
                 }
             }
             fanReadArr.pop()
-            console.log(fanReadArr)
             fanReadArr.forEach(f=>{
                 fans.push({
                     p:{x:f[0],y:f[1]},
@@ -206,7 +199,6 @@ function decodeNewFile(data){
                 }
             }
             valveReadArr.pop()
-            console.log(valveReadArr)
             valveReadArr.forEach(v=>{
                 valves.push({p:{x:v[0],y:v[1]},r:v[2],c:[v[3],v[4],v[5]],o:v[6] == 1 ? true:false})
             })
@@ -228,7 +220,6 @@ function decodeNewFile(data){
                 }
             }
             trashReadArr.pop()
-            console.log(trashReadArr)
             trashReadArr.forEach(v=>{
                 tcans.push(vec(v[0],v[1]))
             })
@@ -250,7 +241,6 @@ function decodeNewFile(data){
                 }
             }
             springReadArr.pop()
-            console.log(springReadArr)
             springReadArr.forEach(s=>{
                 springs.push({b1:s[0],b2:s[1],l:s[2]})
             })
@@ -277,4 +267,12 @@ function decodeNewFile(data){
             }
         })
     }
+}
+async function listDirectory(path){
+    const resp = await fetch(path)
+    const text = await resp.text()
+    const parser = new DOMParser()
+    const doc = parser.parseFromString(text, "text/html")
+    const links = Array.from(doc.querySelectorAll("a"))
+    return links.map(a=>a.getAttribute("href"))
 }

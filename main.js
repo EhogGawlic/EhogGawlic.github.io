@@ -19,7 +19,6 @@ function run(){
     if (loading){
     } else {
         tsl+= Math.sin(tsl/targetRate*Math.PI*0.5)*3+0.35
-        console.log(tsl)
         if (tsl >= targetRate){
         getEl("lbg").style.display="none"
         getEl("lrt").style.display="none"
@@ -1146,3 +1145,48 @@ pcanv.addEventListener("mousemove", (e)=>{
         pctx.fill()
     }
 })
+//
+// example loader
+//
+
+//get all folders in things folder (./things)
+
+listDirectory('./things').then((folders)=>{
+    folders.forEach(async(folder,i)=>{
+        if (i > 2){
+            console.log(folder.split('s/')[1])
+            const extxt = `
+                    <div class="thing" id="ex${i-3}">
+                        <p class="thingtitle">${folder.split('s/')[1]}</p><br>
+                        <img class="thingimg" src="${folder + "/image.png"}"><br>
+                        <button class="thingbtn" id="ex${i-3}load">Load</button>
+                    </div>`
+            getEl('excontain').innerHTML += extxt
+            // Wait a tick for DOM to update before attaching listener
+            setTimeout(()=>{
+                const exbtn = document.querySelector(`#ex${i-3}load`)
+                if (exbtn) {
+                    exbtn.onclick= async()=>{
+                        getEl("examples").style.display = "none"
+                        console.log('loading example from ' + folder)
+                        const response = await fetch(folder + '/file.psv')
+                        const arrayBuffer = await response.arrayBuffer()
+                        clear()
+                        decodeNewFile(arrayBuffer)
+                    }
+                }
+            }, 0)
+        }
+    })
+})
+getEl('exbtn').onclick = ()=>{
+    const exbox = getEl("examples")
+    if (exbox.style.display === "none" || exbox.style.display === ""){
+        exbox.style.display = "block"
+    } else {
+        exbox.style.display = "none"
+    }
+}
+document.querySelector('#examples .closebtn').onclick = ()=>{
+    getEl("examples").style.display = "none"
+}
