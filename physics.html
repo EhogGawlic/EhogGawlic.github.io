@@ -95,14 +95,14 @@
                     <label for="saveinp">Save file</label><br>
                     <input type="file" id="saveinp" accept=".psv" onchange = "processFile(this.files)"><br>
                     <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>
-                    <form action="https://customized-attorney-customs-ave.trycloudflare.com/" method="POST">
+                    <div id="shareform">
                         <h4>Share</h4>
                         <label>File</label>
                         <input type="file" name="file" accept=".psv" required><br>
                         <label>Title</label>
-        <input type="text" required  enctype = "multipart/form-data" name="name" placeholder="Enter title"/><br>
-                        <button type="submit">Post</button>
-                    </form>
+                        <input type="text" required name="name" placeholder="Enter title"/><br>
+                        <button>Post</button>
+                    </div>
                     <button id="afbtn">Add fan</button><br>
                     <label for="fsinp">Fan strength</label><br>
                     <input id="fsinp" type="number" value="10"><br>
@@ -347,7 +347,7 @@
                 <button id="pcancelbtn">Cancel</button>
             </div>
             <div id="examples">
-                <h2>Things i made</h2>
+                <h2>Things <s>i</s> people made</h2>
                 <div id="excontain">
                 </div>
                 <button class="closebtn">X</button>

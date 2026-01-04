@@ -453,22 +453,6 @@ window.addEventListener("keypress", (e) => {
         }
     }
 })
-getEl('text').addEventListener('change', function() {
-    const text = getEl('text').value
-    const title = document.getElementById("title").value
-    const file = encode()
-    const filename = document.getElementById("filename").value
-    const user = document.getElementById('username').value
-    getEl("fileh").value=file
-    document.getElementById('post-preview').innerHTML = 
-    `
-    <h3>${title}</h3>
-    <p>By ${user}</p><br>
-    <p>${textToHTML(text)}</p>
-    ${
-        file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${file}">Download ${filename}</a>`: ``
-    }`
-});
 canvas.addEventListener("contextmenu", (e)=>{
     e.preventDefault()
     xinp.value = mx/meterPixRatio
@@ -1155,9 +1139,10 @@ listDirectory('./things').then((folders)=>{
     folders.forEach(async(folder,i)=>{
         if (i > 2){
             console.log(folder.split('s/')[1])
+            const title = decodeURI( folder.split('s/')[1])
             const extxt = `
                     <div class="thing" id="ex${i-3}">
-                        <p class="thingtitle">${folder.split('s/')[1]}</p><br>
+                        <p class="thingtitle">${title}</p><br>
                         <img class="thingimg" src="${folder + "/image.png"}"><br>
                         <button class="thingbtn" id="ex${i-3}load">Load</button>
                     </div>`
@@ -1189,4 +1174,44 @@ getEl('exbtn').onclick = ()=>{
 }
 document.querySelector('#examples .closebtn').onclick = ()=>{
     getEl("examples").style.display = "none"
+}
+//sharing
+async function uploadFormData(url, form) {
+    const res = await fetch(url, {
+      method: 'POST',
+      mode: 'cors', // ensure CORS is used; don't use 'no-cors'
+      body: form,
+    });
+    console.log('Fetch completed, status:', res.status);
+    const text = await res.text();
+    console.log('Response body:', text);
+    return res;
+}
+async function sendCanvasAndFile(canvas, fileInput, title) {
+    
+  const url = 'https://customized-attorney-customs-ave.trycloudflare.com/upload2';
+  const form = new FormData();
+  form.append('name', title);
+
+  const file = fileInput?.files?.[0];
+  if (file) form.append('file', file);
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  form.append('image', blob, 'canvas.png');
+
+  const res = await uploadFormData(url, form);
+  if (!res.ok) throw new Error('Upload failed: ' + res.status);
+  return res;
+}
+document.querySelector("#shareform button").onclick = (e)=>{
+    e.preventDefault()
+    console.log("Form submit button clicked")
+    const titleinp = document.querySelector('#shareform input[name="name"]')
+    const fileinp = document.querySelector('#shareform input[name="file"]')
+    console.log("Calling sendCanvasAndFile...")
+    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
+        console.log("Upload succeeded, status:", res.status)
+        alert("yay you can view it in examples after ehag approves it")
+    })
+    console.log("Form handler finished")
 }

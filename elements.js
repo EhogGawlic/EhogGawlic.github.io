@@ -205,7 +205,7 @@ req.onsuccess = ()=>{
             tcans = []
             polys=[]
         }
-        if (localStorage.getItem("save").split(";").length==4){
+        if (localStorage.getItem("save") && localStorage.getItem("save").split(";").length==4){
             try{decode(localStorage.getItem("save").toString(), 1)}
             catch(e){
                 console.log(e)
