@@ -1135,7 +1135,8 @@ pcanv.addEventListener("mousemove", (e)=>{
 
 //get all folders in things folder (./things)
 
-listDirectory('./things').then((folders)=>{
+listDirectory('./things').then(async(folders)=>{
+    let nfolders = 0
     folders.forEach(async(folder,i)=>{
         if (i > 2){
             console.log(folder.split('s/')[1])
@@ -1161,9 +1162,38 @@ listDirectory('./things').then((folders)=>{
                     }
                 }
             }, 0)
+            nfolders = i-3
         }
     })
+    // get all examples from server
+    const examples = await fetch(server + '/examples')
+    const examplesList = await examples.json()
+    examplesList.forEach((ex,i)=>{
+        const name = ex.Title
+        const extxt = `
+                <div class="thing" id="ex${nfolders+i+1}">
+                    <p class="thingtitle">${name}</p><br>
+                    <img class="thingimg" src="${server+'/exampleimage?name='+name}"><br>
+                    <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
+                </div>`
+        getEl('excontain').innerHTML += extxt
+        // Wait a tick for DOM to update before attaching listener
+        setTimeout(()=>{
+            const exbtn = document.querySelector(`#ex${nfolders+i+1}load`)
+            if (exbtn) {
+                exbtn.onclick= async()=>{
+                    getEl("examples").style.display = "none"
+                    console.log('loading example from ' + name)
+                    const response = await fetch(server + '/examplefile?name='+name)
+                    const arrayBuffer = await response.arrayBuffer()
+                    clear()
+                    decodeNewFile(arrayBuffer)
+                }
+            }
+        }, 0)
+    })
 })
+
 getEl('exbtn').onclick = ()=>{
     const exbox = getEl("examples")
     if (exbox.style.display === "none" || exbox.style.display === ""){
@@ -1189,7 +1219,7 @@ async function uploadFormData(url, form) {
 }
 async function sendCanvasAndFile(canvas, fileInput, title) {
     
-  const url = 'https://customized-attorney-customs-ave.trycloudflare.com/upload2';
+  const url = 'https://auction-receptors-margaret-stories.trycloudflare.com/upload3';
   const form = new FormData();
   form.append('name', title);
 
@@ -1211,7 +1241,7 @@ document.querySelector("#shareform button").onclick = (e)=>{
     console.log("Calling sendCanvasAndFile...")
     sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
         console.log("Upload succeeded, status:", res.status)
-        alert("yay you can view it in examples after ehag approves it")
+        alert("yay you can view it in examples after u reload")
     })
     console.log("Form handler finished")
 }
