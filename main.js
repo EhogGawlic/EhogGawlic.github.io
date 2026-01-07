@@ -19,7 +19,6 @@ function run(){
     if (loading){
     } else {
         tsl+= Math.sin(tsl/targetRate*Math.PI*0.5)*3+0.35
-        console.log(tsl)
         if (tsl >= targetRate){
         getEl("lbg").style.display="none"
         getEl("lrt").style.display="none"
@@ -454,22 +453,6 @@ window.addEventListener("keypress", (e) => {
         }
     }
 })
-getEl('text').addEventListener('change', function() {
-    const text = getEl('text').value
-    const title = document.getElementById("title").value
-    const file = encode()
-    const filename = document.getElementById("filename").value
-    const user = document.getElementById('username').value
-    getEl("fileh").value=file
-    document.getElementById('post-preview').innerHTML = 
-    `
-    <h3>${title}</h3>
-    <p>By ${user}</p><br>
-    <p>${textToHTML(text)}</p>
-    ${
-        file.length ? `<br><a download="${filename}.psave" href="data:text/base64,+${file}">Download ${filename}</a>`: ``
-    }`
-});
 canvas.addEventListener("contextmenu", (e)=>{
     e.preventDefault()
     xinp.value = mx/meterPixRatio
@@ -1146,3 +1129,119 @@ pcanv.addEventListener("mousemove", (e)=>{
         pctx.fill()
     }
 })
+//
+// example loader
+//
+
+//get all folders in things folder (./things)
+
+listDirectory('./things').then(async(folders)=>{
+    let nfolders = 0
+    folders.forEach(async(folder,i)=>{
+        if (i > 2){
+            console.log(folder.split('s/')[1])
+            const title = decodeURI( folder.split('s/')[1])
+            const extxt = `
+                    <div class="thing" id="ex${i-3}">
+                        <p class="thingtitle">${title}</p><br>
+                        <img class="thingimg" src="${folder + "/image.png"}"><br>
+                        <button class="thingbtn" id="ex${i-3}load">Load</button>
+                    </div>`
+            getEl('excontain').innerHTML += extxt
+            // Wait a tick for DOM to update before attaching listener
+            setTimeout(()=>{
+                const exbtn = document.querySelector(`#ex${i-3}load`)
+                if (exbtn) {
+                    exbtn.onclick= async()=>{
+                        getEl("examples").style.display = "none"
+                        console.log('loading example from ' + folder)
+                        const response = await fetch(folder + '/file.psv')
+                        const arrayBuffer = await response.arrayBuffer()
+                        clear()
+                        decodeNewFile(arrayBuffer)
+                    }
+                }
+            }, 0)
+            nfolders = i-3
+        }
+    })
+    // get all examples from server
+    const examples = await fetch(server + '/examples')
+    const examplesList = await examples.json()
+    examplesList.forEach((ex,i)=>{
+        const name = ex.Title
+        const extxt = `
+                <div class="thing" id="ex${nfolders+i+1}">
+                    <p class="thingtitle">${name}</p><br>
+                    <img class="thingimg" src="${server+'/exampleimage?name='+name}"><br>
+                    <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
+                </div>`
+        getEl('excontain').innerHTML += extxt
+        // Wait a tick for DOM to update before attaching listener
+        setTimeout(()=>{
+            const exbtn = document.querySelector(`#ex${nfolders+i+1}load`)
+            if (exbtn) {
+                exbtn.onclick= async()=>{
+                    getEl("examples").style.display = "none"
+                    console.log('loading example from ' + name)
+                    const response = await fetch(server + '/examplefile?name='+name)
+                    const arrayBuffer = await response.arrayBuffer()
+                    clear()
+                    decodeNewFile(arrayBuffer)
+                }
+            }
+        }, 0)
+    })
+})
+
+getEl('exbtn').onclick = ()=>{
+    const exbox = getEl("examples")
+    if (exbox.style.display === "none" || exbox.style.display === ""){
+        exbox.style.display = "block"
+    } else {
+        exbox.style.display = "none"
+    }
+}
+document.querySelector('#examples .closebtn').onclick = ()=>{
+    getEl("examples").style.display = "none"
+}
+//sharing
+async function uploadFormData(url, form) {
+    const res = await fetch(url, {
+      method: 'POST',
+      mode: 'cors', // ensure CORS is used; don't use 'no-cors'
+      body: form,
+    });
+    console.log('Fetch completed, status:', res.status);
+    const text = await res.text();
+    console.log('Response body:', text);
+    return res;
+}
+async function sendCanvasAndFile(canvas, fileInput, title) {
+    
+  const url = server+'/upload3';
+  const form = new FormData();
+  form.append('name', title);
+
+  const file = fileInput?.files?.[0];
+  if (file) form.append('file', file);
+
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  form.append('image', blob, 'canvas.png');
+
+  const res = await uploadFormData(url, form);
+  if (!res.ok) throw new Error('Upload failed: ' + res.status);
+  return res;
+}
+document.querySelector("#shareform button").onclick = (e)=>{
+    e.preventDefault()
+    console.log("Form submit button clicked")
+    const titleinp = document.querySelector('#shareform input[name="name"]')
+    const fileinp = document.querySelector('#shareform input[name="file"]')
+    console.log("Calling sendCanvasAndFile...")
+    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
+        console.log("Upload succeeded, status:", res.status)
+        alert("yay you can view it in examples after u reload")
+    })
+    console.log("Form handler finished")
+}

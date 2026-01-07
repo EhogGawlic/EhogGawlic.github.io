@@ -115,21 +115,8 @@
         </div>
         <div id="updates">
             <h2>Update log</h2>
+            <h4>Latest 5 commits (updates)</h4>
             <ul id="updl">
-                <li>2D: Added better water graphics.</li>
-                <li>2D: Faster collision detection.</li>
-                <li>2D: Fixed streams.</li>
-            </ul>
-            <h2>Update agenda</h2>
-            <ul>
-                <li>3D: Fix camera</li>
-                <li>3D: Add fixed boxes.</li>
-                <li>3D: Add box rotation.</li>
-                <li>2D: Add ball rotation.</li>
-                <li>2D: Add ball textures.</li>
-                <li>2D: Add <a href="https://en.wikipedia.org/wiki/B%C3%A9zier_curve">Bezier curves</a>.</li>
-                <li>2D: Fix surface tension.</li>
-                <li>2D: Fix curves.</li>
             </ul>
             <button id="closebtn">x</button>
         </div>
@@ -140,16 +127,15 @@
             const upd = document.getElementById("updates")
             b3.onclick = function(){
                 upd.style.display = "block"
-                fetch('https://api.github.com/repos/EhogGawlic/EhogGawlic.github.io/commits?per_page=1')
+                fetch('https://api.github.com/repos/EhogGawlic/EhogGawlic.github.io/commits?per_page=5')
     .then(response => response.json())
     .then(data => {
         // The API returns an array of commits; the latest is at index 0
-        const latestCommit = data[0]; 
-        const commitMessage = latestCommit.commit.message;
-        const commitAuthor = latestCommit.commit.author.name;
-        const commitDate = new Date(latestCommit.commit.author.date).toLocaleString();
-        updl.innerHTML = `<li>2D: ${commitMessage}</li>
-    ${updl.innerHTML}`
+        data.forEach(commit => {
+            const li = document.createElement("li")
+            li.textContent = `2D: ${commit.commit.message} (by ${commit.commit.author.name} on ${new Date(commit.commit.author.date).toLocaleDateString()})`
+            document.getElementById("updl").appendChild(li)
+        });
         // Display the information in your HTML
 
     })
@@ -159,7 +145,16 @@
             cbtn.onclick = function(){
                 upd.style.display="none"
             }
+            /**
+             * 
+             * @param {string} url 
+             */
             function goTo(url){
+                if (window.location.href.startsWith("http://localhost")||window.location.href.startsWith("https://raw.githack") || window.location.href.startsWith("http://127.")){
+                    console.log("dev mode")
+                    url += ".html"
+                    console.log(url)
+                }
                 const a = document.createElement("a")
                 a.href=url
                 a.click()

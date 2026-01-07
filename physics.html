@@ -95,22 +95,15 @@
                     <label for="saveinp">Save file</label><br>
                     <input type="file" id="saveinp" accept=".psv" onchange = "processFile(this.files)"><br>
                     <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>
-                    <form action="https://mn4zqn4t-4000.usw3.devtunnels.ms/gyat3.html" method="POST">
+                    <div id="shareform">
                         <h4>Share</h4>
-                        <label for="username">Username</label><br>
-                        <input id="username" name="username" type="text" placeholder="Username" required><br>
-                        <label for="password">Password</label><br>
-                        <input id="password" name="password" type="password" placeholder="Password" required><br>
-                        <label for="title">Title</label>
-                        <input id="title" name="name" type="text" required><br>
-                        <label for="filename">File name</label>
-                        <input id="filename" name="filename" type="text" required><br>
-                        <label for="text">Text/desc.</label><br>
-                        <textarea id="text" name="data" rows="5" cols="20" required></textarea><br>
-                        <input name="fileh" id="fileh" style="display:none" type="text"><br>
-                        <div class="idk" id="post-preview"></div>
-                        <button type="submit">Post</button>
-                    </form>
+                        <p>Note: This may not work because the server runs on my computer and the server stops when my computer is closed and not connected to power. Title length limit is 255 and files over 16 MB in size will not work. Besides, if you have a file that big, there is something wrong with your save.</p>
+                        <label>File</label>
+                        <input type="file" name="file" accept=".psv" required><br>
+                        <label>Title</label>
+                        <input type="text" required name="name" placeholder="Enter title"/><br>
+                        <button>Post</button>
+                    </div>
                     <button id="afbtn">Add fan</button><br>
                     <label for="fsinp">Fan strength</label><br>
                     <input id="fsinp" type="number" value="10"><br>
@@ -339,6 +332,7 @@
             </div>
             <div id="bottommenu">
                 <button id="bombbtn">BoMb</button>
+                <button id="exbtn">Examples</button>
                 <!--<button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>-->
             </div>
             <div id="polycreate" class="popup">
@@ -353,9 +347,15 @@
                 <button id="pcbtn">Create polygon</button><br>
                 <button id="pcancelbtn">Cancel</button>
             </div>
+            <div id="examples">
+                <h2>Things <s>i</s> people made</h2>
+                <div id="excontain">
+                </div>
+                <button class="closebtn">X</button>
+            </div>
         </div>
         <div id="loadingdiv">
-            <img id="lbg" src="loaChristmas.png">
+            <img id="lbg" src="loadingbgr.jpg">
             <img id="lrt" src="loading.png">
         </div>
         <script src="elements.js"></script>
