@@ -1166,6 +1166,7 @@ listDirectory('./things').then(async(folders)=>{
         }
     })
     // get all examples from server
+    try{
     const examples = await fetch(server + '/examples')
     const examplesList = await examples.json()
     examplesList.forEach((ex,i)=>{
@@ -1192,6 +1193,10 @@ listDirectory('./things').then(async(folders)=>{
             }
         }, 0)
     })
+}catch(e){
+    getEl('excontain').innerHTML = "<p>my computer is closed so the server is off and it cannot load examples rn. :(</p>"
+    getEl('shareform').style.display="none"
+}
 })
 
 getEl('exbtn').onclick = ()=>{
