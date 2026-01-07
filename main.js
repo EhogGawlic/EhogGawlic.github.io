@@ -1219,7 +1219,7 @@ async function uploadFormData(url, form) {
 }
 async function sendCanvasAndFile(canvas, fileInput, title) {
     
-  const url = 'https://auction-receptors-margaret-stories.trycloudflare.com/upload3';
+  const url = server+'/upload3';
   const form = new FormData();
   form.append('name', title);
 
