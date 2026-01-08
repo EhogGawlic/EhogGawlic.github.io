@@ -7,7 +7,7 @@ const ITEM = -999998;
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0001)
+    data.push(0x0002)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -90,6 +90,8 @@ function encodeNewFile(){
     data.push(parseFloat(dinp.value))
     data.push(parseFloat(substeps.value))
     data.push(inf ? 1 : 0)
+    data.push(sbreak.checked ? 1 : 0)
+    data.push(255) //padding to prevent cutoff
     return data
 }
 function downloadFile(arr){
@@ -109,7 +111,7 @@ function downloadFile(arr){
 function decodeNewFile(data){
     const arr = Array.from(new Float32Array(data))
         let idx = 1
-    if (arr[0] == 0 || arr[0] == 0x0001){
+    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -246,7 +248,7 @@ function decodeNewFile(data){
             })
         }
     }
-    if (arr[0] == 0x0001){
+    if (arr[0] == 0x0001 || arr[0] == 0x0002){
         const metaEnd = arr.indexOf(ITEM, idx)
         const mdata = arr.slice(idx, metaEnd)
         idx = metaEnd + 1
@@ -266,6 +268,9 @@ function decodeNewFile(data){
                 getEl("infcheck").checked = true
             }
         })
+        if (arr[0] == 0x0002){
+            sbreak.checked = mdata[8] == 1 ? true:false
+        }
     }
 }
 async function listDirectory(path){
