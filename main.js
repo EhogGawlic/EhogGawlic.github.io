@@ -1238,15 +1238,54 @@ async function sendCanvasAndFile(canvas, fileInput, title) {
   if (!res.ok) throw new Error('Upload failed: ' + res.status);
   return res;
 }
-document.querySelector("#shareform button").onclick = (e)=>{
+let signedin = false;
+(async()=>{
+    const sip = await fetch(server+'/testsignin', {credentials: 'include'})
+    const si = await sip.text()
+    if (si == "Y"){
+        const sf = await fetch("./shareform.html")
+        const sftxt = await sf.text()
+        document.querySelector("#shareform").innerHTML = sftxt
+        signedin = true
+    }
+console.log(signedin)
+})()
+console.log(signedin)
+document.querySelector("#shareform button").onclick = async(e)=>{
     e.preventDefault()
     console.log("Form submit button clicked")
-    const titleinp = document.querySelector('#shareform input[name="name"]')
+    if (signedin){
+        const titleinp = document.querySelector('#shareform input[name="name"]')
     const fileinp = document.querySelector('#shareform input[name="file"]')
     console.log("Calling sendCanvasAndFile...")
     sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
         console.log("Upload succeeded, status:", res.status)
         alert("yay you can view it in examples after u reload")
     })
+    } else {
+        const fdata = new FormData()
+        form.append('username', document.querySelector('#shareform input[name="username"]').value)
+        form.append('password', document.querySelector('#shareform input[name="password"]').value)
+        if (document.querySelector('#shareform button').id == "sibtnf"){
+            console.log("sineing in")
+            const res = await uploadFormData(server+"/signin", fdata);
+            if (!res.ok) throw new Error('Upload failed: ' + res.status);
+            if (res.status < 400){
+                signedin = true
+                const sf = await fetch("./shareform.html")
+                const sftxt = await sf.text()
+                document.querySelector("#shareform").innerHTML = sftxt
+            }
+        } else {
+            const res = await uploadFormData(server+"/signup", fdata);
+            if (!res.ok) throw new Error('Upload failed: ' + res.status);
+            if (res.status < 400){
+                signedin = true
+                const sf = await fetch("./shareform.html")
+                const sftxt = await sf.text()
+                document.querySelector("#shareform").innerHTML = sftxt
+            }
+        }
+    }
     console.log("Form handler finished")
 }
