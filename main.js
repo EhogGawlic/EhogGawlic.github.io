@@ -1240,7 +1240,7 @@ async function sendCanvasAndFile(canvas, fileInput, title) {
 }
 let signedin = false;
 (async()=>{
-    const sip = await fetch(server+'/testsignin', {credentials: 'include', mode:'cors'})
+    const sip = await fetch(server+'/testsignin', {method: "POST",credentials: 'include', mode:'cors'})
     const si = await sip.text()
     if (si == "Y"){
         const sf = await fetch("./shareform.html")
