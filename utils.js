@@ -1,4 +1,4 @@
-const server = String(location).includes("127.0.0") ? "http://localhost:3001" : "https://inside-technique-sells-pumps.trycloudflare.com"
+const server = "https://inside-technique-sells-pumps.trycloudflare.com"
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
