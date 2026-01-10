@@ -1194,7 +1194,7 @@ listDirectory('./things').then(async(folders)=>{
         }, 0)
     })
 }catch(e){
-    getEl('excontain').innerHTML = "<p>my computer is closed so the server is off and it cannot load examples rn. :(</p>"
+    getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
     getEl('shareform').style.display="none"
 }
 })
