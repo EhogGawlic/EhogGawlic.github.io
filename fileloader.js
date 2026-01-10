@@ -262,12 +262,17 @@ function decodeNewFile(data){
         if (mdata[7]){
             substeps.value = mdata[7]
         }
-        objs.forEach(o=>{
-            if (o.p.y > 500*meterPixRatio){
-                inf = true
-                getEl("infcheck").checked = true
-            }
-        })
+        if (mdata[8] !== null && mdata[8] !== undefined){
+            inf = mdata[8] == 1 ? true:false
+            getEl("infcheck").checked = inf
+        } else {
+            objs.forEach(o=>{
+                if (o.p.y > 500*meterPixRatio){
+                    inf = true
+                    getEl("infcheck").checked = true
+                }
+            })
+        }
         if (arr[0] == 0x0002){
             sbreak.checked = mdata[8] == 1 ? true:false
         }
