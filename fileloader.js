@@ -274,10 +274,11 @@ function decodeNewFile(data){
     }
 }
 async function listDirectory(path){
-    const resp = await fetch(path)
+    /*const resp = await fetch(path)
     const text = await resp.text()
     const parser = new DOMParser()
     const doc = parser.parseFromString(text, "text/html")
     const links = Array.from(doc.querySelectorAll("a"))
-    return links.map(a=>a.getAttribute("href"))
+    return links.map(a=>a.getAttribute("href"))*/
+    return ['something','','','things/person','things/blob','things/irdk ngl', 'things/biridige']
 }
