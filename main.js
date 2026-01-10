@@ -64,7 +64,7 @@ function run(){
             obj.draw()
             
             if (!paused){
-                
+                if (!disfans){
                 for (let i = 0; i < fans.length; i++){
 
                     const f = fans[i]
@@ -82,7 +82,7 @@ function run(){
                         obj.addForce(10, multVecCon(f.dir,f.s*f.md/(dfcp*f.md)))
                     }
                 //}catch(e){alert(e)}
-                }
+                }}
                 tcans.forEach(tc => {
                     
                     if (obj.p.y-obj.r >= tc.y-30 && obj.p.y+obj.r <= tc.y+40 && obj.p.x-obj.r >= tc.x-30 && obj.p.x+obj.r <= tc.x+30){
@@ -1264,8 +1264,8 @@ document.querySelector("#shareform button").onclick = async(e)=>{
     })
     } else {
         const fdata = new FormData()
-        form.append('username', document.querySelector('#shareform input[name="username"]').value)
-        form.append('password', document.querySelector('#shareform input[name="password"]').value)
+        fdata.append('username', document.querySelector('#shareform input[name="username"]').value)
+        fdata.append('password', document.querySelector('#shareform input[name="password"]').value)
         if (document.querySelector('#shareform button').id == "sibtnf"){
             console.log("sineing in")
             const res = await uploadFormData(server+"/signin", fdata);
