@@ -1214,6 +1214,9 @@ document.querySelector('#examples .closebtn').onclick = ()=>{
 async function uploadFormData(url, form) {
     const res = await fetch(url, {
       method: 'POST',
+    headers: {
+        Authorization: 'Bearer ' + token
+    },
       mode: 'cors', // ensure CORS is used; don't use 'no-cors'
       body: form,
     });
@@ -1240,7 +1243,10 @@ async function sendCanvasAndFile(canvas, fileInput, title) {
 }
 let signedin = false;
 (async()=>{
-    const sip = await fetch(server+'/testsignin', {method: "POST",credentials: 'include', mode:'cors'})
+    const sip = await fetch(server+'/testsignin', {method: "POST",
+  headers: {
+    Authorization: 'Bearer ' + token
+  }, mode:'cors'})
     const si = await sip.text()
     if (si == "Y"){
         const sf = await fetch("./shareform.html")
@@ -1254,15 +1260,7 @@ console.log(signedin)
 document.querySelector("#shareform button").onclick = async(e)=>{
     e.preventDefault()
     console.log("Form submit button clicked")
-    if (signedin){
-        const titleinp = document.querySelector('#shareform input[name="name"]')
-    const fileinp = document.querySelector('#shareform input[name="file"]')
-    console.log("Calling sendCanvasAndFile...")
-    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
-        console.log("Upload succeeded, status:", res.status)
-        alert("yay you can view it in examples after u reload")
-    })
-    } else {
+    if (!signedin){
         const fdata = new FormData()
         fdata.append('username', document.querySelector('#shareform input[name="username"]').value)
         fdata.append('password', document.querySelector('#shareform input[name="password"]').value)
@@ -1275,6 +1273,8 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
+                const rjson = await res.json()
+                token = rjson.tkn
             }
         } else {
             const res = await uploadFormData(server+"/signup", fdata);
@@ -1284,6 +1284,8 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
+                const rjson = await res.json()
+                token = rjson.tkn
             }
         }
     }

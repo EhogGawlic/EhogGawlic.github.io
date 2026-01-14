@@ -1,4 +1,5 @@
 const server = "https://sporting-manufactured-gentleman-backup.trycloudflare.com"
+let token = sessionStorage.getItem('accessToken')
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
