@@ -1221,8 +1221,6 @@ async function uploadFormData(url, form) {
       body: form,
     });
     console.log('Fetch completed, status:', res.status);
-    const text = await res.text();
-    console.log('Response body:', text);
     return res;
 }
 async function sendCanvasAndFile(canvas, fileInput, title) {
