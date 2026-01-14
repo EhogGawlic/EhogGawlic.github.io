@@ -1273,7 +1273,7 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
-                token = res.tkn
+                token = res.token
             }
         } else {
             const res = await uploadFormData(server+"/signup", fdata);
@@ -1284,7 +1284,7 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
                 const rjson = await res.json()
-                token = rjson.tkn
+                token = rjson.token
             }
         }
     }
