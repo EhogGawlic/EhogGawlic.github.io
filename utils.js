@@ -1,4 +1,4 @@
-const server = "https://chances-bowling-conditions-technical.trycloudflare.com"
+const server = "https://sporting-manufactured-gentleman-backup.trycloudflare.com"
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
