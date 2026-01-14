@@ -1221,7 +1221,7 @@ async function uploadFormData(url, form) {
       body: form,
     });
     console.log('Fetch completed, status:', res.status);
-    const text = await res.text();
+    const text = await res.json();
     console.log('Response body:', text);
     return res;
 }
@@ -1273,8 +1273,7 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
-                const rjson = await res.json()
-                token = rjson.tkn
+                token = res.tkn
             }
         } else {
             const res = await uploadFormData(server+"/signup", fdata);
