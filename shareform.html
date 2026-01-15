@@ -4,4 +4,14 @@
 <input type="file" name="file" accept=".psv" required><br>
 <label>Title</label>
 <input type="text" required name="name" placeholder="Enter title"/><br>
-<button>Post</button>
+<button onclick="
+    if (signedin){
+        const titleinp = document.querySelector('#shareform input[name=\'name\']')
+    const fileinp = document.querySelector('#shareform input[name=\'file\']')
+    console.log('Calling sendCanvasAndFile...')
+    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
+        console.log('Upload succeeded, status:', res.status)
+        alert('yay you can view it in examples after u reload')
+    })
+    }
+">Post</button>

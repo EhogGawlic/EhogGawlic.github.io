@@ -64,7 +64,7 @@ function run(){
             obj.draw()
             
             if (!paused){
-                
+                if (!disfans){
                 for (let i = 0; i < fans.length; i++){
 
                     const f = fans[i]
@@ -82,7 +82,7 @@ function run(){
                         obj.addForce(10, multVecCon(f.dir,f.s*f.md/(dfcp*f.md)))
                     }
                 //}catch(e){alert(e)}
-                }
+                }}
                 tcans.forEach(tc => {
                     
                     if (obj.p.y-obj.r >= tc.y-30 && obj.p.y+obj.r <= tc.y+40 && obj.p.x-obj.r >= tc.x-30 && obj.p.x+obj.r <= tc.x+30){
@@ -1214,12 +1214,13 @@ document.querySelector('#examples .closebtn').onclick = ()=>{
 async function uploadFormData(url, form) {
     const res = await fetch(url, {
       method: 'POST',
+    headers: {
+        Authorization: 'Bearer ' + token
+    },
       mode: 'cors', // ensure CORS is used; don't use 'no-cors'
       body: form,
     });
     console.log('Fetch completed, status:', res.status);
-    const text = await res.text();
-    console.log('Response body:', text);
     return res;
 }
 async function sendCanvasAndFile(canvas, fileInput, title) {
@@ -1240,7 +1241,10 @@ async function sendCanvasAndFile(canvas, fileInput, title) {
 }
 let signedin = false;
 (async()=>{
-    const sip = await fetch(server+'/testsignin', {credentials: 'include'})
+    const sip = await fetch(server+'/testsignin', {method: "POST",
+  headers: {
+    Authorization: 'Bearer ' + token
+  }, mode:'cors'})
     const si = await sip.text()
     if (si == "Y"){
         const sf = await fetch("./shareform.html")
@@ -1254,18 +1258,10 @@ console.log(signedin)
 document.querySelector("#shareform button").onclick = async(e)=>{
     e.preventDefault()
     console.log("Form submit button clicked")
-    if (signedin){
-        const titleinp = document.querySelector('#shareform input[name="name"]')
-    const fileinp = document.querySelector('#shareform input[name="file"]')
-    console.log("Calling sendCanvasAndFile...")
-    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
-        console.log("Upload succeeded, status:", res.status)
-        alert("yay you can view it in examples after u reload")
-    })
-    } else {
+    if (!signedin){
         const fdata = new FormData()
-        form.append('username', document.querySelector('#shareform input[name="username"]').value)
-        form.append('password', document.querySelector('#shareform input[name="password"]').value)
+        fdata.append('username', document.querySelector('#shareform input[name="username"]').value)
+        fdata.append('password', document.querySelector('#shareform input[name="password"]').value)
         if (document.querySelector('#shareform button').id == "sibtnf"){
             console.log("sineing in")
             const res = await uploadFormData(server+"/signin", fdata);
@@ -1275,6 +1271,8 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
+                const rjson = await res.json()
+                token = rjson.token
             }
         } else {
             const res = await uploadFormData(server+"/signup", fdata);
@@ -1284,6 +1282,8 @@ document.querySelector("#shareform button").onclick = async(e)=>{
                 const sf = await fetch("./shareform.html")
                 const sftxt = await sf.text()
                 document.querySelector("#shareform").innerHTML = sftxt
+                const rjson = await res.json()
+                token = rjson.token
             }
         }
     }

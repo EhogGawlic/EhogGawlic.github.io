@@ -1,4 +1,6 @@
-const server = String(location).includes("127.0.0") ? "http://localhost:3001" : "https://inside-technique-sells-pumps.trycloudflare.com"
+const server = "https://impression-todd-drawn-privacy.trycloudflare.com"
+let token = sessionStorage.getItem('accessToken') || ''
+
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
@@ -123,6 +125,7 @@ let lines = [],
     flipR=[],
     flipW=[],
     bars=[],
+    disfans =false,
     motor2s=[],                                                                                                                                                
     cellsize = 4,
     ltype=0,
@@ -1098,4 +1101,28 @@ function compareArr(arr1, arr2){
 }
 function pointInBox(x1, y1, x2, y2, p){
     return p.x>x1&&p.y>y1&&p.x<x2&&p.y<y2
+}
+function toggle(vari){
+    console.log(typeof vari)
+    switch(typeof vari){
+        case "boolean":
+            vari = !vari
+            break
+        case HTMLInputElement:
+            vari.checked = !vari.checked
+            break
+        case HTMLButtonElement:
+            let bc = vari.style.backgroundColor
+            if (bc == "lightgray"){
+                vari.style.backgroundColor = "darkgray"
+            }
+            if (bc == "darkgray"){
+                vari.style.backgroundColor = "lightgray"
+            }
+            break
+        default:
+            if (typeof vari == HTMLElement){
+                vari.style.display = vari.style.display === "none" ? "block" : "none"
+            }
+    }
 }
