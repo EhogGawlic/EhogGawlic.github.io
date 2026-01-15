@@ -39,8 +39,11 @@ function encodeNewFile(){
         addVector(data, l.np1)
         addVector(data, l.np2)
         data.push(l.s)
-        data.push(...l.color)
-        
+        if (l.color){
+            data.push(...l.color)
+        } else {
+            data.push(0,0,0)
+        }
         data.push(SEP)
     })
     /*fans.push({
@@ -274,7 +277,7 @@ function decodeNewFile(data){
             })
         }
         if (arr[0] == 0x0002){
-            sbreak.checked = mdata[8] == 1 ? true:false
+            sbreak.checked = mdata[9] == 1 ? true:false
         }
     }
 }
