@@ -94,12 +94,13 @@ class Obj {
                 l.rail.kfs.forEach(kf=>{
                     rl += dist(kf.sp,kf.ep)
                 })
+                console.log("rail len: ",rl)
                 const td = l.rail.t / rl
                 np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
-                
+                console.log("np: ",np)
             }
-            const sp1 = subVec(l.p1,addVec(l.m.p,np))
-        const sp2 = subVec(l.p2, addVec(l.m.p,np))
+            const sp1 = subVec(l.p1,l.m.p)
+        const sp2 = subVec(l.p2, l.m.p)
         const x1 = sp1.x*Math.cos(l.m.t)-sp1.y*Math.sin(l.m.t)+l.m.p.x+np.x
         const y1 = sp1.x*Math.sin(l.m.t)+sp1.y*Math.cos(l.m.t)+l.m.p.y+np.y
         const x2 = sp2.x*Math.cos(l.m.t)-sp2.y*Math.sin(l.m.t)+l.m.p.x+np.x

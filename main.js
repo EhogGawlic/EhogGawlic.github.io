@@ -137,12 +137,20 @@ function run(){
             let np = v(0,0)
             if (l.rail && l.rail.has && l.rail.kfs.length){
                 
-                l.rail.t++
+                l.rail.t+=l.rail.s || 100
                 let rl = 0
                 l.rail.kfs.forEach(kf=>{
                     rl += dist(kf.sp,kf.ep)
                 })
-                const td = l.rail.t / rl * 0.01
+                console.log(rl)
+                let td = l.rail.t / rl
+                if (td/rl > 0.25){
+                    
+                    td = rl*0.5-td
+                    if (td <= 0){
+                        l.rail.t = 0
+                    }
+                }
                 np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
                 
             }
@@ -751,14 +759,31 @@ window.onclick = (e)=>{
             switch(adding.t){
                 case 1:
                     tcans.push({x:mx, y:my})
+                    adding.ia=false
                     break
                 case 2:
                     lines[lninp.value].m = {p:snapLines(mx,my),h:true,t:0,s:msinp.value*0.0174533/targetRate}
+                    adding.ia=false
                     break
                 case 3:
                     addSpeedo({x:mx,y:my})
+                    adding.ia=false
+                    break
+                case 4:
+                        console.log(cn)
+                    switch(cn){
+                        case 0:
+                            c1p = {x:mx,y:my}
+                            cn++
+                            break
+                        case 1:
+                            cn = 0
+                            lines[lninp.value].rail.has = true
+                            lines[lninp.value].rail.kfs.push({sp:c1p,ep:{x:mx,y:my}})
+                            lines[lninp.value].rail.s = parseFloat(rsinp.value)
+                            adding.ia=false
+                    }
             }
-            adding.ia=false
             return
         }
     }   
@@ -947,12 +972,14 @@ okbtn.addEventListener("click", ()=>{
             adding.t=1
             getEl("crv").style.display="none"
             getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
             break
         case "m":
             adding.ia=true
             adding.t=2
             getEl("crv").style.display="none"
             getEl("mtr").style.display="block"
+            getEl("rail").style.display="none"
             break
         case "curve":
             ml=true
@@ -960,12 +987,21 @@ okbtn.addEventListener("click", ()=>{
             canvas.style.cursor = "crosshair"
             getEl("crv").style.display="block"
             getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
             break
         case "speedo":
             adding.ia=true
             adding.t=3
             getEl("crv").style.display="none"
             getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
+            break
+        case "rail":
+            adding.ia=true
+            adding.t=4
+            getEl("crv").style.display="none"
+            getEl("mtr").style.display="none"
+            getEl("rail").style.display="block"
     }
 
 })
@@ -974,14 +1010,28 @@ asinp.onchange = function(){
         case "tc":
             getEl("crv").style.display="none"
             getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
             break
         case "m":
             getEl("crv").style.display="none"
             getEl("mtr").style.display="block"
+            getEl("rail").style.display="none"
             break
         case "curve":
             getEl("crv").style.display="block"
             getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
+            break
+        case "speedo":
+            getEl("crv").style.display="none"
+            getEl("mtr").style.display="none"
+            getEl("rail").style.display="none"
+            break
+        case "rail":
+            getEl("crv").style.display="none"
+            getEl("mtr").style.display="none"
+            getEl("rail").style.display="block"
+            break
     }
 }
 savebtn.addEventListener("click", ()=>{

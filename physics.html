@@ -125,7 +125,7 @@
                         <option value="tc">Trash can</option>
                         <option value="curve">Curve</option>
                         <option value="speedo">Speed tester thing</option>
-                        <option value="ov">Other type of valve (not ready yet)</option>
+                        <option value="rail">Rail</option>
                     </select><br>Line #<br>
                     <input id="lni" type="number" value="0" max="0" min="0"><br>
                     <div id="mtr">
@@ -150,6 +150,12 @@
                                 <path d="M 10 10 C 10 180 90 -80 90 90" stroke="#0000FF" stroke-width="10" fill="none"/>
                             </svg>
                         </button>
+                    </div>
+                    <div id="rail" class="hidden">
+                        Click 1 is to set start point, click 2 is to set end point.<br>
+                        <button onclick="lines[lninp.value].rail.has = false">Remove rail</button><br>
+                        <label for="rsinp">Rail speed</label><br>
+                        <input id="rsinp" type="number" value="100">
                     </div>
                     <button id="okbtn1">OK</button><br>
                     <button id="dbtn">Delete (select)</button><br>
