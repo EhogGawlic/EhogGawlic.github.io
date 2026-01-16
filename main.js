@@ -137,21 +137,21 @@ function run(){
             let np = v(0,0)
             if (l.rail && l.rail.has && l.rail.kfs.length){
                 
-                l.rail.t+=l.rail.s || 100
+                l.rail.t+= paused ? 0 : l.rail.s*0.1 ||10
                 let rl = 0
                 l.rail.kfs.forEach(kf=>{
                     rl += dist(kf.sp,kf.ep)
                 })
-                console.log(rl)
                 let td = l.rail.t / rl
-                if (td/rl > 0.25){
+                if (td > 1){
                     
-                    td = rl*0.5-td
+                    td = 2-td
                     if (td <= 0){
                         l.rail.t = 0
                     }
                 }
-                np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
+                const nrail = subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)
+                np = multVecCon(nrail,td)
                 
             }
             if (l.color){
@@ -412,7 +412,8 @@ abbtn.addEventListener("click", ()=>{
     parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
 })
 window.addEventListener("keypress", (e) => {
-    if (document.activeElement.id!=="consoletxt"){
+    const typ = document.activeElement.tagName
+    if (typ !== "INPUT" && typ !== "TEXTAREA"){
         
         switch (e.key){
             case "c"||"Escape":
@@ -770,7 +771,7 @@ window.onclick = (e)=>{
                     adding.ia=false
                     break
                 case 4:
-                        console.log(cn)
+                        logOut(cn)
                     switch(cn){
                         case 0:
                             c1p = {x:mx,y:my}
@@ -779,7 +780,7 @@ window.onclick = (e)=>{
                         case 1:
                             cn = 0
                             lines[lninp.value].rail.has = true
-                            lines[lninp.value].rail.kfs.push({sp:c1p,ep:{x:mx,y:my}})
+                            lines[lninp.value].rail.kfs[0]={sp:c1p,ep:{x:mx,y:my}}
                             lines[lninp.value].rail.s = parseFloat(rsinp.value)
                             adding.ia=false
                     }

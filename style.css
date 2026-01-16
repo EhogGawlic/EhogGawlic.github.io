@@ -276,3 +276,10 @@ h1{
     font-size:large;
     background-color: red;
 }
+#outls{
+    background-color: black;
+    color: white;
+    height: 200px;
+    padding: 10px;
+    overflow-y: scroll;
+}

@@ -18,6 +18,7 @@ class Obj {
     rotv = 0
     rota=0
     friction=0.5
+    texture = null
     constructor(x, y, r, c, w, vx, vy, b, l, st, f) {
         this.p={x,y}
         this.v={x:vx*(meterPixRatio/targetRate),y:vy*(meterPixRatio/targetRate)}
@@ -94,10 +95,12 @@ class Obj {
                 l.rail.kfs.forEach(kf=>{
                     rl += dist(kf.sp,kf.ep)
                 })
-                console.log("rail len: ",rl)
-                const td = l.rail.t / rl
-                np = multVecCon(norm(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp)) ,td)
-                console.log("np: ",np)
+                let td = l.rail.t / rl
+                if (td > 1){
+                    
+                    td = 2-td
+                }
+                np = multVecCon(subVec(l.rail.kfs[0].ep,l.rail.kfs[0].sp) ,td)
             }
             const sp1 = subVec(l.p1,l.m.p)
         const sp2 = subVec(l.p2, l.m.p)
@@ -261,6 +264,13 @@ class Obj {
         })
     }
     draw(){
+        if (this.texture){
+            const tex = textures[this.texture]
+            if (tex){
+                ctx.drawImage(tex,this.p.x - this.r + emv.x, this.p.y - this.r + emv.y, this.r*2, this.r*2)
+            }
+            return
+        }
         if (this.s){
             ctx.strokeStyle = "blue"
             ctx.lineWidth = 2

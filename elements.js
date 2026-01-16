@@ -246,3 +246,26 @@ function toggleDisp(el){
     const dis = getEl(el).style.display
     getEl(el).style.display = dis === "none" ? "block" : "none"
 }
+function logOut(out){
+    switch(typeof out){
+        case "object":
+            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+JSON.stringify(out) + "</span><br>"
+            break
+        default:
+            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+out + "</span><br>"
+    }
+    //auto-scroll to bottom
+    getEl("outls").scrollTop = getEl("outls").scrollHeight
+    //limit to last 25 lines
+    const lines = getEl("outls").getElementsByTagName("span")
+    if (lines.length > 25){
+        getEl("outls").removeChild(lines[0])
+    }
+}
+let textures = {}
+
+function loadTex(src,name){
+    const isrc = imgSrc(src)
+    textures[name] = isrc
+}
+loadTex("./textures/domer.png","domer")

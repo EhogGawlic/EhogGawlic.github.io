@@ -1015,12 +1015,15 @@ function clear(){
     springs=[]
     bars=[]
     speedos=[]
-    ltype=0
+    selecting = false
+    av = false 
+    af = false 
+    ml = false
+    abomb = false
+    arope.ia = false
     cn=0
-    ml =false
     deleting=false
-    adding.ia=false
-    drawing=false
+    ltype=0
 }
 const objToString = obj => Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(',\n');
 function log(text){
