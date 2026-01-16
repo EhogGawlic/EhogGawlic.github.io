@@ -60,6 +60,17 @@ function run(){
         }
         ctx.clearRect(0,0,innerHeight,innerHeight)
         let dqueue = []
+springs.forEach(rope=>{
+            const b1 = objs[rope.b1]
+            const b2 = objs[rope.b2]
+            ctx.strokeStyle="yellow"
+            ctx.lineWidth=2
+            ctx.beginPath()
+        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
+            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
+            ctx.stroke()
+            ctx.lineWidth=1
+        })
         objs.forEach(obj => {
             obj.draw()
             
@@ -199,17 +210,6 @@ function run(){
             const b1 = objs[rope.b1]
             const b2 = objs[rope.b2]
             ctx.strokeStyle="brown"
-            ctx.lineWidth=2
-            ctx.beginPath()
-        ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
-            ctx.lineTo(b2.p.x+emv.x, b2.p.y+emv.y)
-            ctx.stroke()
-            ctx.lineWidth=1
-        })
-springs.forEach(rope=>{
-            const b1 = objs[rope.b1]
-            const b2 = objs[rope.b2]
-            ctx.strokeStyle="yellow"
             ctx.lineWidth=2
             ctx.beginPath()
         ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y)
