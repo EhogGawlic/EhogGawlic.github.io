@@ -1203,21 +1203,24 @@ listDirectory('./things').then(async(folders)=>{
                         <img class="thingimg" src="${folder + "/image.png"}"><br>
                         <button class="thingbtn" id="ex${i-3}load">Load</button>
                     </div>`
-            getEl('excontain').innerHTML += extxt
-            // Wait a tick for DOM to update before attaching listener
-            setTimeout(()=>{
-                const exbtn = document.querySelector(`#ex${i-3}load`)
-                if (exbtn) {
-                    exbtn.onclick= async()=>{
-                        getEl("examples").style.display = "none"
-                        console.log('loading example from ' + folder)
-                        const response = await fetch(folder + '/file.psv')
-                        const arrayBuffer = await response.arrayBuffer()
-                        clear()
-                        decodeNewFile(arrayBuffer)
-                    }
+            const container = getEl('excontain')
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = extxt
+            const newElement = tempDiv.firstElementChild
+            container.appendChild(newElement)
+
+            const exbtn = newElement.querySelector('.thingbtn')
+            if (exbtn) {
+                exbtn.addEventListener('click', async()=>{
+                    getEl("examples").style.display = "none"
+                    console.log('loading example from ' + folder)
+                    const response = await fetch(folder + '/file.psv')
+                    const arrayBuffer = await response.arrayBuffer()
+                    clear()
+                    decodeNewFile(arrayBuffer)
                 }
-            }, 0)
+                )
+            }
             nfolders = i-3
         }
     })
@@ -1233,17 +1236,24 @@ listDirectory('./things').then(async(folders)=>{
                     <img class="thingimg" src="${server+'/exampleimage?name='+name}"><br>
                     <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
                 </div>`
-        getEl('excontain').innerHTML += extxt
-        // Wait a tick for DOM to update before attaching listener
-        setTimeout(()=>{
-            const exbtn = document.querySelector(`#ex${nfolders+i+1}load`)
+            const container = getEl('excontain')
+            const tempDiv = document.createElement('div')
+            tempDiv.innerHTML = extxt
+            const newElement = tempDiv.firstElementChild
+            container.appendChild(newElement)
+
+            // Then attach listener immediately (no setTimeout needed):
+            const exbtn = newElement.querySelector('.thingbtn')
+            console.log('Found button:', exbtn, 'ID:', nfolders+i+1)
             if (exbtn) {
-                exbtn.onclick= async()=>{
+                exbtn.addEventListener('click', async()=>{
+                    console.log('Click handler fired')
                     getEl("examples").style.display = "none"
                     console.log('loading example from ' + name)
                     const response = await fetch(server + '/examplefile?name='+name)
                     const arrayBuffer = await response.arrayBuffer()
                     // check filename (either file.psv or file.pms)
+                    console.log(exbtn,nfolders+i+1)
                     console.log(response.headers.get('Content-Disposition'))
                     if (response.headers.get('Content-Disposition') && response.headers.get('Content-Disposition').includes('file.psv')){
                         clear()
@@ -1251,37 +1261,37 @@ listDirectory('./things').then(async(folders)=>{
                     } else {
                         decodeMaterialFile(arrayBuffer)
                     }
-                }
+                })
             }
-        }, 0)
     })
-    nfolders += examplesList.length
+    const nfolders2 = nfolders + examplesList.length
     const scripts = await fetch(server+'/scripts')
     const scriptList = await scripts.json()
     scriptList.forEach((scr,i)=>{
         const name = scr.Title
-        logOut("loading script "+name)
         const extxt = `
-                <div class="thing" id="ex${nfolders+i+1}">
+                <div class="thing" id="ex${nfolders2+i+1}">
                     <p class="thingtitle">${name}</p><br>
                     <img class="thingimg" src="./script.png"><br>
-                    <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
+                    <button class="thingbtn" id="ex${nfolders2+i+1}load">Load</button>
                 </div>`
-        getEl('excontain').innerHTML += extxt
-        // Wait a tick for DOM to update before attaching listener
-        setTimeout(()=>{
-            const exbtn = document.querySelector(`#ex${nfolders+i+1}load`)
-            if (exbtn) {
-                exbtn.onclick= async()=>{
-                    getEl("examples").style.display = "none"
-                    logOut("loading script: \""+name+'"')
-                    const response = await fetch(server + '/script?name='+name)
-                    const scr = await response.text()
-                    logOut("Running: "+scr)
-                    eval(scr)
-                }
-            }
-        }, 0)
+        const container = getEl('excontain')
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = extxt
+        const newElement = tempDiv.firstElementChild
+        container.appendChild(newElement)
+
+        const exbtn = newElement.querySelector('.thingbtn')
+        if (exbtn) {
+            exbtn.addEventListener('click', async()=>{
+                getEl("examples").style.display = "none"
+                logOut("loading script: \""+name+'"')
+                const response = await fetch(server + '/script?name='+name)
+                const scr = await response.text()
+                logOut("Running: "+scr)
+                eval(scr)
+            })
+        }
     })
 }catch(e){
     getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
