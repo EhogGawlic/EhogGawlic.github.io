@@ -7,7 +7,7 @@ const ITEM = -999998;
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0003)
+    data.push(0x0004)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -20,7 +20,10 @@ function encodeNewFile(){
         data.push(obj.liquid ? 1 : 0)
         data.push(obj.surftens)
         data.push(...obj.c)
-
+        data.push(obj.texture.length || 0)
+        for (let c = 0; c < obj.texture.length; c++){ //c++ haha
+            data.push(obj.texture.charCodeAt(c))
+        }
         data.push(SEP)
     })
     data.push(ITEM)
@@ -104,6 +107,16 @@ function encodeNewFile(){
     data.push(parseFloat(substeps.value))
     data.push(inf ? 1 : 0)
     data.push(sbreak.checked ? 1 : 0)
+    const texs = Object.entries(textures)
+    data.push(texs.length)
+    texs.forEach(entry=>{
+        const name = entry[0]
+        const val = entry[1].src
+        console.log(entry)
+
+        data.push(...stringToArr(name),...stringToArr(val))
+        data.push(0x676767)
+    })
     data.push(255) //padding to prevent cutoff
     return data
 }
@@ -134,7 +147,7 @@ function downloadMatFile(arr){
 function decodeNewFile(data){
     const arr = Array.from(new Float32Array(data))
         let idx = 1
-    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003){
+    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -156,6 +169,15 @@ function decodeNewFile(data){
                 const nb = new Obj(
                     b[1],b[2],b[7],[b[13],b[14],b[15]],b[8],b[3]/(meterPixRatio/targetRate),b[4]/(meterPixRatio/targetRate),b[9],b[11] ==1 ? true:false,b[12],b[10]
                 )
+                if (arr[0] >= 0x0004){
+                    const texlen = b[16]
+                    let tex = ""
+                    for (let tc = 0; tc < texlen; tc++){
+                        const char = String.fromCharCode(b[17+tc])
+                        tex += char
+                    }
+                    nb.texture = tex
+                }
                 objs.push(nb)
             })
         }
@@ -275,7 +297,7 @@ function decodeNewFile(data){
             })
         }
     }
-    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003){
+    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004){
         const metaEnd = arr.indexOf(ITEM, idx)
         const mdata = arr.slice(idx, metaEnd)
         idx = metaEnd + 1
@@ -300,8 +322,34 @@ function decodeNewFile(data){
                 }
             })
         }
-        if (arr[0] == 0x0002 || arr[0] == 0x0003){
+        if (arr[0] >= 0x0002){
             sbreak.checked = mdata[9] == 1 ? true:false
+        }
+        if (arr[0] >= 0x0004){
+            const len = mdata[10]
+            console.log(len)
+            let finTex = 0
+            const texturess = mdata.slice(11,mdata.length-1)
+
+            let texReadArr = [[]]
+            let last = texReadArr[0]
+            for (let i = 0; i < texturess.length; i++){
+                if (texturess[i] == 0x676767){
+                    texReadArr.push([])
+                    last = texReadArr[texReadArr.length-1]
+                }
+                else{
+                    last.push(texturess[i])
+                }
+            }
+            texReadArr.forEach(tex=>{
+                const arr1 = tex.slice(0,tex.indexOf(0x6767))
+                const arr2 = tex.slice(tex.indexOf(0x6767)+1)
+                const str1 = arrToString(arr1)
+                const str2 = arrToString(arr2)
+                console.log(str1,str2)
+                loadTex(str2,str1)
+            })
         }
     }
 }

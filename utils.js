@@ -1148,3 +1148,18 @@ function toggle(vari){
             }
     }
 }
+function stringToArr(str){
+    let res = [str.length]
+    for (let i = 0; i < str.length; i++){
+        res.push(str.charCodeAt(i))
+    }
+    res.push(0x6767)
+    return res
+}
+function arrToString(arr){
+    let res = ""
+    for (let i = 0; i < arr[0]; i++){
+        res += String.fromCharCode(arr[i+1])
+    }
+    return res
+}
