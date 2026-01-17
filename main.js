@@ -1036,12 +1036,7 @@ asinp.onchange = function(){
     }
 }
 savebtn.addEventListener("click", ()=>{
-    try {
     downloadFile(encodeNewFile())
-        
-    } catch (error) {
-        alert(error)
-    }
 })
 ppbtn.addEventListener("click", ()=>{
     paused = paused ? false : true

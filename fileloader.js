@@ -421,7 +421,7 @@ function decodeMaterialFile(buf){
     }
     if (url.length > 0){
         logOut("Texture URL: "+url)
-        const tn = toString(Math.random())
+        const tn = Math.random().toString()
         loadTex(url,tn)
         objs.forEach(o=>{
             o.texture = tn
