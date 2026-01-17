@@ -20,10 +20,11 @@ function encodeNewFile(){
         data.push(obj.liquid ? 1 : 0)
         data.push(obj.surftens)
         data.push(...obj.c)
-        data.push(obj.texture.length || 0)
+        data.push(obj.texture ? obj.texture.length : 0)
+        if (obj.texture){
         for (let c = 0; c < obj.texture.length; c++){ //c++ haha
             data.push(obj.texture.charCodeAt(c))
-        }
+        }}
         data.push(SEP)
     })
     data.push(ITEM)
