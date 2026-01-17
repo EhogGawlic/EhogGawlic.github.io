@@ -1238,8 +1238,13 @@ listDirectory('./things').then(async(folders)=>{
                     console.log('loading example from ' + name)
                     const response = await fetch(server + '/examplefile?name='+name)
                     const arrayBuffer = await response.arrayBuffer()
-                    clear()
+                    // check filename (either file.psv or file.pms)
+                    if (response.headers.get('Content-Disposition') && response.headers.get('Content-Disposition').includes('file.psv')){
+                        clear()
                     decodeNewFile(arrayBuffer)
+                    } else {
+                        decodeMaterialFile(arrayBuffer)
+                    }
                 }
             }
         }, 0)
@@ -1283,9 +1288,23 @@ async function sendCanvasAndFile(canvas, fileInput, title) {
   const file = fileInput?.files?.[0];
   if (file) form.append('file', file);
 
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-  form.append('image', blob, 'canvas.png');
+  if (fileInput.files[0].name.endsWith('.pms')){
+    if (curtexurl){
+        const response = await fetch(curtexurl);
+        const arrayBuffer = await response.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: response.headers.get('Content-Type') || 'image/png' });
+        form.append('image', blob, 'image.'+(response.headers.get('Content-Type').split('/')[1]||'png'));
+    } else {
+        const response = await fetch("./textures/default.png");
+        const arrayBuffer = await response.arrayBuffer();
+        const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+        form.append('image', blob, 'image.png');
 
+    }
+  } else {
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    form.append('image', blob, 'canvas.png');
+  }
   const res = await uploadFormData(url, form);
   if (!res.ok) throw new Error('Upload failed: ' + res.status);
   return res;

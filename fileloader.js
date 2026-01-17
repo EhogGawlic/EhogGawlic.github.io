@@ -117,6 +117,16 @@ function downloadFile(arr){
     a.click()
     document.body.removeChild(a)
 }
+function downloadMatFile(arr){
+    const url = URL.createObjectURL(new Blob([arr], {type: 'application/octet-stream'}))
+    console.log(url)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = savename.value+'.pms'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+}
 /**
  * 
  * @param {ArrayBuffer} arr 
@@ -303,4 +313,70 @@ async function listDirectory(path){
     const links = Array.from(doc.querySelectorAll("a"))
     return links.map(a=>a.getAttribute("href"))*/
     return ['something','','','things/person','things/blob','things/irdk ngl', 'things/biridige']
+}
+let curtexurl = ""
+function encodeMaterialFile(){
+    const buf = new ArrayBuffer(10+256) // 10 bytes color,density,bounciness,etc + 256 texture url
+    const view = new DataView(buf)
+    let offset = 0
+    view.setFloat16(offset,parseFloat(rinp.value))
+    offset += 2
+    view.setFloat16(offset,parseFloat(dinp.value))
+    offset += 2
+    view.setFloat16(offset,parseFloat(binp.value))
+    offset += 2
+    const color = HEXRGB(cinp.value)
+    view.setUint8(offset,color[0])
+    offset += 1
+    view.setUint8(offset,color[1])
+    offset += 1
+    view.setUint8(offset,color[2])
+    offset += 1
+    view.setUint8(offset,liq ? 1 : 0)
+    offset += 1
+    const url = prompt("Enter texture URL (max 256 characters):","")
+    if (url !== null){
+        curtexurl = url
+        for (let i = 0; i < 256; i++){
+            const charCode = i < url.length ? url.charCodeAt(i) : 0
+            view.setUint8(offset,charCode)
+            offset += 1
+        }
+    }
+    return buf
+}
+function decodeMaterialFile(buf){
+    const view = new DataView(buf)
+    let offset = 0
+    rinp.value = view.getFloat16(offset)
+    offset += 2
+    dinp.value = view.getFloat16(offset)
+    offset += 2
+    binp.value = view.getFloat16(offset)
+    offset += 2
+    const col = [
+        view.getUint8(offset),
+        view.getUint8(offset+1),
+        view.getUint8(offset+2)
+    ]
+    offset += 3
+    cinp.value = RGBHEX(col[0],col[1],col[2])
+    liq = view.getUint8(offset) == 1 ? true:false
+    offset += 1
+    let url = ""
+    for (let i = 0; i < 256; i++){
+        const charCode = view.getUint8(offset)
+        if (charCode !== 0){
+            url += String.fromCharCode(charCode)
+        }
+        offset += 1
+    }
+    if (url.length > 0){
+        logOut("Texture URL: "+url)
+        const tn = toString(Math.random())
+        loadTex(url,tn)
+        objs.forEach(o=>{
+            o.texture = tn
+        })
+    }
 }

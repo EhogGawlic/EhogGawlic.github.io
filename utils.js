@@ -206,7 +206,11 @@ function loadJSON(files){
     }
     reader.readAsText(files[0])
 }
-
+/**
+ * 
+ * @param {String} from 
+ * @returns 
+ */
 function HEXRGB(from){
     let c = [0,0,0]
     c[0]=hRGBa[from.charAt(1)]*16
@@ -217,6 +221,16 @@ function HEXRGB(from){
     c[2]+=hRGBa[from.charAt(6)]
     
     return c
+}
+function RGBHEX(r,g,b){
+    let str = "#"
+    str+=rHEXa[Math.floor(r/16)]
+    str+=rHEXa[r%16]
+    str+=rHEXa[Math.floor(g/16)]
+    str+=rHEXa[g%16]
+    str+=rHEXa[Math.floor(b/16)]
+    str+=rHEXa[b%16]
+    return str
 }
 function imgSrc(url){
     const srcimg = document.createElement("img")
@@ -992,7 +1006,6 @@ function generateBezierPrev(x1,y1,x2,y2,cpx,cpy,w){
  */
 
 function processFile(files) {
-    clear()
     const reader = new FileReader()
     /**
      * 
@@ -1001,7 +1014,12 @@ function processFile(files) {
     reader.onload = (e) => {
         console.log(e.target.result)
         const arrayBuffer = e.target.result
-        decodeNewFile(arrayBuffer)
+        if (files[0].name.endsWith(".psv")){
+            clear()
+            decodeNewFile(arrayBuffer)
+        } else {
+            decodeMaterialFile(arrayBuffer)
+        }
     }
     reader.readAsArrayBuffer(files[0])
 }

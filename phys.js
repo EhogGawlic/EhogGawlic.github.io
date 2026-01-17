@@ -267,7 +267,12 @@ class Obj {
         if (this.texture){
             const tex = textures[this.texture]
             if (tex){
+                ctx.save()
+                ctx.beginPath()
+                ctx.arc(this.p.x+emv.x, this.p.y+emv.y, this.r, 0, Math.PI * 2)
+                ctx.clip()
                 ctx.drawImage(tex,this.p.x - this.r + emv.x, this.p.y - this.r + emv.y, this.r*2, this.r*2)
+                ctx.restore()
             }
             return
         }
