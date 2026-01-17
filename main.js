@@ -1059,7 +1059,12 @@ rstbtn.addEventListener("click", ()=>{
     reader.onload = (e) => {
         console.log(e.target.result)
         const arrayBuffer = e.target.result
-        decodeNewFile(arrayBuffer)
+        if (saveinp.files[0].name.endsWith(".psv")){
+            clear()
+            decodeNewFile(arrayBuffer)
+        } else {
+            decodeMaterialFile(arrayBuffer)
+        }
     }
     reader.readAsArrayBuffer(saveinp.files[0])
 })
@@ -1239,6 +1244,7 @@ listDirectory('./things').then(async(folders)=>{
                     const response = await fetch(server + '/examplefile?name='+name)
                     const arrayBuffer = await response.arrayBuffer()
                     // check filename (either file.psv or file.pms)
+                    console.log(response.headers.get('Content-Disposition'))
                     if (response.headers.get('Content-Disposition') && response.headers.get('Content-Disposition').includes('file.psv')){
                         clear()
                     decodeNewFile(arrayBuffer)

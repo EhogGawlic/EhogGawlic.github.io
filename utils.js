@@ -1015,6 +1015,7 @@ function processFile(files) {
         console.log(e.target.result)
         const arrayBuffer = e.target.result
         if (files[0].name.endsWith(".psv")){
+            logOut("Loading PSV file")
             clear()
             decodeNewFile(arrayBuffer)
         } else {
