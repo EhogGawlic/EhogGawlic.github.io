@@ -1393,3 +1393,23 @@ document.querySelector("#shareform button").onclick = async(e)=>{
     }
     console.log("Form handler finished")
 }
+getEl("postscriptbtn").onclick=async()=>{
+    const title = getEl("stitleinp").value
+    const desc = getEl("sdescinp").value
+    const script = getEl("scriptinp").value
+    if (signedin){
+        const fdata = new FormData()
+        fdata.append("name", title)
+        fdata.append("desc",desc)
+        fdata.append("script",script)
+        const res = await uploadFormData(server+"/uploadscript",fdata)
+        if (!res.ok){
+            alert('Error. Code '+res.status)
+            if (res.status >= 500 && res.status<=599){
+                alert("Script name is probably taken")
+            }
+            return
+        }
+        alert("Done! View it in examples after you upload.")
+    }
+}

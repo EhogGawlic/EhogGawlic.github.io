@@ -375,6 +375,31 @@
                 </div>
                 <button class="closebtn">X</button>
             </div>
+            <div id="postscript" class="popup">
+                <h3>Post script</h3><br>
+                <label for="stitleinp">Title/name</label><br>
+                <input id="stitleinp" type="text" placeholder="Title"><br>
+                <label for="sdescinp">Description</label><br>
+                <textarea id="sdescinp" rows="3" cols="50" placeholder="Description"></textarea><br>
+                <label for="scriptinp">Script content</label><br>
+                <textarea id="scriptinp" rows="5" cols="50" placeholder="Code goes here."></textarea><br>
+                <a href="./main.js" target="_blank">Main script for reference</a><br>
+                <a href="./utils.js" target="_blank">Utilities script for reference</a><br>
+                <a href="./phys.js" target="_blank">Physics script for reference (ball constructor)</a><br>
+                <a href="./elements.js" target="_blank">Elements script for reference</a><br>
+                <a href="./fileloader.js" target="_blank">File saving/loading script for reference</a><br>
+                <a href="view-source:https://ehoggawlic.github.io/physics" target="_blank">Main HTML file ur on rn for reference</a><br>
+                <a href="https://github.com/EhogGawlic/ehoggawlic.github.io" target="_blank">Github repo for reference</a><br>
+                <button onclick="
+                    try{
+                        const result = eval(getEl('scriptinp').value)
+                        logOut('From script tester (result): '+result)
+                    } catch(e){
+                        logOut('From script tester: ERR: '+e)
+                    }
+                ">Test</button><br>
+                <button id="postscriptbtn">Post!</button>
+            </div>
         </div>
         <div id="loadingdiv">
             <img id="lbg" src="loadingbgr.jpg">
