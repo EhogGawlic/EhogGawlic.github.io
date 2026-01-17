@@ -1255,6 +1255,34 @@ listDirectory('./things').then(async(folders)=>{
             }
         }, 0)
     })
+    nfolders += examplesList.length
+    const scripts = await fetch(server+'/scripts')
+    const scriptList = await scripts.json()
+    scriptList.forEach((scr,i)=>{
+        const name = scr.Title
+        logOut("loading script "+name)
+        const extxt = `
+                <div class="thing" id="ex${nfolders+i+1}">
+                    <p class="thingtitle">${name}</p><br>
+                    <img class="thingimg" src="./script.png"><br>
+                    <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
+                </div>`
+        getEl('excontain').innerHTML += extxt
+        // Wait a tick for DOM to update before attaching listener
+        setTimeout(()=>{
+            const exbtn = document.querySelector(`#ex${nfolders+i+1}load`)
+            if (exbtn) {
+                exbtn.onclick= async()=>{
+                    getEl("examples").style.display = "none"
+                    logOut("loading script: \""+name+'"')
+                    const response = await fetch(server + '/script?name='+name)
+                    const scr = await response.text()
+                    logOut("Running: "+scr)
+                    eval(scr)
+                }
+            }
+        }, 0)
+    })
 }catch(e){
     getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
     getEl('shareform').style.display="none"

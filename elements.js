@@ -269,3 +269,5 @@ function loadTex(src,name){
     textures[name] = isrc
 }
 loadTex("./textures/domer.png","domer")
+loadTex("./textures/bol2.png","bol2")
+loadTex("./textures/plastic.png","plastic")
