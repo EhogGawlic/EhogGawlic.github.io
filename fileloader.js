@@ -177,7 +177,7 @@ function decodeNewFile(data){
                         const char = String.fromCharCode(b[17+tc])
                         tex += char
                     }
-                    nb.texture = tex
+                    nb.texture = tex.length ? tex: null
                 }
                 objs.push(nb)
             })

@@ -251,6 +251,7 @@ h1{
     border: 5px solid black;
     border-radius: 10px;
     background-color: lightgray;
+    overflow-y: scroll;
 }
 #excontain .thing .thingtitle{
     font-size: 20px;
