@@ -1269,6 +1269,7 @@ listDirectory('./things').then(async(folders)=>{
                     <p class="thingtitle">${name}</p><br>
                     <img class="thingimg" src="./script.png"><br>
                     <button class="thingbtn" id="ex${nfolders2+i+1}load">Load</button>
+                    <a href="${server}/sdesc?name=${name}" target="_blank">Description</a>
                 </div>`
         const container = getEl('excontain')
         const tempDiv = document.createElement('div')
