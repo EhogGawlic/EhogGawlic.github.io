@@ -1,4 +1,4 @@
-const server = "https://secretary-mime-armstrong-machines.trycloudflare.com"
+const server = "https://posing-presenting-there-township.trycloudflare.com"
 let token = sessionStorage.getItem('accessToken') || ''
 
 Float32Array.prototype.push = function(...items){
