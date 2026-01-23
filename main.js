@@ -1188,37 +1188,6 @@ pcanv.addEventListener("mousemove", (e)=>{
 
 listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
-    folders.forEach(async(folder,i)=>{
-        if (i > 2){
-            console.log(folder.split('s/')[1])
-            const title = decodeURI( folder.split('s/')[1])
-            const extxt = `
-                    <div class="thing" id="ex${i-3}">
-                        <p class="thingtitle">${title}</p><br>
-                        <img class="thingimg" src="${folder + "/image.png"}"><br>
-                        <button class="thingbtn" id="ex${i-3}load">Load</button>
-                    </div>`
-            const container = getEl('excontain')
-            const tempDiv = document.createElement('div')
-            tempDiv.innerHTML = extxt
-            const newElement = tempDiv.firstElementChild
-            container.appendChild(newElement)
-
-            const exbtn = newElement.querySelector('.thingbtn')
-            if (exbtn) {
-                exbtn.addEventListener('click', async()=>{
-                    getEl("examples").style.display = "none"
-                    console.log('loading example from ' + folder)
-                    const response = await fetch(folder + '/file.psv')
-                    const arrayBuffer = await response.arrayBuffer()
-                    clear()
-                    decodeNewFile(arrayBuffer)
-                }
-                )
-            }
-            nfolders = i-3
-        }
-    })
     // get all examples from server
     try{
     const examples = await fetch(server + '/examples')
@@ -1290,6 +1259,7 @@ listDirectory('./things').then(async(folders)=>{
         }
     })
 }catch(e){
+    logOut("Error loading examples: "+e)
     getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
     getEl('shareform').style.display="none"
 }
