@@ -1193,7 +1193,9 @@ listDirectory('./things').then(async(folders)=>{
     logOut('fetch complete')
     const examplesList = await examples.json()
     logOut('fetch complete')
+    try{
     examplesList.forEach((ex,i)=>{
+        logOut("lode")
         logOut("Loading example: " + ex.Title)
         const name = ex.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
         logOut("Example name 2: "+name)
@@ -1239,6 +1241,7 @@ listDirectory('./things').then(async(folders)=>{
                 logOut('Event listener created')
             }
     })
+}catch(e){logOut(e)}
     const nfolders2 = nfolders + examplesList.length
     const scripts = await fetch(server+'/scripts')
     const scriptList = await scripts.json()
