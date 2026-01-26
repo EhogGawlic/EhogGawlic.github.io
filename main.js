@@ -1190,7 +1190,9 @@ listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
     // get all examples from server
     try{
+        logOut("fetching")
     const examples = await fetch(server + '/examples')
+    logOut('fetch complete')
     const examplesList = await examples.json()
     logOut('fetch complete')
     examplesList.forEach((ex,i)=>{
