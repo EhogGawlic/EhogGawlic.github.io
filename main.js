@@ -1193,7 +1193,7 @@ listDirectory('./things').then(async(folders)=>{
     const examples = await fetch(server + '/examples')
     const examplesList = await examples.json()
     examplesList.forEach((ex,i)=>{
-        const name = ex.Title
+        const name = ex.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
         const extxt = `
                 <div class="thing" id="ex${nfolders+i+1}">
                     <p class="thingtitle">${name}</p><br>
@@ -1232,7 +1232,7 @@ listDirectory('./things').then(async(folders)=>{
     const scripts = await fetch(server+'/scripts')
     const scriptList = await scripts.json()
     scriptList.forEach((scr,i)=>{
-        const name = scr.Title
+        const name = scr.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
         const extxt = `
                 <div class="thing" id="ex${nfolders2+i+1}">
                     <p class="thingtitle">${name}</p><br>
