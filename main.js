@@ -1192,24 +1192,34 @@ listDirectory('./things').then(async(folders)=>{
     try{
     const examples = await fetch(server + '/examples')
     const examplesList = await examples.json()
+    logOut('fetch complete')
     examplesList.forEach((ex,i)=>{
+        logOut("Loading example: " + ex.Title)
         const name = ex.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
+        logOut("Example name 2: "+name)
         const extxt = `
                 <div class="thing" id="ex${nfolders+i+1}">
                     <p class="thingtitle">${name}</p><br>
                     <img class="thingimg" src="${server+'/exampleimage?name='+name}"><br>
                     <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
                 </div>`
+                logOut('created html for example')
             const container = getEl('excontain')
             const tempDiv = document.createElement('div')
+                logOut('created html for example')
             tempDiv.innerHTML = extxt
+                logOut('created html for example')
             const newElement = tempDiv.firstElementChild
             container.appendChild(newElement)
+                logOut('created html for example')
 
             // Then attach listener immediately (no setTimeout needed):
             const exbtn = newElement.querySelector('.thingbtn')
+                logOut('created html for example')
             console.log('Found button:', exbtn, 'ID:', nfolders+i+1)
+                logOut('Found button')
             if (exbtn) {
+                logOut('Found button')
                 exbtn.addEventListener('click', async()=>{
                     console.log('Click handler fired')
                     getEl("examples").style.display = "none"
@@ -1226,6 +1236,7 @@ listDirectory('./things').then(async(folders)=>{
                         decodeMaterialFile(arrayBuffer)
                     }
                 })
+                logOut('Event listener created')
             }
     })
     const nfolders2 = nfolders + examplesList.length
