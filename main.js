@@ -1188,8 +1188,6 @@ pcanv.addEventListener("mousemove", (e)=>{
 
 listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
-    // get all examples from server
-    try{
         logOut("fetching")
     const examples = await fetch(server + '/examples')
     logOut('fetch complete')
@@ -1270,12 +1268,12 @@ listDirectory('./things').then(async(folders)=>{
                 eval(scr)
             })
         }
-    })
-}catch(e){
-    logOut("Error loading examples: "+e)
+    })/*
+}catch(errr){
+    logOut("Error loading examples: "+errr)
     getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
     getEl('shareform').style.display="none"
-}
+}*/
 })
 
 getEl('exbtn').onclick = ()=>{

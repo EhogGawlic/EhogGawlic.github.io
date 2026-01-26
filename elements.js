@@ -252,7 +252,7 @@ function logOut(out){
             getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+JSON.stringify(out) + "</span><br><br>"
             break
         default:
-            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+out + "</span><br><br>"
+            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+out.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('&', '&amp;') + "</span><br><br>"
     }
     //auto-scroll to bottom
     getEl("outls").scrollTop = getEl("outls").scrollHeight
