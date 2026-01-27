@@ -1190,7 +1190,7 @@ listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
     // get all examples from server
     try{
-    const examples = await fetch(server + '/examples')
+    const examples = await fetch(server + '/examples', {method:"GET"})
     const examplesList = await examples.json()
     examplesList.forEach((ex,i)=>{
         const name = ex.Title
@@ -1208,7 +1208,6 @@ listDirectory('./things').then(async(folders)=>{
 
             // Then attach listener immediately (no setTimeout needed):
             const exbtn = newElement.querySelector('.thingbtn')
-            console.log('Found button:', exbtn, 'ID:', nfolders+i+1)
             if (exbtn) {
                 exbtn.addEventListener('click', async()=>{
                     console.log('Click handler fired')
