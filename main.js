@@ -1189,26 +1189,36 @@ pcanv.addEventListener("mousemove", (e)=>{
 listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
     // get all examples from server
-    try{
     const examples = await fetch(server + '/examples', {method:"GET"})
     const examplesList = await examples.json()
+    logOut('fetch complete')
+    try{
     examplesList.forEach((ex,i)=>{
-        const name = ex.Title
+        logOut("lode")
+        logOut("Loading example: " + ex.Title)
+        const name = ex.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
+        logOut("Example name 2: "+name)
         const extxt = `
                 <div class="thing" id="ex${nfolders+i+1}">
                     <p class="thingtitle">${name}</p><br>
                     <img class="thingimg" src="${server+'/exampleimage?name='+name}"><br>
                     <button class="thingbtn" id="ex${nfolders+i+1}load">Load</button>
                 </div>`
+                logOut('created html for example')
             const container = getEl('excontain')
             const tempDiv = document.createElement('div')
+                logOut('created html for example')
             tempDiv.innerHTML = extxt
+                logOut('created html for example')
             const newElement = tempDiv.firstElementChild
             container.appendChild(newElement)
+                logOut('created html for example')
 
             // Then attach listener immediately (no setTimeout needed):
             const exbtn = newElement.querySelector('.thingbtn')
+            console.log('Found button:', exbtn, 'ID:', nfolders+i+1)
             if (exbtn) {
+                logOut('Found button')
                 exbtn.addEventListener('click', async()=>{
                     console.log('Click handler fired')
                     getEl("examples").style.display = "none"
@@ -1225,13 +1235,15 @@ listDirectory('./things').then(async(folders)=>{
                         decodeMaterialFile(arrayBuffer)
                     }
                 })
+                logOut('Event listener created')
             }
     })
+}catch(e){logOut(e)}
     const nfolders2 = nfolders + examplesList.length
     const scripts = await fetch(server+'/scripts')
     const scriptList = await scripts.json()
     scriptList.forEach((scr,i)=>{
-        const name = scr.Title
+        const name = scr.Title.replaceAll("<","&lt;").replaceAll(">", "&gt;")
         const extxt = `
                 <div class="thing" id="ex${nfolders2+i+1}">
                     <p class="thingtitle">${name}</p><br>
@@ -1256,12 +1268,12 @@ listDirectory('./things').then(async(folders)=>{
                 eval(scr)
             })
         }
-    })
-}catch(e){
-    logOut("Error loading examples: "+e)
+    })/*
+}catch(errr){
+    logOut("Error loading examples: "+errr)
     getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
     getEl('shareform').style.display="none"
-}
+}*/
 })
 
 getEl('exbtn').onclick = ()=>{
