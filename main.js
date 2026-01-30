@@ -1189,9 +1189,8 @@ pcanv.addEventListener("mousemove", (e)=>{
 
 listDirectory('./things').then(async(folders)=>{
     let nfolders = 0
-        logOut("fetching")
-    const examples = await fetch(server + '/examples')
-    logOut('fetch complete')
+    // get all examples from server
+    const examples = await fetch(server + '/examples', {method:"GET"})
     const examplesList = await examples.json()
     logOut('fetch complete')
     try{
@@ -1218,9 +1217,7 @@ listDirectory('./things').then(async(folders)=>{
 
             // Then attach listener immediately (no setTimeout needed):
             const exbtn = newElement.querySelector('.thingbtn')
-                logOut('created html for example')
             console.log('Found button:', exbtn, 'ID:', nfolders+i+1)
-                logOut('Found button')
             if (exbtn) {
                 logOut('Found button')
                 exbtn.addEventListener('click', async()=>{
