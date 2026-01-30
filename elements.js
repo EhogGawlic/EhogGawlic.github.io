@@ -247,12 +247,15 @@ function toggleDisp(el){
     getEl(el).style.display = dis === "none" ? "block" : "none"
 }
 function logOut(out){
-    switch(typeof out){
-        case "object":
-            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+JSON.stringify(out) + "</span><br><br>"
-            break
-        default:
-            getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+out.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('&', '&amp;') + "</span><br><br>"
+    // normalize any input to a safe string before inserting into the log
+    if (typeof out === "object"){
+        const s = JSON.stringify(out)
+        getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+s + "</span><br><br>"
+    } else {
+        let s = String(out)
+        // escape ampersand first to avoid double-escaping
+        s = s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+        getEl("outls").innerHTML += "<span>("+(new Date()).getTime()+") "+s + "</span><br><br>"
     }
     //auto-scroll to bottom
     getEl("outls").scrollTop = getEl("outls").scrollHeight

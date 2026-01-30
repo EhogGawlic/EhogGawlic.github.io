@@ -774,14 +774,15 @@ window.onclick = (e)=>{
                         logOut(cn)
                     switch(cn){
                         case 0:
-                            c1p = {x:mx,y:my}
+                            c1p = snapLines(mx,my)
                             cn++
                             break
                         case 1:
                             cn = 0
                             lines[lninp.value].rail.has = true
-                            lines[lninp.value].rail.kfs[0]={sp:c1p,ep:{x:mx,y:my}}
+                            lines[lninp.value].rail.kfs[0]={sp:c1p,ep:snapLines(mx,my)}
                             lines[lninp.value].rail.s = parseFloat(rsinp.value)
+                            lines[lninp.value].rail.t = 0
                             adding.ia=false
                     }
             }
