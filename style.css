@@ -1,3 +1,7 @@
+@font-face {
+    font-family: hand;
+    src: url(hand.ttf);
+}
 canvas{
     position: absolute;
     top: 0;
@@ -29,8 +33,9 @@ body{
     background-color: lightgray;
 }
 *{
-    font-family: 'Courier New', Courier, monospace;
+    font-family: hand;
     font-size: small;
+    font-weight: bolder;
 }
 p{
     user-select: none;
