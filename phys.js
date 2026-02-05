@@ -271,7 +271,25 @@ class Obj {
                 ctx.beginPath()
                 ctx.arc(this.p.x+emv.x, this.p.y+emv.y, this.r, 0, Math.PI * 2)
                 ctx.clip()
-                ctx.drawImage(tex,this.p.x - this.r + emv.x, this.p.y - this.r + emv.y, this.r*2, this.r*2)
+                
+                // Calculate aspect ratio and scale to fit circle
+                const aspectRatio = tex.width / tex.height
+                let drawWidth = this.r * 2
+                let drawHeight = this.r * 2
+                
+                if (aspectRatio > 1) {
+                    // Wider than tall - constrain by height
+                    drawWidth = drawHeight * aspectRatio
+                } else {
+                    // Taller than wide - constrain by width
+                    drawHeight = drawWidth / aspectRatio
+                }
+                
+                // Center the texture
+                const offsetX = this.p.x - drawWidth / 2 + emv.x
+                const offsetY = this.p.y - drawHeight / 2 + emv.y
+                
+                ctx.drawImage(tex, offsetX, offsetY, drawWidth, drawHeight)
                 ctx.restore()
             }
             return
@@ -313,7 +331,8 @@ class Obj {
 //const tobj = new Obj(400, 100, 10, [0,0,255], 10, 10, 0, 1)
 function addObj(x,y,r,b,c,vx,vy,w){
     objs.push(new Obj(x, y, r*meterPixRatio, c, w, vx*meterPixRatio, vy*meterPixRatio, b, liq, parseFloat(stinp.value)*0.001))
-    
+    if (textures["tex"+(ntexname-1)])
+    objs[objs.length-1].texture = "tex"+(ntexname-1)
 }
 function addFan(x,y,speed,d,mp){
     fans.push({

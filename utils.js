@@ -1,6 +1,6 @@
 const server = "https://mailman-destiny-tender-corn.trycloudflare.com";
 let token = sessionStorage.getItem('accessToken') || ''
-
+let ntexname = 1
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
@@ -1162,4 +1162,16 @@ function arrToString(arr){
         res += String.fromCharCode(arr[i+1])
     }
     return res
+}
+async function testImgUrl(url){
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = function() {
+            resolve(true);
+        };
+        img.onerror = function() {
+            reject("Failed to load image at " + url);
+        };
+        img.src = url;
+    });
 }
