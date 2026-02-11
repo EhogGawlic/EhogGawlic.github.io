@@ -95,9 +95,9 @@
 
                         <!--<button id="edit">Edit ball</button>-->
                     </div>
-                    <button id="clearbtn">Clear</button><br>
-                    <button id="clearufbtn" style="font-size: x-small;">Clear unfixed</button><br>
-                    <button id="albtn">Add line</button><br>
+                    <button id="clearbtn">Clear<span class="infobtn" id="clrIB">i</span></button><br>
+                    <button id="clearufbtn" style="font-size: x-small;">Clear unfixed<span class="infobtn" id="cufIB">i</span></button><br>
+                    <button id="albtn">Add line<span class="infobtn" id="linIB">i</span></button><br>
                     <button onclick="drawing=!drawing;this.style.backgroundColor = drawing ? 'green':'lightgray';">Draw</button><br>
                     <label for="lwinp">Line width</label><br>
                     <input id="lwinp" type="number" value="20"><br>
@@ -110,7 +110,7 @@
                     <div class="idk"><button id="ppbtn" style="background-color: green;">⏵⏸</button><button id="2sbtn" style="background-color: yellow;">⏵⏵</button><button id="3sbtn" style="background-color: yellow;">⏵⏵⏵</button><button style="background-color: orange;" onclick="
     clearInterval(loop)
     loop = setInterval(run, 1000/60)">Slow</button></div><br>
-                    <button id="savebtn">Save as file</button><br>
+                    <button id="savebtn" style="position: relative;">Save as file<span class="infobtn" id="safIB">i</span></button><br>
                     <button onclick="downloadMatFile(encodeMaterialFile())">Save material</button> (e.g. density 10, radius 5, etc. also textures (see domer button))<br>
                     <!--<button id="savebtnc" onclick="saveData(encode(), 'save')">Save as cookie</button><br>-->
                     <a id="savelnk" download="save.psv" style="display: none;" href="data:text.json,{'objs':[],'lines':[]}">Save</a><br>
@@ -131,7 +131,7 @@
                         <button id="sibtnf">Sign in</button>
                         <button id="subtnf">Sign up</button>
                     </div>
-                    <button id="afbtn">Add fan</button><br>
+                    <button id="afbtn">Add fan<span class="infobtn" id="adfIB">i</span></button><br>
                     <label for="fsinp">Fan strength</label><br>
                     <input id="fsinp" type="number" value="10"><br>
                     <button onclick="toggle(disfans);toggle(this)">Toggle fans</button><br>
@@ -365,7 +365,7 @@
                 </p>
             </div>
             <div id="bottommenu">
-                <button id="bombbtn">BoMb</button>
+                <button id="bombbtn">BoMb<span class="infobtn" id="bomIB">i</span></button>
                 <button id="exbtn">Examples</button>
                 <!--<button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>-->
             </div>

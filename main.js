@@ -1401,3 +1401,21 @@ getEl("postscriptbtn").onclick=async()=>{
         alert("Done! View it in examples after you upload.")
     }
 }
+//load info buttons
+(async()=>{
+    const res = await fetch("./infobtn.json")
+    const json = await res.json()
+    for (const key in json){
+        /**
+         * @type {HTMLSpanElement}
+         */
+        const btn = document.querySelector("#"+key)
+        if (btn){
+            btn.onclick = function(e){
+                e.stopPropagation()
+                alert(json[key])
+                e.stopPropagation()
+            }
+        }
+    }
+})()

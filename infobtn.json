@@ -1,0 +1,8 @@
+{
+    "safIB": "Saves current simulation state as a .psv file. This file can be loaded later to restore the simulation to this state.",
+    "clrIB": "Clears everything.",
+    "cufIB": "Clears all balls that are not anchored.",
+    "bomIB": "Turns bomb tool on. When you click on the canvas, it will create a stationary bomb that explodes in 5 seconds. You can only place one otherwise the other one will not explode.",
+    "linIB": "Turns line tool on. To use, click somewhere on the canvas. This is the start point. Let go, and click the second point. This is the end point, and the line will be added. Shortcut: L",
+    "adfIB": "Turns fan tool on. To use, click somewhere on the canvas. This is the fan position. Let go, and click again. This is the direction and max distance the fan acts. Shortcut: F"
+}
