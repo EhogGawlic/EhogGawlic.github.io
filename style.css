@@ -79,14 +79,18 @@ button{
     border-radius: 5px;
 }
 #settingsbtn{
-    position: absolute;
+    position: fixed;
+    top: auto;
+    left: auto;
     right: 5px;
     bottom: 10px;
     width: 50px;
     height: 50px;
 }
 #consolebtn{
-    position: absolute;
+    position: fixed;
+    top: auto;
+    left: auto;
     right: 5px;
     bottom: 70px;
     width: 50px;
@@ -121,6 +125,8 @@ h1{
 }
 #xstbtn{
     position: absolute;
+    top: auto;
+    left: auto;
     top: 5px;
     right: 5px;
     width: 25px;
@@ -278,6 +284,8 @@ h1{
 .closebtn{
     
     position: absolute;
+    top: auto;
+    left: auto;
     top: 5px;
     right: 5px;
     width: 25px;
