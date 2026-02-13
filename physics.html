@@ -70,12 +70,17 @@
                     const url =smtinp.value
                     testImgUrl(url).then(valid=>{
                         const n = 'tex'+ntexname
-                    ntexname++
-                    loadTex(url,n)
+                        curtex=n
+                        ntexname++
+                        loadTex(url,n)
                     }).catch(e=>{
                         alert('Invalid image URL')
                     })
                 ">OK</button><br>
+                <button id="savetexbtn">Save texture</button><br>
+                <select id="svdtextslct">
+                    <option selected value="">None</option>
+                </select>
                 Want 3D? Check this out: <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a><br>
                 <a href="./index.html">Main page</a><br>
                 <a href="https://w-chat-pht6.onrender.com/">W Chat</a><br>

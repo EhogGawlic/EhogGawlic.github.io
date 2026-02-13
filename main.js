@@ -1419,3 +1419,40 @@ getEl("postscriptbtn").onclick=async()=>{
         }
     }
 })()
+//load saved textures
+try{
+const texturesls = localStorage.getItem("stexs")
+const stexselect = getEl("svdtextslct")
+if (texturesls){
+    const texjson = JSON.parse(texturesls)
+    for (const key in texjson){
+        const url = texjson[key]
+        const n = 'tex'+ntexname
+        ntexname++
+        loadTex(url,n)
+        const opt = document.createElement("option")
+        opt.value = n
+        opt.textContent = n
+        stexselect.appendChild(opt)
+    }
+} else {
+    localStorage.setItem("stexs", "{}")
+}
+stexselect.onchange = function(){
+    curtex = stexselect.value
+}
+getEl("savetexbtn").onclick = function(){
+    try{
+        logOut("Saving texture...")
+        logOut("Current texture: "+curtex)
+    let json = localStorage.getItem("stexs")
+    if (!json){
+        json = "{}"
+        localStorage.setItem("stexs", json)
+    }
+    let texjson = JSON.parse(json)
+    texjson[curtex] = texjson[curtex] = textures[curtex].src
+    localStorage.setItem("stexs", JSON.stringify(texjson))
+}catch(e){logOut("Error saving texture: "+e)}
+}
+}catch(e){logOut("Error loading textures: "+e)}

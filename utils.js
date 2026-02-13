@@ -1,6 +1,7 @@
 const server = "https://mailman-destiny-tender-corn.trycloudflare.com";
 let token = sessionStorage.getItem('accessToken') || ''
 let ntexname = 1
+let curtex=""
 Float32Array.prototype.push = function(...items){
     let length = this.length
     let newLength = length + items.length
@@ -1125,10 +1126,29 @@ function pointInBox(x1, y1, x2, y2, p){
     return p.x>x1&&p.y>y1&&p.x<x2&&p.y<y2
 }
 function toggle(vari){
-    console.log(typeof vari)
     switch(typeof vari){
         case "boolean":
             vari = !vari
+            break
+        case "string":
+            if (window[vari] !== undefined){
+                window[vari] = !window[vari]
+            } else {
+                switch(document.getElementById(vari).type){
+                    case "checkbox":
+                        document.getElementById(vari).checked = !document.getElementById(vari).checked
+                        break
+                    case "button":
+                        let bc = document.getElementById(vari).style.backgroundColor
+                        if (bc != "darkgray"){
+                            document.getElementById(vari).style.backgroundColor = "darkgray"
+                        }
+                        if (bc == "darkgray"){
+                            document.getElementById(vari).style.backgroundColor = "lightgray"
+                        }
+                        break
+                }
+            }
             break
         case HTMLInputElement:
             vari.checked = !vari.checked
@@ -1145,6 +1165,8 @@ function toggle(vari){
         default:
             if (typeof vari == HTMLElement){
                 vari.style.display = vari.style.display === "none" ? "block" : "none"
+            } else {
+                vari = !vari
             }
     }
 }

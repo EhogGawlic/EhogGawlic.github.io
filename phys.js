@@ -331,8 +331,8 @@ class Obj {
 //const tobj = new Obj(400, 100, 10, [0,0,255], 10, 10, 0, 1)
 function addObj(x,y,r,b,c,vx,vy,w){
     objs.push(new Obj(x, y, r*meterPixRatio, c, w, vx*meterPixRatio, vy*meterPixRatio, b, liq, parseFloat(stinp.value)*0.001))
-    if (textures["tex"+(ntexname-1)])
-    objs[objs.length-1].texture = "tex"+(ntexname-1)
+    if (curtex){
+    objs[objs.length-1].texture = curtex}
 }
 function addFan(x,y,speed,d,mp){
     fans.push({
