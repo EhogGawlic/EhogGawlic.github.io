@@ -510,7 +510,7 @@ let pmx;
 let pmy;
 canvas.addEventListener("mousemove", (e)=>{
     mx = Math.round((e.clientX-offX)*ma) - emv.x
-    my = Math.round(e.clientY*ma) - emv.y
+    my = Math.round((e.clientY-75)*ma) - emv.y
     if (clicking){
         if (!drawing)
         {

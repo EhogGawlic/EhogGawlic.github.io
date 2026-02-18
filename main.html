@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="logo.png">
+        <title>Physics</title>
+        <link rel="stylesheet" href="style2.css">
+        <script src="vector.js"></script>
+        <script src="fileloader.js"></script>
+        <script src="utils.js"></script>
+    </head>
+    <body>
+        <div id="main">
+            <canvas id="canvas"> UR CANVAS (loading) </canvas>
+            
+            <div id="leftmenu">
+                <p>Note: The screen is 500 meters (theoretically) wide and tall.<br>
+                Units are in meters.</p>
+                <button id="addballbtn">Add ball</button><br>
+                <label for="xinp">X-value of ball</label><br>
+                <input id="xinp" type="number" value="250"><br>
+                <label for="yinp">Y-value of ball</label><br>
+                <input id="yinp" type="number" value="250"><br>
+                <label for="rinp">Radius (half the diameter/size)</label><br>
+                <input id="rinp" type="number" value="5">meters<br>
+                <label for="binp">Bounciness (1 is full bounce, 0 is no bounce)</label><br>
+                <input id="binp" type="number" value="0.8"><br>
+                <label for="cinp">Ball color</label><br>
+                <input id="cinp" type="color" value="#F0F0F0"><br>
+                <label for="winp">Weight of ball</label><br>
+                <input id="winp" type="number" value="981.7">kg<br>
+                <label for="vxinp">X-value of ball velocity (m/s)</label><br>
+                <input id="vxinp" type="number" value="500">m/s<br>
+                <label for="vyinp">Y-value of ball velocity (m/s)</label><br>
+                <input id="vyinp" type="number" value="0">m/s<br>
+                <label for="density">Density (kg/m²)</label>
+                <input id="dinp" type="number" value="12.5">kg/m²<br>
+                <label for="stinp">Surface tension (mN/meter²)<br><span class="tinytxt">Note: Surface tension of water is about 72 mN/meter².</span></label><br>
+                <input id="stinp" type="number" value="0"><br>
+                <label for="presets">Preset materials</label><br>
+                <select id="presets">
+                    <option value="pla">PLA</option>
+                    <option value="sm">Steel marble</option>
+                    <option value="fb">Fully bouncy</option>
+                    <option value="nb">No bounce</option>
+                    <option value="w">Water (68°F)</option>
+                    <option value="m">Mercury (liquid metal at room temp.)</option>
+                    <option value="sf">Styrofoam</option>
+                </select><br>
+                <label for="autoc">Auto-create balls</label>
+                <input id="autoc" type="checkbox"><br>
+                <label for="substeps">Substeps</label><br>
+                <input id="substeps" type="number" value="4"><br>
+                <label for="swi">Stream width</label><br>
+                <input id="swi" value="5" type="number"><br>
+                <label for="acs">Auto-create speed</label><br>
+                <input id="acs" value="2" type="number"><br>
+                <label for="fixed">Fixed</label><br>
+                <input type="checkbox" id="fixed"><br>
+                <button onclick="
+                    objs.forEach(o=>{
+                        o.texture='domer'
+                    })
+                ">Domer</button><br>
+                <label for="smtinp">Set texture (right click image and press "copy image URL")</label><br>
+                <input id="smtinp" type = "text" maxlength="255"><br>
+                <button onclick="
+                    const url =smtinp.value
+                    testImgUrl(url).then(valid=>{
+                        const n = 'tex'+ntexname
+                        curtex=n
+                        ntexname++
+                        loadTex(url,n)
+                    }).catch(e=>{
+                        alert('Invalid image URL')
+                    })
+                ">OK</button><br>
+                <button id="savetexbtn">Save texture</button><br>
+                <select id="svdtextslct">
+                    <option selected value="">None</option>
+                </select>
+                Want 3D? Check this out: <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a><br>
+                <a href="./index.html">Main page</a><br>
+                <a href="https://w-chat-pht6.onrender.com/">W Chat</a><br>
+                <div class="idk">
+                    <h3>Output</h3>
+                    <div id="outls">
+                        <span>You will see output here.</span><br>
+                    </div>
+                </div>
+            </div>
+            <div id="rightmenu">
+                <span id="FPS"></span>
+                    <div class="idk">
+                    <button id="selectbtn">Select</button><br>
+                    <div id="hidden">
+                        <button id="remove">Remove</button>
+
+                        <!--<button id="edit">Edit ball</button>-->
+                    </div>
+                    <button id="clearbtn">Clear<span class="infobtn" id="clrIB">i</span></button><br>
+                    <button id="clearufbtn" style="font-size: x-small;">Clear unfixed<span class="infobtn" id="cufIB">i</span></button><br>
+                    <button id="albtn">Add line<span class="infobtn" id="linIB">i</span></button><br>
+                    <button onclick="drawing=!drawing;this.style.backgroundColor = drawing ? 'green':'lightgray';">Draw</button><br>
+                    <label for="lwinp">Line width</label><br>
+                    <input id="lwinp" type="number" value="20"><br>
+                    <label for="bcolinp">Line color</label><br>
+                    <input type="color" id="lcolinp" value="#000000"><br>
+                    <button id="avbtn">Add valve</button><br>
+                    <button id="ocvbtn" style="font-size: xx-small;">Open/close valve</button><br>
+                    <label for="vninp">Valve #</label><br>
+                    <input id="vninp" type="number" value="0" max="0" min="0"><br>
+                    <div class="idk"><button id="ppbtn" style="background-color: green;">⏵⏸</button><button id="2sbtn" style="background-color: yellow;">⏵⏵</button><button id="3sbtn" style="background-color: yellow;">⏵⏵⏵</button><button style="background-color: orange;" onclick="
+    clearInterval(loop)
+    loop = setInterval(run, 1000/60)">Slow</button></div><br>
+                    <button id="savebtn" style="position: relative;">Save as file<span class="infobtn" id="safIB">i</span></button><br>
+                    <button onclick="downloadMatFile(encodeMaterialFile())">Save material</button> (e.g. density 10, radius 5, etc. also textures (see domer button))<br>
+                    <!--<button id="savebtnc" onclick="saveData(encode(), 'save')">Save as cookie</button><br>-->
+                    <a id="savelnk" download="save.psv" style="display: none;" href="data:text.json,{'objs':[],'lines':[]}">Save</a><br>
+                    <label for="savename">File name</label><br>
+                    <input id="savename" type="text" value="save"><br>
+                    <label for="saveinp">Save file</label><br>
+                    <input type="file" id="saveinp" accept=".psv, .pms" onchange = "processFile(this.files)"><br>
+                    <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>
+                    <div id="shareform">
+                        <h4>Share</h4>
+                        <p>Note: This may not work because the server runs on my computer and the server stops when my computer is closed and not connected to power. Title length limit is 255 and files over 16 MB in size will not work. Besides, if you have a file that big, there is something wrong with your save.</p>
+                        <h6><u>SIGN IN / UP</u></h6>
+                        <label>Username</label>
+                        <input type="text" name="username" required placeholder="Username (e.g Potatoman)"><br>
+                        <label>Password</label>
+                        <p>Important: Make one if signing up</p>
+                        <input type="password" required name="password"><br>
+                        <button id="sibtnf">Sign in</button>
+                        <button id="subtnf">Sign up</button>
+                    </div>
+                    <button id="afbtn">Add fan<span class="infobtn" id="adfIB">i</span></button><br>
+                    <label for="fsinp">Fan strength</label><br>
+                    <input id="fsinp" type="number" value="10"><br>
+                    <button onclick="toggle(disfans);toggle(this)">Toggle fans</button><br>
+                    <label for="scinp">Scale</label><br>
+                    <select id="scinp">
+                        <option value="m">Meters</option>
+                        <option value="cm">Centimeters</option>
+                        <option value="mm">Millimeters</option>
+                    </select><br>
+                </div>
+                <div class="idk">
+                    <label for="addselect">Watcha gonna add (select line first for motor)</label><br>
+                    <select id="addselect">
+                        <option value="m">Motor</option>
+                        <option value="tc">Trash can</option>
+                        <option value="curve">Curve</option>
+                        <option value="speedo">Speed tester thing</option>
+                        <option value="rail">Rail</option>
+                    </select><br>Line #<br>
+                    <input id="lni" type="number" value="0" max="0" min="0"><br>
+                    <div id="mtr">
+                        <label for="msinp">Motor speed</label><br>
+                        <input id="msinp" type="number" value="1">°/sec<br>
+                        <button onclick="lines[lninp.value].m.h=false;lines[lninp.value].m.t=0">Remove motor</button><br>
+                    </div>
+                    <div id="crv">
+                        <label for="ct">Curve type</label><br>
+                        -- Note --<br>
+                        Arcs are counterclockwise. First click is<br>
+                        the center of the arc, second is the start<br>
+                        point of the arc, and third is shown.<br>
+                        (You'll know what I mean by shown when<br>
+                        you get to the third click.)<br>
+                        --<br>
+                        Arc <button id="acb"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="10" height="10">
+                            <path d="M 10 10 A 1 1 0 0 1 10 90" stroke="#0000FF" stroke-width="10" fill="none"/>
+                        </svg></button><br>
+                        &lt;--NOT AVAILABLE--&gt;
+                        Bezier <button id="bcb" onclick="ltype=2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="10" height="10">
+                                <path d="M 10 10 C 10 180 90 -80 90 90" stroke="#0000FF" stroke-width="10" fill="none"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="rail" class="hidden">
+                        Click 1 is to set start point, click 2 is to set end point.<br>
+                        <button onclick="lines[lninp.value].rail.has = false">Remove rail</button><br>
+                        <label for="rsinp">Rail speed</label><br>
+                        <input id="rsinp" type="number" value="100">
+                    </div>
+                    <button id="okbtn1">OK</button><br>
+                    <button id="dbtn">Delete (select)</button><br>
+                    <button onclick="disec=!disec">Delete 2 (select)</button>
+                </div><br>
+                <div class="idk">
+                    <h3>Thing editing & deleting</h3>
+                    <button onclick="getEl('bl').style.display = getEl('bl').style.display === 'block' ? 'none':'block'">Edit balls</button>
+                    <div class="hidden" id="bl">
+                        <label for="bounce">Bounce</label><br>
+                        <input id="bounce" type="number" value="0.2"><br>
+                        <label for="weight">Weight</label><br>
+                        <input id="weight" type="number" value="1000"><br>
+                        <button id="bleok">OK</button><br>
+                        <label for="dtypeinp">Delete all of color 🤔</label><br>
+                        <input id="dtypeinp" type="color"><br>
+                        <button id="bldok">Delete/remove</button><br>
+                        <button onclick="lines.splice(lines.length-1,1)">Delete last line</button>
+                    </div><br>
+                    <div class="hidden" id="fn">
+                        <label for="fsped">Fan speed</label><br>
+                        <input id="fsped" type="number" value="10000">
+                    </div>
+                </div><br>
+                <div class="idk">
+                    <h3>ropes and stuff</h3>
+                    <button id="arbtn">AdD rOpE (sElEcT 2 bAlLs)</button><br>
+                    <button onclick="
+    arope.ia=true
+    arope.t=2">AdD sPrInG (sElEcT 2 bAlLs)</button> - Note: Use Styrofoam material or set density to 2 and use default radius<br>
+                    <button onclick="
+                        const sx = jtw.value
+                        const sy = jth.value
+                        for (let x = 0; x < sx; x++){
+                            for (let y = 0; y < sy; y++){
+                                
+                                addObj(x*40+parseInt(jtx.value)*meterPixRatio,y*40+parseInt(jty.value)*meterPixRatio,
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
+            const b = objs[objs.length-1]
+                                if (x > 0){
+                                    addSpring(objs.length-1, objs.length -1 - sy)
+                                }
+                                if (y > 0){
+                                    addSpring(objs.length -2, objs.length-1)
+                                }
+                                if (x>0 && y > 0){
+                                    addSpring(objs.length-2-sy,objs.length-1)
+                                    addSpring(objs.length-1-sy,objs.length-2)
+                                }
+
+                            }
+                        }
+                    ">add jiggly thing</button><button onclick="toggleDisp('jts')" style="width:150px">jiggly thing settings</button><br>
+                    ️<div id="jts" style="display: none;" class="idk">
+                        <label for="jtw">Width</label><br>
+                        <input id="jtw" type="number" value="10"><br>
+                        <label for="jth">Height</label><br>
+                        <input id="jth" type="number" value="6"><br>
+                        <label for="jtx">X pos</label><br>
+                        <input id="jtx" type="number" value="50"><br>
+                        <label for="jty">Y pos</label><br>
+                        <input id="jty" type="number" value="50"><br>
+                        <label for="jbr">Ball radius</label><br>
+                        <input id="jbr" type="number" value="50"><br>
+                        <label for="jba">Ball # for springy ball</label><br>
+                        <input id="jba" type="number" value="10"><br>
+                    </div><br>
+                    <button onclick="
+                    const x= parseInt(jtx.value)*meterPixRatio
+                    const y= parseInt(jty.value)*meterPixRatio
+                    const r = parseFloat(jbr.value)*meterPixRatio
+                    addObj(x,y,
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
+            const fb =objs.length-1
+                        for (let angle = 0; angle < Math.PI*2; angle += Math.PI*2/parseInt(jba.value)){
+                          
+                            const bx = x + Math.cos(angle)*r
+                            const by = y + Math.sin(angle)*r
+                    addObj(bx,by,
+            parseFloat(rinp.value)*meterPixRatio,parseFloat(binp.value),
+            HEXRGB(cinp.value),parseFloat(vxinp.value)*meterPixRatio,
+            parseFloat(vyinp.value)*meterPixRatio, parseFloat(winp.value))
+                            addSpring(objs.length-1, fb)
+                            if (angle > 0){
+                                addSpring(objs.length-2, objs.length-1)
+                                if (objs.length > fb+2){
+                                addSpring(objs.length-3, objs.length-1)
+                                }
+                            }
+                            
+                        }
+                        addSpring(objs.length-1, fb+1)
+                        addSpring(objs.length-2, fb+1)
+                    ">Add springy ball</button>
+                    <button onclick="
+                    for (let i = 0; i < objs.length; i++){
+                        if (i != 0){
+                            addRope(i-1, i)
+                        }
+                    }
+                    ">chain all</button><br>
+                    <button onclick="
+                    try{
+                    for (let i = 0; i < objs.length; i++){
+                        const tdists = []
+                        for (let j = 0; j < objs.length; j++){
+                            if (i != j){
+                                const tdist = dist(objs[i].p, objs[j].p)
+                                tdists.push({index: j, distance: tdist})
+                            }
+                        }
+                        tdists.sort((a,b) => a.distance - b.distance)
+                        for (let k = 0; k < snsi.value; k++){
+                            addSpring(i, tdists[k].index)
+                        }
+                    }
+                }catch(e){alert(e)}
+                    ">Connect all balls with their <select id="snsi">
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6" selected>6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select> closest ones</button><br>
+                    <button onclick="springs=[]"
+                    >Remove all springs</button>
+                </div>
+                <!--<span id="console">text</span>-->
+                <img src="tcan.png" style="display: none;" id="tcansrc">
+                <!--<button id="slbtn" style="font-size: smaller;" onclick="sobjs = objs;slines = lines">Save locally</button>-->
+            </div>
+                <button id="settingsbtn"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Gear_%2889033%29_-_The_Noun_Project.svg"></button>
+                <button id="consolebtn" onclick="getEl('console').style.display = getEl('console').style.display === 'none' ? 'block' : 'none'">CONS<br>OLE</button>
+            
+            <div id="settings">
+                <h1>SETTINGS</h1>
+                <label for="gravinp">Gravity</label><br>
+                <input id="gravinp" value="1" type="number" max="5"> Gs<br>
+                <label for="ceinp">Can explode</label><br>
+                <input id="ceinp" type="checkbox"><br>
+                <!--<label for="slines">Snap lines</label><br>-->
+                <input type="checkbox" id="slinp" checked="true"><br>
+                Save every <input id="sps" type="number" value="5"> second(s)<br>
+                <label for="cres">Curve quality</label><br>
+                <input id="cres" type="number" value="20"><br>
+                <label for="saveslot">Save slot # (1-3)</label><br>
+                <input id="saveslot" type="number" value="1" min="1" max="3"><br>
+                <label for="inf">Infinite (use arrow keys to move)</label><br>
+                <input id="infcheck" type="checkbox" value="false"><br>
+                <label for="hcontrast">High contrast</label><br>
+                <input id="hcontrast" type="checkbox" value="false" onchange="canvas.style.backgroundColor = this.checked ? 'black' : 'white'"><br>
+                <label for="sbreak">Springs break</label><br>
+                <input id="sbreak" type="checkbox" value="false"><br>
+                <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a>
+
+                <button id="xstbtn" onclick="
+                    settings.style.display='none'
+                    paused=false
+                ">×</button>
+           
+
+            </div>
+            <div id="console">
+                <h1>CONSOLE</h1>
+                <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl('result').innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
+                <span id="result"></span><br>
+                <p>
+                    FUNCTIONS & VARIABLES<br>
+                    ---------<br>
+                    log (text): Logs text to console<br>
+                    clearConsole (): Clears console<br>
+                    paused: S.E.<br>
+                    objs: All the balls<br>
+                    lines: All the lines<br>
+                    tcans: All the trash cans<br>
+                    fans: All the fans<br>
+                    bye:)
+                </p>
+            </div>
+            <div id="bottommenu">
+                <button id="bombbtn">BoMb<span class="infobtn" id="bomIB">i</span></button>
+                <button id="exbtn">Examples</button>
+                <!--<button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>-->
+            </div>
+            <div id="polycreate" class="popup">
+                <h1>Polygon creator</h1>
+                <label for="pcol">Color</label><br>
+                <input type="color" id="pcol" value="#000000"><br>
+                <label for="pdens">DENsItY</label><br>
+                <input type="number" id="pdens" value="12.5"><br>
+                
+                <canvas id="polycanvas">UR CANVAS (loading)</canvas><br>
+                <span>Click to add points. <s>Right click to delete.</s></span><br>
+                <button id="pcbtn">Create polygon</button><br>
+                <button id="pcancelbtn">Cancel</button>
+            </div>
+            <div id="examples">
+                <h2>Things <s>i</s> people made</h2>
+                <div id="excontain">
+                </div>
+                <button class="closebtn">X</button>
+            </div>
+            <div id="postscript" class="popup">
+                <h3>Post script</h3><br>
+                <label for="stitleinp">Title/name</label><br>
+                <input id="stitleinp" type="text" placeholder="Title"><br>
+                <label for="sdescinp">Description</label><br>
+                <textarea id="sdescinp" rows="3" cols="50" placeholder="Description"></textarea><br>
+                <label for="scriptinp">Script content</label><br>
+                <textarea id="scriptinp" rows="5" cols="50" placeholder="Code goes here."></textarea><br>
+                <a href="./main.js" target="_blank">Main script for reference</a><br>
+                <a href="./utils.js" target="_blank">Utilities script for reference</a><br>
+                <a href="./phys.js" target="_blank">Physics script for reference (ball constructor)</a><br>
+                <a href="./elements.js" target="_blank">Elements script for reference</a><br>
+                <a href="./fileloader.js" target="_blank">File saving/loading script for reference</a><br>
+                <a href="view-source:https://ehoggawlic.github.io/physics" target="_blank">Main HTML file ur on rn for reference</a><br>
+                <a href="https://github.com/EhogGawlic/ehoggawlic.github.io" target="_blank">Github repo for reference</a><br>
+                <button onclick="
+                    try{
+                        const result = eval(getEl('scriptinp').value)
+                        logOut('From script tester (result): '+result)
+                    } catch(e){
+                        logOut('From script tester: ERR: '+e)
+                    }
+                ">Test</button><br>
+                <button id="postscriptbtn">Post!</button>
+            </div>
+            <div id="topbar">
+                <div id="tpbarbtns">
+                    <button>test</button>
+                    <button>test</button>
+                    <button>test</button>
+                    <button>test</button>
+                    <button>test</button>
+                    <button>test</button>
+                </div>
+            </div>
+        </div>
+        <div id="loadingdiv">
+            <img id="lbg" src="loadingbgr.jpg">
+            <img id="lrt" src="loading.png">
+        </div>
+        <script src="elements2.js"></script>
+        <script src="phys.js"></script>
+        <script src="polygon.js"></script>
+        <script src="main2.js"></script>
+    </body>
+</html>
