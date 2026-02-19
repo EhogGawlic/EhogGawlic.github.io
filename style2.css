@@ -1,147 +1,167 @@
 @font-face {
-    font-family: hand;
-    src: url(hand.ttf);
+  font-family: hand;
+  src: url(hand.ttf);
 }
-button{
-    cursor:pointer
+button {
+  cursor: pointer;
 }
-#canvas{
-    position: absolute;
-    left:0;
-    bottom:0;
-    top:75px;
-    cursor:pointer;
+#canvas {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  top: 75px;
+  cursor: pointer;
 }
-#main{
-    position: absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    width:100%;
-    height:100%;
+#main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 }
-.hidden{
-    display: none;
+.hidden {
+  display: none;
 }
-#rightmenu{
-    position: absolute;
-    right: 0;
-    top: 75px;
-    bottom:0;
-    left: calc(100% - 300px);
-    height: calc(100% - 75px);
-    background-color: lightgray;
-    border-left: 1px solid black;
-    overflow:scroll;
+#rightmenu {
+  position: absolute;
+  right: 0;
+  top: 75px;
+  bottom: 0;
+  left: calc(100% - 300px);
+  height: calc(100% - 75px);
+  background-color: lightgray;
+  border-left: 1px solid black;
+  overflow: scroll;
 }
-#leftmenu{
-    position: absolute;
-    left: 0;
-    top: 75px;
-    bottom:0;
-    width: 300px;
-    background-color: lightgray;
-    border-right: 1px solid black;
-    display:none;
-    overflow:scroll;
+#leftmenu {
+  position: absolute;
+  left: 0;
+  top: 75px;
+  bottom: 0;
+  width: 300px;
+  background-color: lightgray;
+  border-right: 1px solid black;
+  display: none;
+  overflow: scroll;
 }
-.popup{
-    position: absolute;
-    top: 30%;
-    left: 30%;
-    bottom: 30%;
-    right:30px;
-    background-color: lightgray;
-    border: 1px solid black;
-    overflow:scroll;
-    display: none;
+.popup {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  bottom: 30%;
+  right: 30px;
+  background-color: lightgray;
+  border: 1px solid black;
+  overflow: scroll;
+  display: none;
 }
-#settings{
-    position: absolute;
-    top: 30%;
-    left: 30%;
-    bottom: 30%;
-    right:30px;
-    background-color: lightgray;
-    border: 1px solid black;
-    overflow:scroll;
-    display: none;
-
+#settings {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  bottom: 30%;
+  right: 30px;
+  background-color: lightgray;
+  border: 1px solid black;
+  overflow: scroll;
+  display: none;
 }
-#console{
-    position: absolute;
-    top: 30%;
-    left: 30%;
-    bottom: 30%;
-    right:30px;
-    background-color: lightgray;
-    border: 1px solid black;
-    overflow:scroll;
-    display: none;
+#console {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  bottom: 30%;
+  right: 30px;
+  background-color: lightgray;
+  border: 1px solid black;
+  overflow: scroll;
+  display: none;
 }
-#bottommenu{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 75px;
-    background-color: lightgray;
-    border-top: 1px solid black;
+#bottommenu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 75px;
+  background-color: lightgray;
+  border-top: 1px solid black;
 }
-#bottommenu button{
-    width: 100px;
-    height: 50px;
-    margin: 10px;
+#bottommenu button {
+  width: 100px;
+  height: 50px;
+  margin: 10px;
 }
-#loadingdiv{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:100%;
-    display: none;
+#loadingdiv {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  display: none;
 }
-#lbg{
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+#lbg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
 }
-#lrt{
-    position: absolute;
-    top: 500px;
-    left: 45%;
-    right: 45%;
+#lrt {
+  position: absolute;
+  top: 500px;
+  left: 45%;
+  right: 45%;
 }
-#topbar{
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 75px;
-    background-color: lightgray;
-    border-bottom: 1px solid black;
+#topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 75px;
+  background-color: lightgray;
+  border-bottom: 1px solid black;
 }
-#tpbarbtns{
-    position: absolute;
-    height: 26px;
-    bottom:0;
-    left: 10px;
-    border-top:1px solid black;
-    width:100%;
+#tpbarbtns {
+  position: absolute;
+  height: 26px;
+  bottom: 0;
+  left: 10px;
+  border-top: 1px solid black;
+  width: 100%;
 }
-#tpbarbtns button{
-    width: 60px;
-    height: 20px;
-    margin: 3px;
-    border:0px;
-    border-radius: 5px;
-    background-color: rgba(200,200,200,0);
+#tpbarbtns button {
+  width: 60px;
+  height: 20px;
+  margin: 3px;
+  border: 0px;
+  border-radius: 5px;
+  background-color: rgba(200, 200, 200, 0);
 }
-#tpbarbtns button:hover{
-    background-color: rgba(240,240,240,1);
+#tpbarbtns button:hover {
+  background-color: rgba(240, 240, 240, 1);
+}
+.bpopup{
+  position: absolute;
+  left: 0;
+  top: 25px;
+  width: 100px;
+  background-color: rgb(50,50,50);
+  color:white;
+  height: 300px;
+  border-radius: 10px;
+  text-align: left;
+}
+.bpopup span{
+  background-color: rgba(1,1,1,0);
+  border: 0px;
+  color:white;
+  cursor: pointer;
+}
+.bpopup span:hover{
+  background-color: rgb(240,240,240);
+  color:black;
 }
