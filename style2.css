@@ -144,13 +144,17 @@ button {
 .bpopup{
   position: absolute;
   left: 0;
-  top: 25px;
+  top: 20px;
   width: 100px;
   background-color: rgb(50,50,50);
   color:white;
   height: 300px;
   border-radius: 10px;
   text-align: left;
+  display: none;
+}
+.bpopup span .bpopup{
+  left:100px;
 }
 .bpopup span{
   background-color: rgba(1,1,1,0);
@@ -161,4 +165,12 @@ button {
 .bpopup span:hover{
   background-color: rgb(240,240,240);
   color:black;
+}
+.closebtn{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 20px;
+  height: 20px;
+  background-color: red;
 }

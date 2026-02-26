@@ -598,7 +598,7 @@ window.onclick = (e)=>{
             return
         }
     
-    if (e.clientX>offX&&e.clientX<innerWidth-offX && e.clientY>0&&e.clientY<innerHeight-50){
+    if (e.target == canvas){
 
         if (!selecting && !ml && !av && !af && !deleting && !adding.ia&& !abomb && !arope.ia){
             try{
@@ -1477,9 +1477,16 @@ Array.from(tbbs).forEach(tbb=>{
     let queue = [tbb]
     while (queue.length>0){
         const first = queue.shift()
+
         const children = first.children
         if (children){
             const ppup = children[0]
+            first.addEventListener("click",()=>{
+                ppup.style.display="block"
+            })
+            first.addEventListener("mouseleave",()=>{
+                ppup.style.display="none"
+            })
             const ppupc = ppup.children
             Array.from(ppupc).forEach(bt=>{
                 bt.addEventListener("mouseenter",(e)=>{
@@ -1490,6 +1497,7 @@ Array.from(tbbs).forEach(tbb=>{
                     bt.style.backgroundColor = "rgba(230,230,230,0)"
                     e.stopPropagation()
                 })
+                queue.push(bt)
             })
         }
     }
