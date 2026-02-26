@@ -1456,3 +1456,41 @@ getEl("savetexbtn").onclick = function(){
 }catch(e){logOut("Error saving texture: "+e)}
 }
 }catch(e){logOut("Error loading textures: "+e)}
+const bpopups = Array.from(document.querySelectorAll(".bpopup"))
+bpopups.forEach(b=>{
+    b.addEventListener("mouseover", (e)=>{
+        e.stopImmediatePropagation()
+        e.stopPropagation()
+    })
+})
+/**
+ * @type {HTMLButtonElement[]}
+ */
+const tbbs = document.querySelectorAll("#tpbarbtns button")
+Array.from(tbbs).forEach(tbb=>{
+    tbb.addEventListener("mouseenter",()=>{
+        tbb.style.backgroundColor = "rgba(240,240,240,100)"
+    })
+    tbb.addEventListener("mouseleave",()=>{
+        tbb.style.backgroundColor = "rgba(230,230,230,0)"
+    })
+    let queue = [tbb]
+    while (queue.length>0){
+        const first = queue.shift()
+        const children = first.children
+        if (children){
+            const ppup = children[0]
+            const ppupc = ppup.children
+            Array.from(ppupc).forEach(bt=>{
+                bt.addEventListener("mouseenter",(e)=>{
+                    bt.style.backgroundColor = "rgba(240,240,240,100)"
+                    e.stopPropagation()
+                })
+                bt.addEventListener("mouseleave",(e)=>{
+                    bt.style.backgroundColor = "rgba(230,230,230,0)"
+                    e.stopPropagation()
+                })
+            })
+        }
+    }
+})
