@@ -9,10 +9,6 @@ async function getDb() {
 
 exports.handler = async (event) => {
   try {
-    const id = event.queryStringParameters?.id;
-    if (!id)
-      return { statusCode: 400, body: JSON.stringify({ error: "Missing id" }) };
-
     const db = await getDb();
     const doc = await db
       .collection("posts").find({})
