@@ -15,8 +15,7 @@ exports.handler = async (event) => {
 
     const db = await getDb();
     const doc = await db
-      .collection("posts")
-      .findOne({ _id: new ObjectId(id) });
+      .collection("posts").find({})
     if (!doc)
       return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
 
