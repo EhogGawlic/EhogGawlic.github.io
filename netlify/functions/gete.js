@@ -2,6 +2,10 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 let client;
 async function getDb() {
+  
+  if (!process.env.MONGODB_URI) {
+    throw new Error("MONGODB_URI is not set");
+  }
   if (!client) client = new MongoClient(process.env.MONGODB_URI);
   await client.connect();
   return client.db("game");
