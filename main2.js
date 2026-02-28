@@ -1714,3 +1714,17 @@ Array.from(tbbs).forEach((tbb) => {
     }
   }
 });
+getPosts().then(posts=>{
+  logOut(
+    "Testing - this feature will only work on the second url (https://boxsand.netlify.app)",
+  );
+logOut(posts)
+}).catch(e=>{
+  
+  logOut(
+    "Testing - this feature will only work on the second url (https://boxsand.netlify.app)",
+  );
+  logOut(
+    "Error (this is prob cuz ur not on the old link): "+e
+  )
+})
