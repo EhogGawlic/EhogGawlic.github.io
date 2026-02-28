@@ -214,3 +214,9 @@ html{
 *{
   font-family: 'Courier New', Courier, monospace;
 }
+#footer{
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  font-weight: bolder;
+}
