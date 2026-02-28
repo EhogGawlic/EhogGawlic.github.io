@@ -12,9 +12,9 @@ async function getPosts(){
 }
 function postsToHtml(posts){
   //{"data":[{"_id":"69a2767e9333dbcf707380a3","author":"ehogin","content":"hi","file":"","type":"post"}]}
-  const posts = posts.data
+  const postsd = posts.data
   let out = ``
-  Array.from(posts).forEach(data=>{
+  Array.from(postsd).forEach(data=>{
     
     const author = data.author;
     const content = data.content;
