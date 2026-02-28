@@ -16,7 +16,7 @@ exports.handler = async (event) => {
       return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
 
     return { statusCode: 200, body: JSON.stringify({ data: doc.content }) };
-  } catch {
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid id" }) };
+  } catch (e){
+    return { statusCode: 400, body: JSON.stringify({ error: e }) };
   }
 };
