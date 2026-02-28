@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save file</title>
+    <link rel="stylesheet" href="./style2.css"></link>
+  </head>
+  <body>
+      <h1>Save file</h1>
+    <div id="fsmain">
+      <label for="fnameinp">File name:</label>
+      <input type="text" id="fnameinp"><br>
+      <button onclick="saveNow()">Save</button>
+    </div>
+    <script>
+  const origin = location.origin;
+  let pending = null;
+
+  // tell opener we are ready
+  window.opener?.postMessage({ type: "FS_READY" }, origin);
+
+  window.addEventListener("message", (e) => {
+    if (e.origin !== origin) return;
+    if (e.data?.type !== "FS_SAVE") return;
+    pending = e.data; // { buffer, fileName, mime }
+    fnameinp.value=pending.fileName
+  });
+
+  function saveNow() {
+    if (!pending) return;
+    const blob = new Blob([pending.buffer], { type: pending.mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (fnameinp.value|'save')+".psv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+  </body>
+</html>

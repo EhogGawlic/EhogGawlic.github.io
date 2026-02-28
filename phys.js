@@ -126,12 +126,12 @@ class Obj {
     }
     collwall(){
         if (!inf){
-            if (this.p.y>=innerHeight-this.r){
-                this.p.y=innerHeight-this.r
+            if (this.p.y>=innerHeight-this.r-75){
+                this.p.y=innerHeight-this.r-75
                 this.pp.y = this.p.y+this.v.y*this.b
             }
-            if (this.p.x>=innerHeight-this.r){
-                this.p.x=innerHeight-this.r
+            if (this.p.x>=innerHeight-this.r-75){
+                this.p.x=innerHeight-this.r-75
                 this.pp.x = this.p.x+this.v.x*this.b
             }
             if (this.p.x<=this.r){

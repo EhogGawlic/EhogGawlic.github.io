@@ -1197,3 +1197,30 @@ async function testImgUrl(url){
         img.src = url;
     });
 }
+// main page
+function openFileSaverAndSend(floatArrayData, fileName) {
+  const saver = window.open("./filesaver.html", "Save file", "width=600,height=400");
+  const origin = location.origin;
+
+  const onMsg = (e) => {
+    if (e.source !== saver || e.origin !== origin) return;
+    if (e.data?.type !== "FS_READY") return;
+
+    const typed = new Float32Array(floatArrayData);
+    const buffer = typed.buffer; // transferable
+    saver.postMessage(
+      {
+        type: "FS_SAVE",
+        fileName,
+        mime: "application/octet-stream",
+        buffer
+      },
+      origin,
+      [buffer] // transfer ownership (no copy)
+    );
+
+    window.removeEventListener("message", onMsg);
+  };
+
+  window.addEventListener("message", onMsg);
+}

@@ -89,11 +89,15 @@
                         <span>You will see output here.</span><br>
                     </div>
                 </div>
-                <button class="closebtn" onclick="lmenu.style.display='none'">X</button>
+                <button class="closebtn" onclick="lmenu.style.display='none'
+                      offX = 0
+                      rmenu.style.left = canvas.width+'px'
+                      canvas.style.left='0'">X</button>
             </div>
             <div id="rightmenu">
                 <span id="FPS"></span>
                     <div class="idk">
+                      <h3>Main tools</h3>
                     <button id="selectbtn">Select</button><br>
                     <div id="hidden">
                         <button id="remove">Remove</button>
@@ -115,13 +119,7 @@
                     <div class="idk"><button id="ppbtn" style="background-color: green;">⏵⏸</button><button id="2sbtn" style="background-color: yellow;">⏵⏵</button><button id="3sbtn" style="background-color: yellow;">⏵⏵⏵</button><button style="background-color: orange;" onclick="
     clearInterval(loop)
     loop = setInterval(run, 1000/60)">Slow</button></div><br>
-                    <button id="savebtn" style="position: relative;">Save as file<span class="infobtn" id="safIB">i</span></button><br>
-                    <button onclick="downloadMatFile(encodeMaterialFile())">Save material</button> (e.g. density 10, radius 5, etc. also textures (see domer button))<br>
-                    <!--<button id="savebtnc" onclick="saveData(encode(), 'save')">Save as cookie</button><br>-->
-                    <a id="savelnk" download="save.psv" style="display: none;" href="data:text.json,{'objs':[],'lines':[]}">Save</a><br>
-                    <label for="savename">File name</label><br>
-                    <input id="savename" type="text" value="save"><br>
-                    <label for="saveinp">Save file</label><br>
+                    <label for="saveinp">Load file</label><br>
                     <input type="file" id="saveinp" accept=".psv, .pms" onchange = "processFile(this.files)"><br>
                     <button id="rstbtn" style="font-size: x-small;">Reset to save</button><br>
                     <div id="shareform">
@@ -148,6 +146,7 @@
                     </select><br>
                 </div>
                 <div class="idk">
+                      <h3>Object additions</h3>
                     <label for="addselect">Watcha gonna add (select line first for motor)</label><br>
                     <select id="addselect">
                         <option value="m">Motor</option>
@@ -321,10 +320,8 @@
                 <img src="tcan.png" style="display: none;" id="tcansrc">
                 <!--<button id="slbtn" style="font-size: smaller;" onclick="sobjs = objs;slines = lines">Save locally</button>-->
             </div>
-                <button id="settingsbtn"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Gear_%2889033%29_-_The_Noun_Project.svg"></button>
-                <button id="consolebtn" onclick="getEl('console').style.display = getEl('console').style.display === 'none' ? 'block' : 'none'">CONS<br>OLE</button>
             
-            <div id="settings">
+            <div id="settings" class="popup">
                 <h1>SETTINGS</h1>
                 <label for="gravinp">Gravity</label><br>
                 <input id="gravinp" value="1" type="number" max="5"> Gs<br>
@@ -345,14 +342,14 @@
                 <input id="sbreak" type="checkbox" value="false"><br>
                 <a href="3d/download.html">3ᴅ ᴘʜʏsɪᴄs</a>
 
-                <button id="xstbtn" onclick="
+                <button class="closebtn" onclick="
                     settings.style.display='none'
                     paused=false
                 ">×</button>
            
 
             </div>
-            <div id="console">
+            <div id="console" class="popup">
                 <h1>CONSOLE</h1>
                 <textarea rows="5" cols="50" id="consoletxt" onchange="try{getEl('result').innerText=eval(this.value);consolehist.push(this.value)}catch(e){getEl('result').innerHTML=e}this.value=''"></textarea><br>
                 <span id="result"></span><br>
@@ -372,6 +369,9 @@
             <div id="bottommenu">
                 <button id="bombbtn">BoMb<span class="infobtn" id="bomIB">i</span></button>
                 <button id="exbtn">Examples</button>
+                <button class="closebtn" onclick="
+                  bottommenu.style.display='none'
+                ">X</button>
                 <!--<button id="polybtn" onclick="toggleDisp('polycreate')">POLYGON FINALLY</button>-->
             </div>
             <div id="polycreate" class="popup">
@@ -419,11 +419,27 @@
             </div>
             <div id="topbar">
                 <div id="tpbarbtns">
-                    <button>View
-                      <div class="bpopup">
-                      <span onclick="lmenu.style.display='block'">Left bar</span><br>
-                      <span onclick="settings.style.display='none'">Settings</span>
-                    </div></button>
+                  <button>View
+                    <div class="bpopup">
+                      <span onclick="lmenu.style.display='block'
+                      offX = 300
+                      rmenu.style.left = offX+canvas.width+'px'
+                      canvas.style.left='300px'
+                      ">Left bar</span><br>
+                      <span onclick="settings.style.display='block'">Settings</span><br>
+                      <span onclick="bottommenu.style.display='block'">Bottom bar</span><br>
+                    </div>
+                  </button>
+                  <button>File
+                    <div class="bpopup">
+                      <span onclick='
+                        openFileSaverAndSend(encodeNewFile(),"save")
+                        '>Save</span><br>
+                      <span onclick='
+                        openFileSaverAndSend(encodeMaterialFile(),"material")
+                        '>Save material</span>
+                    </div>
+                  </button>
                 </div>
             </div>
         </div>

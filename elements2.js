@@ -16,11 +16,11 @@ function canv(id){
     return getEl(id)
 }
 const canvas = canv("canvas")
-canvas.width=innerHeight
-canvas.height=innerHeight
-const multamount = (innerHeight-75)/innerHeight
+canvas.width=innerHeight-75
+canvas.height=innerHeight-75
+const multamount = 1//(innerHeight-75)/innerHeight
 const ma = 1/multamount
-const offX=0
+let offX=0
 canvas.style.width=innerHeight-75+"px"
 canvas.style.height=innerHeight-75+"px"
 const ctx = canvas.getContext("2d"),
