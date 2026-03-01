@@ -124,6 +124,7 @@ button {
   height: 75px;
   background-color: lightgray;
   border-bottom: 1px solid black;
+  line-height: normal;
 }
 #tpbarbtns {
   position: absolute;

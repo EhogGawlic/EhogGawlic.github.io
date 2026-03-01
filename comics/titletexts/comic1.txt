@@ -1,0 +1,1 @@
+<Img src="./favicon.ico"></imG>

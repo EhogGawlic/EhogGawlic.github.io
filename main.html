@@ -419,6 +419,7 @@
                 <button id="postscriptbtn">Post!</button>
             </div>
             <div id="topbar">
+              <p><b>Physics</b><br>Does not care what you put in to this</p>
                 <div id="tpbarbtns">
                   <button>View
                     <div class="bpopup">
@@ -430,6 +431,10 @@
                       <span onclick="settings.style.display='block'">Settings</span><br>
                       <span onclick="bottommenu.style.display='block'">Bottom bar</span><br>
                       <span onclick="examples.style.display='block'">Examples</span><br>
+                      <span onclick='
+                        window.open("./comic.html", "comic", `toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes,
+                 width=${innerWidth},height=${innerHeight},top=0,left=0`);
+                      '>Open comic</span>
                     </div>
                   </button>
                   <button>File
@@ -449,7 +454,7 @@
             <img id="lbg" src="loadingbgr.jpg">
             <img id="lrt" src="loading.png">
         </div>
-        <div id="footer">v2.1.7</div>
+        <div id="footer">v2.2.7</div>
         <script src="elements2.js"></script>
         <script src="phys.js"></script>
         <script src="polygon.js"></script>

@@ -15,16 +15,20 @@
         right: calc(50% - 300px);
         height: 200px;
         background-color: white;
-        border: 5px solid black;
+        border: 1px solid black;
+        border-radius: 5px;
       }
       #mainbox {
         position: absolute;
-        top: 250px;
+        top: 220px;
         left: calc(50% - 300px);
         right: calc(50% - 300px);
         background-color: white;
-        border: 5px solid black;
+        border: 1px solid black;
         text-align: center;
+        border-radius: 5px;
+        display: inline-block; /* Allows width to grow with content */
+        white-space: nowrap;
       }
       #mainbox h2 {
         text-align: center;
@@ -32,8 +36,9 @@
       #mainbox img {
         display: inline-block;
         border: 1px solid lightblue;
+        width: 580px;
       }
-      html{
+      html {
         background-color: azure;
       }
     </style>
@@ -44,22 +49,61 @@
     </div>
     <div id="mainbox">
       <h2 id="title">Title</h2>
+      <div>
+        <button onclick="
+        if (cn > 1){
+          updateQueryParam('c',cn-1)
+        }
+          ">Previous</button
+        ><button onclick="
+        if (cn < 2){
+          updateQueryParam('c',cn+1)
+        }
+        ">Next</button>
+      </div>
       <img src="./comics/comic1.png" />
     </div>
     <script>
+      function updateQueryParam(key, value, replace = false) {
+        try {
+          // Create a URL object from the current location
+          const url = new URL(window.location.href);
+
+          // Update or add the query parameter
+          url.searchParams.set(key, value);
+
+          // Update the browser's address bar without reloading
+          if (replace) {
+            window.history.replaceState({}, "", url);
+          } else {
+            window.history.pushState({}, "", url);
+            window.location.reload()
+          }
+        } catch (err) {
+          console.error("Invalid URL or parameter:", err);
+        }
+      }
       const url = new URL(window.location.href);
       const params = new URLSearchParams(url.search);
-      const cn = params.get("c");
-
-      // Check if a parameter exists
-      if (params.has("c")) {
-        document.querySelector("img").src = "./comics/comic"+cn+".png"
-        fetch("./comics/names/comic"+cn+".txt").then(res=>res.text()).then(text=>{
-          title.innerHTML = text
-        }).catch(e=>{
-          title.innerText=e
-        })
+      let cn = parseInt(params.get("c"));
+      document.querySelector("img").title = "Title text";
+      if (!cn || !params.has("c")) {
+        cn = 2;
       }
+      (async () => {
+        document.querySelector("img").src = "./comics/comic" + cn + ".png";
+        const res1 = await fetch("./comics/names/comic" + cn + ".txt");
+
+        const res2 = await fetch("./comics/titletexts/comic" + cn + ".txt");
+        if (res1.ok && res2.ok) {
+          const txt1 = await res1.text();
+          const txt2 = await res2.text();
+          title.innerHTML = txt1;
+          document.querySelector("img").title = txt2;
+        } else {
+          console.log(res1.code);
+        }
+      })();
     </script>
   </body>
 </html>
