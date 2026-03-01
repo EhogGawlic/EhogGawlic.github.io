@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>totays comick</title>
+    <style>
+      * {
+        font-family: "Courier New", Courier, monospace;
+      }
+      #headbox {
+        position: absolute;
+        top: 10px;
+        left: calc(50% - 300px);
+        right: calc(50% - 300px);
+        height: 200px;
+        background-color: white;
+        border: 5px solid black;
+      }
+      #mainbox {
+        position: absolute;
+        top: 250px;
+        left: calc(50% - 300px);
+        right: calc(50% - 300px);
+        background-color: white;
+        border: 5px solid black;
+        text-align: center;
+      }
+      #mainbox h2 {
+        text-align: center;
+      }
+      #mainbox img {
+        display: inline-block;
+        border: 1px solid lightblue;
+      }
+      html{
+        background-color: azure;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="headbox">
+      <h1>TOTAYS COMICK</h1>
+    </div>
+    <div id="mainbox">
+      <h2 id="title">Title</h2>
+      <img src="./comics/comic1.png" />
+    </div>
+    <script>
+      const url = new URL(window.location.href);
+      const params = new URLSearchParams(url.search);
+      const cn = params.get("c");
+
+      // Check if a parameter exists
+      if (params.has("c")) {
+        document.querySelector("img").src = "./comics/comic"+cn+".png"
+        fetch("./comics/names/comic"+cn+".txt").then(res=>res.text()).then(text=>{
+          title.innerHTML = text
+        }).catch(e=>{
+          title.innerText=e
+        })
+      }
+    </script>
+  </body>
+</html>
