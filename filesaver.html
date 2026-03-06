@@ -10,13 +10,13 @@
       <h1>Save file</h1>
     <div id="fsmain">
       <label for="fnameinp">File name:</label>
-      <input type="text" id="fnameinp"><br>
+      <input type="text" id="fnameinp" value="save"><br>
       <button onclick="saveNow()">Save</button>
     </div>
     <script>
   const origin = location.origin;
   let pending = null;
-
+  const ninp = document.getElementById("fnameinp")
   // tell opener we are ready
   window.opener?.postMessage({ type: "FS_READY" }, origin);
 
@@ -29,11 +29,12 @@
 
   function saveNow() {
     if (!pending) return;
+    const name = ninp.value
     const blob = new Blob([pending.buffer], { type: pending.mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = (fnameinp.value|'save')+".psv";
+    a.download = (name|'save')+".psv";
     a.click();
     URL.revokeObjectURL(url);
   }
