@@ -1,15 +1,9 @@
-async function getPosts(){
-  const res = await fetch("/.netlify/functions/gete", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: "{}",
-  });
-  if (!res.ok){
-    throw new Error(res.statusText)
-  }
-  const { shareId } = await res.json();
-  const link = `${location.origin}/?share=${shareId}`;
+async function getPosts() {
+  const res = await fetch("/.netlify/functions/gete", { method: "GET" });
+  if (!res.ok) throw new Error(res.statusText);
+  return await res.json(); // { data: [...] }
 }
+
 function postsToHtml(posts){
   //{"data":[{"_id":"69a2767e9333dbcf707380a3","author":"ehogin","content":"hi","file":"","type":"post"}]}
   const postsd = posts.data

@@ -1224,3 +1224,9 @@ function openFileSaverAndSend(floatArrayData, fileName) {
 
   window.addEventListener("message", onMsg);
 }
+function switchRBarPanel(id){
+  for (const panel of document.querySelectorAll("#idkcntn .idk")){
+    panel.style.display = "none";
+  }
+  document.querySelector("#idkcntn #"+id).style.display = "block";
+}

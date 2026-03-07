@@ -33,7 +33,8 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = (fnameinp.value|'save')+".psv";
+    const typedName = (fnameinp.value || pending.fileName || "save").trim();
+    a.download = typedName || "save.psv";
     a.click();
     URL.revokeObjectURL(url);
   }

@@ -33,7 +33,6 @@ button {
   height: calc(100% - 75px);
   background-color: lightgray;
   border-left: 1px solid black;
-  overflow: scroll;
 }
 #leftmenu {
   position: absolute;
@@ -185,6 +184,8 @@ button {
   border: 1px solid black;
   border-radius: 2px;
   margin: 1px;
+  margin-left: 31px;
+  display: none;
 }
 .infobtn{
   position: absolute;
@@ -220,4 +221,31 @@ html{
   right: 5px;
   bottom: 5px;
   font-weight: bolder;
+}
+#rmlb{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  bottom: 0;
+  background-color: white;
+  z-index: 2;
+}
+#rmlb img{
+  width: 28px;
+  margin: 1px;
+  cursor: pointer;
+}
+#FPS{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
+#idkcntn{
+  position: absolute;
+  left: 30px;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  overflow: scroll;
 }
