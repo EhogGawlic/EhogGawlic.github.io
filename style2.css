@@ -252,3 +252,10 @@ html{
 #idkcntn .idk{
   display: none;
 }
+.post{
+  margin: 5px;
+  border: 1px;
+  border-radius: 5px;
+  background-color: gray;
+  overflow: scroll;
+}
