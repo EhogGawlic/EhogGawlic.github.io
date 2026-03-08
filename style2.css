@@ -185,7 +185,6 @@ button {
   border-radius: 2px;
   margin: 1px;
   margin-left: 31px;
-  display: none;
 }
 .infobtn{
   position: absolute;
@@ -248,4 +247,8 @@ html{
   bottom: 0;
   right: 0;
   overflow: scroll;
+}
+
+#idkcntn .idk{
+  display: none;
 }

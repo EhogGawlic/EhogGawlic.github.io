@@ -1721,7 +1721,8 @@ getPosts().then(posts=>{
   logOut(posts)
 logOut(JSON.parse(posts))
   logOut("Loding")
-  getEl("excontain").innerHTML = postsToHtml(posts)
+  const psts = postsToHtml(posts);
+  getEl("excontain").innerHTML = psts
 }).catch(e=>{
   
   logOut(
