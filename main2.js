@@ -1719,7 +1719,6 @@ getPosts().then(posts=>{
     "Testing - this feature will only work on the second url (https://boxsand.netlify.app)",
   );
   logOut(posts)
-logOut(JSON.parse(posts))
   logOut("Loding")
   const psts = postsToHtml(posts);
   getEl("excontain").innerHTML = psts
