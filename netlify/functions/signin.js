@@ -33,6 +33,6 @@ exports.handler = async(event)=>{
         });
         return { statusCode: 200, body: JSON.stringify({ data: user }) };
     } catch (e) {
-        return { statusCode: 500, body: JSON.stringify({ error: "Server error" }) };
+        return { statusCode: 500, body: JSON.stringify({ error: "Server error: "+e }) };
     }
 }
