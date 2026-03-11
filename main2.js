@@ -1399,14 +1399,17 @@ document.querySelector("#shareform button").onclick = async (e) => {
     alert(signedin)
     if (document.querySelector("#shareform button").id == "sibtnf") {
       logOut("sineing in");
+      try{
       const res = await signin(usern, pass)
-      if (!res.ok) logOut("Upload failed: " + res.status);
-      if (res.ok) {
+      if (res) {
+        logOut(JSON.stringify(res))
         signedin = true;
         const sf = await fetch("./shareform.html");
         const sftxt = await sf.text();
         document.querySelector("#shareform").innerHTML = sftxt;
       }
+      }
+      catch(e){logOut(e)}
     }/* else {
       const res = await uploadFormData(server + "/signup", fdata);
       if (!res.ok) throw new Error("Upload failed: " + res.status);
