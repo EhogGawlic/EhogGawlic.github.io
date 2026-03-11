@@ -1396,11 +1396,12 @@ document.querySelector("#shareform button").onclick = async (e) => {
   if (!signedin) {
     const usern = document.querySelector('#shareform input[name="username"]').value
     const pass = document.querySelector('#shareform input[name="password"]').value
+    alert(signedin)
     if (document.querySelector("#shareform button").id == "sibtnf") {
-      console.log("sineing in");
+      logOut("sineing in");
       const res = await signin(usern, pass)
-      if (!res.ok) throw new Error("Upload failed: " + res.status);
-      if (res.status < 400) {
+      if (!res.ok) logOut("Upload failed: " + res.status);
+      if (res.ok) {
         signedin = true;
         const sf = await fetch("./shareform.html");
         const sftxt = await sf.text();
