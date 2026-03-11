@@ -10,7 +10,7 @@ async function signin(username, password){
     credentials:"include",
     mode: "cors"
   });
-  if (!res.ok) throw new Error(res.statusText);
+  if (!res.ok) logOut(res.statusText)
   return await res.json();
 }
 /**
@@ -31,7 +31,7 @@ async function post(content,file){
     credentials:"include",
     mode:'cors'
   })
-  if (!res.ok) throw new Error(res.statusText)
+  if (!res.ok) logOut(res.statusText)
   return await res.json()
 }
 async function testsignin(){
