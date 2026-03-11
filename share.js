@@ -3,7 +3,12 @@ async function getPosts() {
   if (!res.ok) throw new Error(res.statusText);
   return await res.json(); // { data: [...] }
 }
-
+//temporary
+async function getUsers(){
+  const res = await fetch("/.netlify/functions/signin", { method: "GET" });
+  if (!res.ok) throw new Error(res.statusText);
+  return await res.json();
+}
 function postsToHtml(posts){
   //{"data":[{"_id":"69a2767e9333dbcf707380a3","author":"ehogin","content":"hi","file":"","type":"post"}]}
   const postsd = posts.data
