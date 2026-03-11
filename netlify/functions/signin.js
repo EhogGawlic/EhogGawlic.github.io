@@ -18,7 +18,7 @@ exports.handler = async(event)=>{
         if (!user)
             return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
         //test pass
-        const pass = user.hashpass
+        const pass = user.hashedpass
         const correct = await bcrypt.compare(body.password,pass)
         if (!correct)
             return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
