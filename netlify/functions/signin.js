@@ -9,15 +9,29 @@ async function getDb() {
   return client.db("game");
 }
 exports.handler = async(event)=>{
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
     try{
         
         const body = JSON.parse(event.body || "{}");
         const db = await getDb();
-        const users = await db.collection("users").find({}).toArray()
-        if (!users)
+        const user = await db.collection("users").find({username:body.username})
+        if (!user)
             return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
-        
-        return { statusCode: 200, body: JSON.stringify({ data: users }) };
+        //test pass
+        const pass = user.hashpass
+        const correct = await bcrypt.compare(body.password,pass)
+        if (!correct)
+            return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
+        const token = jwt.sign({username}, process.env.SECRET, {expiresIn: '1800s'})
+        context.cookies.set({
+            name: "token",
+            value: token,
+            httpOnly: true, // Recommended for security
+            secure: true,   // Recommended for production
+            path: '/',
+            maxAge: 1800 // 1 week
+        });
+        return { statusCode: 200, body: JSON.stringify({ data: user }) };
     } catch (e) {
         return { statusCode: 500, body: JSON.stringify({ error: "Server error" }) };
     }

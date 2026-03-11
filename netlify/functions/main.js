@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const jwt = require("jsonwebtoken")
 let client;
 async function getDb() {
   if (!client) client = new MongoClient(process.env.MONGODB_URI);
@@ -6,15 +7,24 @@ async function getDb() {
   return client.db("game");
 }
 exports.handler = async (event) => {
+  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
   try {
     const body = JSON.parse(event.body || "{}");
     const db = await getDb();
+    //check credentials
+    const token = context.cookies.get("token")
+    if (!token)
+      return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
+    const usern = jwt.verify(token, process.env.SECRET)
+    if (!usern)
+      return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
     const doc = {
       content: body.content,
-      author: body.author,
+      author: usern,
       file: body.file,
       type: body.type
     };
+
     const result = await db.collection("posts").insertOne(doc);
     return {
       statusCode: 200,

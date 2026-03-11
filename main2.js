@@ -1365,106 +1365,7 @@ pcanv.addEventListener("mousemove", (e) => {
     pctx.fill();
   }
 });
-//
-// example loader
-//
 
-//get all folders in things folder (./things)
-
-listDirectory("./things").then(async (folders) => {
-  let nfolders = 0;
-  // get all examples from server
-  const examples = await fetch(server + "/examples", { method: "GET" });
-  const examplesList = await examples.json();
-  logOut("fetch complete");
-  try {
-    examplesList.forEach((ex, i) => {
-      logOut("lode");
-      logOut("Loading example: " + ex.Title);
-      const name = ex.Title.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-      logOut("Example name 2: " + name);
-      const extxt = `
-                <div class="thing" id="ex${nfolders + i + 1}">
-                    <p class="thingtitle">${name}</p><br>
-                    <img class="thingimg" src="${server + "/exampleimage?name=" + name}"><br>
-                    <button class="thingbtn" id="ex${nfolders + i + 1}load">Load</button>
-                </div>`;
-      logOut("created html for example");
-      const container = getEl("excontain");
-      const tempDiv = document.createElement("div");
-      logOut("created html for example");
-      tempDiv.innerHTML = extxt;
-      logOut("created html for example");
-      const newElement = tempDiv.firstElementChild;
-      container.appendChild(newElement);
-      logOut("created html for example");
-
-      // Then attach listener immediately (no setTimeout needed):
-      const exbtn = newElement.querySelector(".thingbtn");
-      console.log("Found button:", exbtn, "ID:", nfolders + i + 1);
-      if (exbtn) {
-        logOut("Found button");
-        exbtn.addEventListener("click", async () => {
-          console.log("Click handler fired");
-          getEl("examples").style.display = "none";
-          console.log("loading example from " + name);
-          const response = await fetch(server + "/examplefile?name=" + name);
-          const arrayBuffer = await response.arrayBuffer();
-          // check filename (either file.psv or file.pms)
-          console.log(exbtn, nfolders + i + 1);
-          console.log(response.headers.get("Content-Disposition"));
-          if (
-            response.headers.get("Content-Disposition") &&
-            response.headers.get("Content-Disposition").includes("file.psv")
-          ) {
-            clear();
-            decodeNewFile(arrayBuffer);
-          } else {
-            decodeMaterialFile(arrayBuffer);
-          }
-        });
-        logOut("Event listener created");
-      }
-    });
-  } catch (e) {
-    logOut(e);
-  }
-  const nfolders2 = nfolders + examplesList.length;
-  const scripts = await fetch(server + "/scripts");
-  const scriptList = await scripts.json();
-  scriptList.forEach((scr, i) => {
-    const name = scr.Title.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-    const extxt = `
-                <div class="thing" id="ex${nfolders2 + i + 1}">
-                    <p class="thingtitle">${name}</p><br>
-                    <img class="thingimg" src="./script.png"><br>
-                    <button class="thingbtn" id="ex${nfolders2 + i + 1}load">Load</button>
-                    <a href="${server}/sdesc?name=${name}" target="_blank">Description</a>
-                </div>`;
-    const container = getEl("excontain");
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = extxt;
-    const newElement = tempDiv.firstElementChild;
-    container.appendChild(newElement);
-
-    const exbtn = newElement.querySelector(".thingbtn");
-    if (exbtn) {
-      exbtn.addEventListener("click", async () => {
-        getEl("examples").style.display = "none";
-        logOut('loading script: "' + name + '"');
-        const response = await fetch(server + "/script?name=" + name);
-        const scr = await response.text();
-        logOut("Running: " + scr);
-        eval(scr);
-      });
-    }
-  }); /*
-}catch(errr){
-    logOut("Error loading examples: "+errr)
-    getEl('excontain').innerHTML += "<p>my computer is closed so the server is off and it cannot load examples from other people rn. :(</p>"
-    getEl('shareform').style.display="none"
-}*/
-});
 
 getEl("exbtn").onclick = () => {
   const exbox = getEl("examples");
@@ -1477,69 +1378,11 @@ getEl("exbtn").onclick = () => {
 document.querySelector("#examples .closebtn").onclick = () => {
   getEl("examples").style.display = "none";
 };
-//sharing
-async function uploadFormData(url, form) {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-    },
-    mode: "cors", // ensure CORS is used; don't use 'no-cors'
-    body: form,
-  });
-  console.log("Fetch completed, status:", res.status);
-  return res;
-}
-async function sendCanvasAndFile(canvas, fileInput, title) {
-  const url = server + "/upload3";
-  const form = new FormData();
-  form.append("name", title);
-
-  const file = fileInput?.files?.[0];
-  if (file) form.append("file", file);
-
-  if (fileInput.files[0].name.endsWith(".pms")) {
-    if (curtexurl) {
-      const response = await fetch(curtexurl);
-      const arrayBuffer = await response.arrayBuffer();
-      const blob = new Blob([arrayBuffer], {
-        type: response.headers.get("Content-Type") || "image/png",
-      });
-      form.append(
-        "image",
-        blob,
-        "image." +
-          (response.headers.get("Content-Type").split("/")[1] || "png"),
-      );
-    } else {
-      const response = await fetch("./textures/default.png");
-      const arrayBuffer = await response.arrayBuffer();
-      const blob = new Blob([arrayBuffer], {
-        type: "application/octet-stream",
-      });
-      form.append("image", blob, "image.png");
-    }
-  } else {
-    const blob = await new Promise((resolve) =>
-      canvas.toBlob(resolve, "image/png"),
-    );
-    form.append("image", blob, "canvas.png");
-  }
-  const res = await uploadFormData(url, form);
-  if (!res.ok) throw new Error("Upload failed: " + res.status);
-  return res;
-}
 let signedin = false;
 (async () => {
-  const sip = await fetch(server + "/testsignin", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-    },
-    mode: "cors",
-  });
-  const si = await sip.text();
-  if (si == "Y") {
+  
+  const si = await testsignin()
+  if (si.data) {
     const sf = await fetch("./shareform.html");
     const sftxt = await sf.text();
     document.querySelector("#shareform").innerHTML = sftxt;
@@ -1550,30 +1393,20 @@ let signedin = false;
 console.log(signedin);
 document.querySelector("#shareform button").onclick = async (e) => {
   e.preventDefault();
-  console.log("Form submit button clicked");
   if (!signedin) {
-    const fdata = new FormData();
-    fdata.append(
-      "username",
-      document.querySelector('#shareform input[name="username"]').value,
-    );
-    fdata.append(
-      "password",
-      document.querySelector('#shareform input[name="password"]').value,
-    );
+    const usern = document.querySelector('#shareform input[name="username"]').value
+    const pass = document.querySelector('#shareform input[name="password"]').value
     if (document.querySelector("#shareform button").id == "sibtnf") {
       console.log("sineing in");
-      const res = await uploadFormData(server + "/signin", fdata);
+      const res = await signin(usern, pass)
       if (!res.ok) throw new Error("Upload failed: " + res.status);
       if (res.status < 400) {
         signedin = true;
         const sf = await fetch("./shareform.html");
         const sftxt = await sf.text();
         document.querySelector("#shareform").innerHTML = sftxt;
-        const rjson = await res.json();
-        token = rjson.token;
       }
-    } else {
+    }/* else {
       const res = await uploadFormData(server + "/signup", fdata);
       if (!res.ok) throw new Error("Upload failed: " + res.status);
       if (res.status < 400) {
@@ -1584,10 +1417,10 @@ document.querySelector("#shareform button").onclick = async (e) => {
         const rjson = await res.json();
         token = rjson.token;
       }
-    }
+    }*/
   }
   console.log("Form handler finished");
-};
+};/*
 getEl("postscriptbtn").onclick = async () => {
   const title = getEl("stitleinp").value;
   const desc = getEl("sdescinp").value;
@@ -1607,7 +1440,7 @@ getEl("postscriptbtn").onclick = async () => {
     }
     alert("Done! View it in examples after you upload.");
   }
-};
+};*/
 //load info buttons
 (async () => {
   const res = await fetch("./infobtn.json");
