@@ -21,10 +21,10 @@ exports.handler = async(event)=>{
         if (!body.password) {
             return { statusCode: 400, body: JSON.stringify({ error: "Missing password" }) };
         }
-        if (!user.hashedpass) {
-            return { statusCode: 500, body: JSON.stringify({ error: "User record missing hashedpass" }) };
+        if (!user.hashpass) {
+            return { statusCode: 500, body: JSON.stringify({ error: "User record missing hashpass" }) };
         }
-        const pass = user.hashedpass
+        const pass = user.hashpass
         const correct = await bcrypt.compare(body.password, pass)
         if (!correct)
             return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
