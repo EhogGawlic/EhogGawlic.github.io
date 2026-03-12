@@ -8,26 +8,26 @@ async function getDb() {
   await client.connect();
   return client.db("game");
 }
-exports.handler = async(event,context)=>{
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+export default async(event,context)=>{
+  if (event.httpMethod !== 'POST') return new Response({ status: 405, statusText: 'Method Not Allowed' });
     try{
         
         const body = JSON.parse(event.body || "{}");
         const db = await getDb();
         const user = await db.collection("users").findOne({ username: body.username })
         if (!user)
-            return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
+            return new Response({ status: 404, statusText: "Not found" });
         //test pass
         if (!body.password) {
-            return { statusCode: 400, body: JSON.stringify({ error: "Missing password" }) };
+            return new Response({ status: 400, statusText: "Missing password" }) ;
         }
         if (!user.hashpass) {
-            return { statusCode: 500, body: JSON.stringify({ error: "User record missing hashpass" }) };
+            return new Response({status: 500, statusText: "User record missing hashpass" }) ;
         }
         const pass = user.hashpass
         const correct = await bcrypt.compare(body.password, pass)
         if (!correct)
-            return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
+            return new Response({ status: 401, statusText: "Invalid credentials" })
         const token = jwt.sign({ username: user.username }, process.env.SECRET, {expiresIn: '1800s'})
         context.cookies.set({
             name: "token",
@@ -37,8 +37,8 @@ exports.handler = async(event,context)=>{
             path: '/',
             maxAge: 1800 // 1 week
         });
-        return { statusCode: 200, body: JSON.stringify({ data: user }) };
+        return Response.json({data:user})
     } catch (e) {
-        return { statusCode: 500, body: JSON.stringify({ error: "Server error: "+e }) };
+        return new Response({ status: 500, statusText: "Server error: "+e });
     }
 }
