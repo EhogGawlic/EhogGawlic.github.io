@@ -8,7 +8,7 @@ async function getDb() {
   await client.connect();
   return client.db("game");
 }
-exports.handler = async(event)=>{
+exports.handler = async(event,context)=>{
   if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
     try{
         
