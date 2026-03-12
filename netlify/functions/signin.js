@@ -14,7 +14,7 @@ exports.handler = async(event)=>{
         
         const body = JSON.parse(event.body || "{}");
         const db = await getDb();
-        const user = await db.collection("users").find({username:body.username})
+        const user = await db.collection("users").findOne({ username: body.username })
         if (!user)
             return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
         //test pass
@@ -22,7 +22,7 @@ exports.handler = async(event)=>{
         const correct = await bcrypt.compare(body.password,pass)
         if (!correct)
             return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
-        const token = jwt.sign({username}, process.env.SECRET, {expiresIn: '1800s'})
+        const token = jwt.sign({ username: user.username }, process.env.SECRET, {expiresIn: '1800s'})
         context.cookies.set({
             name: "token",
             value: token,
