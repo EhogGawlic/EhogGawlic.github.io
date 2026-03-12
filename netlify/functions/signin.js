@@ -18,8 +18,14 @@ exports.handler = async(event)=>{
         if (!user)
             return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
         //test pass
+        if (!body.password) {
+            return { statusCode: 400, body: JSON.stringify({ error: "Missing password" }) };
+        }
+        if (!user.hashedpass) {
+            return { statusCode: 500, body: JSON.stringify({ error: "User record missing hashedpass" }) };
+        }
         const pass = user.hashedpass
-        const correct = await bcrypt.compare(body.password,pass)
+        const correct = await bcrypt.compare(body.password, pass)
         if (!correct)
             return { statusCode: 401, body: JSON.stringify({ error: "Invalid credentials" })}
         const token = jwt.sign({ username: user.username }, process.env.SECRET, {expiresIn: '1800s'})
