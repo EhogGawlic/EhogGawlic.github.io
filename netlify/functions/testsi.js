@@ -6,19 +6,19 @@ async function getDb() {
   await client.connect();
   return client.db("game");
 }
-exports.handler = async(event)=>{
-  if (event.httpMethod !== 'POST') return { statusCode: 405, body: 'Method Not Allowed' };
+export default async(event)=>{
+  if (event.httpMethod !== 'POST') return new Response({status: 405, statusText: 'Method Not Allowed' });
     try{
         
         const body = JSON.parse(event.body || "{}");
         const token = context.cookies.get("token")
         if (!token)
-            return { statusCode: 200, body: JSON.stringify({ data:false })}
+            return Response.json({data:false})
         const usern = jwt.verify(token, process.env.SECRET)
         if (!usern)
-            return { statusCode: 200, body: JSON.stringify({ data:false })}
-        return { statusCode: 200, body: JSON.stringify({ data: true }) };
+            return Response.json({data:false})
+            return Response.json({data:true})
     } catch (e) {
-        return { statusCode: 500, body: JSON.stringify({ error: "Server error" }) };
+        return new Response({ status: 500, statusText:"Server error"});
     }
 }
