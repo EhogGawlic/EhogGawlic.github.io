@@ -50,16 +50,18 @@ function postsToHtml(posts){
   //{"data":[{"_id":"69a2767e9333dbcf707380a3","author":"ehogin","content":"hi","file":"","type":"post"}]}
   const postsd = posts.data
   let out = ``
-  Array.from(postsd).forEach(data=>{
+  Array.from(postsd).forEach((data, idx)=>{
     
     const author = data.author;
     const content = data.content;
     const file = data.file;
     const type = data.type;
+    const hasFile = !!file && type === "postf";
     out += `
       <div class="post">
         <h3>By ${author}</h3>
         <p>${content}</p><br>
+        ${hasFile ? `<button class="download-save" data-idx="${idx}">Download save</button>` : ``}
       </div>
     `
   })

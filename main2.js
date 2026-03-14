@@ -1583,6 +1583,7 @@ getPosts().then(posts=>{
   );
   logOut(posts)
   logOut("Loding")
+  window.postsCache = posts.data || []
   const psts = postsToHtml(posts);
   getEl("excontain").innerHTML = psts
 }).catch(e=>{
@@ -1593,4 +1594,26 @@ getPosts().then(posts=>{
   logOut(
     "Error (this is prob cuz ur not on the old link): "+e
   )
+})
+
+const excontain = getEl("excontain")
+excontain.addEventListener("click", (e) => {
+  const btn = e.target.closest(".download-save")
+  if (!btn) return
+  const idx = parseInt(btn.dataset.idx)
+  const post = (window.postsCache || [])[idx]
+  if (!post || !post.file){
+    logOut("No file on this post")
+    return
+  }
+  const buffer = base64ToArrayBuffer(post.file)
+  const blob = new Blob([buffer], { type: "application/octet-stream" })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement("a")
+  a.href = url
+  a.download = `save-${post._id || idx}.psv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 })
