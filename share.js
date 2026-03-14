@@ -35,7 +35,7 @@ async function post(content,file){
   return await res.json()
 }
 async function testsignin(){
-  const res = await fetch("/.netlify/functions/main", {
+  const res = await fetch("/.netlify/functions/testsi", {
     method: "POST",
     credentials:"include",
     mode:'cors'
