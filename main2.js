@@ -1568,11 +1568,3 @@ getPosts().then(posts=>{
     "Error (this is prob cuz ur not on the old link): "+e
   )
 })
-getUsers().then(users=>{
-  logOut("users:")
-  logOut(users)
-  logOut("Stringified:")
-  logOut(JSON.stringify(users))
-}).catch(e=>{
-  logOut("error: "+e)
-})

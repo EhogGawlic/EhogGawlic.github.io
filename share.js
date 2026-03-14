@@ -25,9 +25,6 @@ async function post(content,file){
   }
   const res = await fetch("/.netlify/functions/main", {
     method: "POST",
-    body: JSON.stringify({
-      content,file,type
-    }),
     credentials:"include",
     mode:'cors'
   })
