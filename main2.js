@@ -1402,13 +1402,29 @@ shareFormEl.addEventListener("click", async (e) => {
   if (!btn || !shareFormEl.contains(btn)) return;
   e.preventDefault();
   if (!signedin) {
-    const usern = document.querySelector('#shareform input[name="username"]').value
-    const pass = document.querySelector('#shareform input[name="password"]').value
-    alert(signedin)
+    const usern = document.querySelector(
+      '#shareform input[name="username"]',
+    ).value;
+    const pass = document.querySelector(
+      '#shareform input[name="password"]',
+    ).value;
+    alert(signedin);
     if (btn.id == "sibtnf") {
       logOut("sineing in");
+      try {
+        const res = await signin(usern, pass);
+        if (res) {
+          logOut(JSON.stringify(res));
+          signedin = true;
+          await renderShareForm();
+        }
+      } catch (e) {
+        logOut(e);
+      }
+    } else {
+      logOut("sineing upp");
       try{
-      const res = await signin(usern, pass)
+      const res = await signup(usern, pass)
       if (res) {
         logOut(JSON.stringify(res))
         signedin = true;
@@ -1416,18 +1432,7 @@ shareFormEl.addEventListener("click", async (e) => {
       }
       }
       catch(e){logOut(e)}
-    }/* else {
-      const res = await uploadFormData(server + "/signup", fdata);
-      if (!res.ok) throw new Error("Upload failed: " + res.status);
-      if (res.status < 400) {
-        signedin = true;
-        const sf = await fetch("./shareform.html");
-        const sftxt = await sf.text();
-        document.querySelector("#shareform").innerHTML = sftxt;
-        const rjson = await res.json();
-        token = rjson.token;
-      }
-    }*/
+    }
   } else {
     
     const titleinp = document.querySelector(

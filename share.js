@@ -12,6 +12,15 @@ async function signin(username, password){
   });
   if (!res.ok) logOut(res.statusText)
   return await res.json();
+}async function signup(username, password) {
+  const res = await fetch("/.netlify/functions/signup", {
+    method: "POST",
+    body: JSON.stringify({ username, password }),
+    credentials: "include",
+    mode: "cors",
+  });
+  if (!res.ok) logOut(res.statusText);
+  return await res.json();
 }
 /**
  * 
