@@ -1379,34 +1379,40 @@ document.querySelector("#examples .closebtn").onclick = () => {
   getEl("examples").style.display = "none";
 };
 let signedin = false;
+const shareFormEl = document.querySelector("#shareform");
+
+async function renderShareForm() {
+  const sf = await fetch("./shareform.html");
+  const sftxt = await sf.text();
+  shareFormEl.innerHTML = sftxt;
+}
+
 (async () => {
-  
-  const si = await testsignin()
+  const si = await testsignin();
   if (si.data) {
-    const sf = await fetch("./shareform.html");
-    const sftxt = await sf.text();
-    document.querySelector("#shareform").innerHTML = sftxt;
+    await renderShareForm();
     signedin = true;
   }
   console.log(signedin);
 })();
 console.log(signedin);
-document.querySelector("#shareform button").onclick = async (e) => {
+
+shareFormEl.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button");
+  if (!btn || !shareFormEl.contains(btn)) return;
   e.preventDefault();
   if (!signedin) {
     const usern = document.querySelector('#shareform input[name="username"]').value
     const pass = document.querySelector('#shareform input[name="password"]').value
     alert(signedin)
-    if (document.querySelector("#shareform button").id == "sibtnf") {
+    if (btn.id == "sibtnf") {
       logOut("sineing in");
       try{
       const res = await signin(usern, pass)
       if (res) {
         logOut(JSON.stringify(res))
         signedin = true;
-        const sf = await fetch("./shareform.html");
-        const sftxt = await sf.text();
-        document.querySelector("#shareform").innerHTML = sftxt;
+        await renderShareForm();
       }
       }
       catch(e){logOut(e)}
@@ -1444,7 +1450,7 @@ document.querySelector("#shareform button").onclick = async (e) => {
     }
   }
   console.log("Form handler finished");
-};/*
+});/*
 getEl("postscriptbtn").onclick = async () => {
   const title = getEl("stitleinp").value;
   const desc = getEl("sdescinp").value;
