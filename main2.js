@@ -1433,7 +1433,7 @@ shareFormEl.addEventListener("click", async (e) => {
     const titleinp = document.querySelector(
       "#shareform input[name='name']",
     );
-    const cntinp = document.querySelector("#shareform input[name='content']");
+    const cntinp = document.querySelector("#shareform textarea[name='content']");
     
     const afsfcb = document.querySelector(
       "#shareform input[type='checkbox']",
