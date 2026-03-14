@@ -1422,6 +1422,26 @@ document.querySelector("#shareform button").onclick = async (e) => {
         token = rjson.token;
       }
     }*/
+  } else {
+    
+    const titleinp = document.querySelector(
+      "#shareform input[name='name']",
+    );
+    const cntinp = document.querySelector("#shareform input[name='content']");
+    
+    const afsfcb = document.querySelector(
+      "#shareform input[type='checkbox']",
+    );
+    const content = cntinp.value
+    const title = titleinp.value
+    const addFile = afsfcb.checked
+    if (addFile){
+      const data = encodeNewFile()
+      const buffer = new Float32Array(data).buffer
+      await post(content, buffer)
+    } else {
+      await post(content, null)
+    }
   }
   console.log("Form handler finished");
 };/*

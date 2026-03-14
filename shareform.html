@@ -1,18 +1,9 @@
 <h4>Share</h4>
 <p>Note: This may not work because the server runs on my computer and the server stops when my computer is closed and not connected to power. Title length limit is 255 and files over 16 MB in size will not work. Besides, if you have a file that big, there is something wrong with your save.</p>
-<label>File</label>
-<input type="file" name="file" accept=".psv, .pms" required><br>
+<label for="afsfcb">Add current file: </label>
+<input id="afsfcb" type="checkbox"><br>
 <label>Title</label>
 <input type="text" required name="name" placeholder="Enter title"/><br>
-<button onclick="
-    if (signedin){
-        const titleinp = document.querySelector('#shareform input[name=\'name\']')
-    const fileinp = document.querySelector('#shareform input[name=\'file\']')
-    console.log('Calling sendCanvasAndFile...')
-    sendCanvasAndFile(canvas, fileinp, titleinp.value).then(res=>{
-        console.log('Upload succeeded, status:', res.status)
-        alert('yay you can view it in examples after u reload')
-    })
-    }
-">Post</button><br>
-<button onclick="toggleDisp('postscript')">Post some script (e.g. realisticish)</button>
+<label>Content/desc</label>
+<textarea required name="content" placeholder="Enter content"></textarea><br>
+<button>Post</button><br>

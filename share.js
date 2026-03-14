@@ -19,15 +19,18 @@ async function signin(username, password){
  * @param {ArrayBuffer} file 
  */
 async function post(content,file){
-  let type = "post"
-  if (file){
-    type="postf"
+  const hasFile = !!file
+  const type = hasFile ? "postf" : "post"
+  const form = new FormData()
+  form.append("content", content)
+  form.append("type", type)
+  if (hasFile){
+    const blob = new Blob([file], { type: "application/octet-stream" })
+    form.append("file", blob, "save.psv")
   }
   const res = await fetch("/.netlify/functions/main", {
     method: "POST",
-    body: JSON.stringify({
-      content,file,type
-    }),
+    body: form,
     credentials:"include",
     mode:'cors'
   })
