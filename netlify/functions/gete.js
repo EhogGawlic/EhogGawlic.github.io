@@ -15,7 +15,11 @@ exports.handler = async (event) => {
   try {
     const db = await getDb();
     const docs = await db
-      .collection("posts").find({}).toArray()
+      .collection("posts")
+      .find({})
+      .sort({ _id: -1 }) // newest first
+      .toArray();
+
     if (!docs)
       return { statusCode: 404, body: JSON.stringify({ error: "Not found" }) };
 

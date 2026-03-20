@@ -1230,3 +1230,4 @@ function switchRBarPanel(id){
   }
   document.querySelector("#idkcntn #"+id).style.display = "block";
 }
+

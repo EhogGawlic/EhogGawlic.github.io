@@ -258,3 +258,9 @@ html{
   background-color: gray;
   overflow: scroll;
 }
+#statusspan{
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  height: 26px;
+}

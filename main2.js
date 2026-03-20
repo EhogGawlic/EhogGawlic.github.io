@@ -1411,6 +1411,7 @@ shareFormEl.addEventListener("click", async (e) => {
     alert(signedin);
     if (btn.id == "sibtnf") {
       logOut("sineing in");
+      btn.enabled=false
       try {
         const res = await signin(usern, pass);
         if (res) {
@@ -1421,8 +1422,10 @@ shareFormEl.addEventListener("click", async (e) => {
       } catch (e) {
         logOut(e);
       }
+      btn.enabled = true;
     } else {
       logOut("sineing upp");
+      btn.enabled = false;
       try{
       const res = await signup(usern, pass)
       if (res) {
@@ -1432,6 +1435,7 @@ shareFormEl.addEventListener("click", async (e) => {
       }
       }
       catch(e){logOut(e)}
+      btn.enabled = true;
     }
   } else {
     
@@ -1446,6 +1450,7 @@ shareFormEl.addEventListener("click", async (e) => {
     const content = cntinp.value
     const title = titleinp.value
     const addFile = afsfcb.checked
+      btn.enabled = false;
     if (addFile){
       const data = encodeNewFile()
       const buffer = new Float32Array(data).buffer
@@ -1453,6 +1458,7 @@ shareFormEl.addEventListener("click", async (e) => {
     } else {
       await post(content, null)
     }
+      btn.enabled = true;
   }
   console.log("Form handler finished");
 });/*
