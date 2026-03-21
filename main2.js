@@ -119,6 +119,12 @@ function run() {
         obj.phys();
       }
     });
+    if (typeof rbDrawAll === "function") {
+      rbDrawAll();
+      if (!paused) {
+        rbIntegrateAll();
+      }
+    }
 
     for (let n = dqueue.length - 1; n >= 0; n--) {
       const rem = dqueue[n];
@@ -385,6 +391,9 @@ function run() {
               b2.pp = addVec(b2.pp, dp2);
             }
           });
+        }
+        if (typeof rbResolveAll === "function") {
+          rbResolveAll();
         }
       }
     }

@@ -5,7 +5,7 @@ class Obj {
     v
     a={x:0,y:0}
     c=[0,0,0]
-    w=2**64
+    w=2**31//2038 in unix time idk
     r=10
     b=0.5
     n=0

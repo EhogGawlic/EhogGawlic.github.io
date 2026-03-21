@@ -1035,6 +1035,9 @@ function clear(){
     springs=[]
     bars=[]
     speedos=[]
+    if (typeof rbClear === "function") {
+        rbClear()
+    }
     selecting = false
     av = false 
     af = false 
