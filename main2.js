@@ -480,6 +480,17 @@ abbtn.addEventListener("click", () => {
     parseFloat(winp.value),
   );
 });
+addboxbtn.addEventListener("click", () => {
+  if (typeof addRBBox !== "function") return;
+  const x = parseFloat(xinp.value) * meterPixRatio;
+  const y = parseFloat(yinp.value) * meterPixRatio;
+  const w = parseFloat(bwinp.value) * meterPixRatio;
+  const h = parseFloat(bhinp.value) * meterPixRatio;
+  const angle = (parseFloat(bainp.value) || 0) * (Math.PI / 180);
+  const mass = parseFloat(bmassinp.value) || 1;
+  const color = HEXRGB(bcolinp.value);
+  addRBBox(x, y, w, h, { mass, color, angle });
+});
 window.addEventListener("keypress", (e) => {
   const typ = document.activeElement.tagName;
   if (typ !== "INPUT" && typ !== "TEXTAREA") {

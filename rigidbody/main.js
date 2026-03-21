@@ -533,6 +533,76 @@ function rbResolveBodyLine(body, line) {
   const { p1, p2, w } = lineData
   const capRadius = (w || 1) * 0.5
   const proj = rbClosestPointOnSegmentInfo(body.p, p1, p2)
+  const dir = rbNormalize(rbSub(p2, p1))
+  if (rbLength(dir) < rbEPS) return
+  const n = { x: -dir.y, y: dir.x }
+  const hw = (w || 1) * 0.5
+  const v1 = rbAdd(p1, rbMul(n, hw))
+  const v2 = rbAdd(p2, rbMul(n, hw))
+  const v3 = rbSub(p2, rbMul(n, hw))
+  const v4 = rbSub(p1, rbMul(n, hw))
+  const rect = [v1, v2, v3, v4]
+  const center = rbMul(rbAdd(p1, p2), 0.5)
+  const mtv = rbFindMTV(body.worldVerts, rect, body.p, center)
+  if (mtv) {
+    const totalInv = body.invMass
+    if (totalInv !== 0) {
+      const correctionMag =
+        Math.max(mtv.depth - rbSettings.slop, 0) *
+        (rbSettings.percent / totalInv)
+      const correction = rbMul(mtv.normal, correctionMag)
+      if (body.invMass > 0) {
+        const adj = rbMul(correction, body.invMass)
+        body.p = rbSub(body.p, adj)
+        body.pp = rbSub(body.pp, adj)
+      }
+      body.updateWorldVerts()
+
+      const contactA = rbSupport(body.worldVerts, mtv.normal)
+      const contactB = proj.point
+      const contact = rbMul(rbAdd(contactA, contactB), 0.5)
+
+      const ra = rbSub(contact, body.p)
+      const va = rbSub(body.p, body.pp)
+      const wa = body.angle - body.pAngle
+      const velA = rbAdd(va, rbCrossSV(wa, ra))
+      const rv = rbMul(velA, -1)
+      const velAlongNormal = rbDot(rv, mtv.normal)
+      if (velAlongNormal <= 0) {
+        const raCrossN = rbCross(ra, mtv.normal)
+        const invMassSum = body.invMass + raCrossN * raCrossN * body.invInertia
+        if (invMassSum !== 0) {
+          const j = (-(1 + body.restitution) * velAlongNormal) / invMassSum
+          const impulse = rbMul(mtv.normal, j)
+          rbApplyImpulse(body, rbMul(impulse, -1), contact)
+
+          const velAfter = rbAdd(
+            rbSub(body.p, body.pp),
+            rbCrossSV(body.angle - body.pAngle, ra),
+          )
+          const rvAfter = rbMul(velAfter, -1)
+          const tangent = rbNormalize(
+            rbSub(rvAfter, rbMul(mtv.normal, rbDot(rvAfter, mtv.normal))),
+          )
+          if (rbLength(tangent) >= rbEPS) {
+            const raCrossT = rbCross(ra, tangent)
+            const invMassSumT =
+              body.invMass + raCrossT * raCrossT * body.invInertia
+            if (invMassSumT !== 0) {
+              const jt = -rbDot(velAfter, tangent) / invMassSumT
+              const mu = body.friction
+              const frictionImpulse =
+                Math.abs(jt) < j * mu
+                  ? rbMul(tangent, jt)
+                  : rbMul(tangent, -j * mu)
+              rbApplyImpulse(body, rbMul(frictionImpulse, -1), contact)
+            }
+          }
+        }
+      }
+    }
+  }
+
   if (proj.t <= 0 || proj.t >= 1) {
     const capPoint = proj.t <= 0 ? p1 : p2
     rbResolveBodyCircle(
@@ -543,69 +613,7 @@ function rbResolveBodyLine(body, line) {
       body.restitution,
       body.friction,
     )
-    return
   }
-  const dir = rbNormalize(rbSub(p2, p1))
-  if (rbLength(dir) < rbEPS) return
-  const n = { x: -dir.y, y: dir.x }
-  const hw = (w || 1) * 0.5
-  const v1 = rbAdd(p1, rbMul(n, hw))
-  const v2 = rbSub(p1, rbMul(n, hw))
-  const v3 = rbSub(p2, rbMul(n, hw))
-  const v4 = rbAdd(p2, rbMul(n, hw))
-  const rect = [v1, v2, v3, v4]
-  const center = rbMul(rbAdd(p1, p2), 0.5)
-  const mtv = rbFindMTV(body.worldVerts, rect, body.p, center)
-  if (!mtv) return
-
-  const totalInv = body.invMass
-  if (totalInv === 0) return
-  const correctionMag =
-    Math.max(mtv.depth - rbSettings.slop, 0) * (rbSettings.percent / totalInv)
-  const correction = rbMul(mtv.normal, correctionMag)
-  if (body.invMass > 0) {
-    const adj = rbMul(correction, body.invMass)
-    body.p = rbSub(body.p, adj)
-    body.pp = rbSub(body.pp, adj)
-  }
-  body.updateWorldVerts()
-
-  const contactA = rbSupport(body.worldVerts, mtv.normal)
-  const contactB = proj.point
-  const contact = rbMul(rbAdd(contactA, contactB), 0.5)
-
-  const ra = rbSub(contact, body.p)
-  const va = rbSub(body.p, body.pp)
-  const wa = body.angle - body.pAngle
-  const velA = rbAdd(va, rbCrossSV(wa, ra))
-  const rv = rbMul(velA, -1)
-  const velAlongNormal = rbDot(rv, mtv.normal)
-  if (velAlongNormal > 0) return
-
-  const raCrossN = rbCross(ra, mtv.normal)
-  const invMassSum = body.invMass + raCrossN * raCrossN * body.invInertia
-  if (invMassSum === 0) return
-  const j = (-(1 + body.restitution) * velAlongNormal) / invMassSum
-  const impulse = rbMul(mtv.normal, j)
-  rbApplyImpulse(body, rbMul(impulse, -1), contact)
-
-  const velAfter = rbAdd(
-    rbSub(body.p, body.pp),
-    rbCrossSV(body.angle - body.pAngle, ra),
-  )
-  const rvAfter = rbMul(velAfter, -1)
-  const tangent = rbNormalize(
-    rbSub(rvAfter, rbMul(mtv.normal, rbDot(rvAfter, mtv.normal))),
-  )
-  if (rbLength(tangent) < rbEPS) return
-  const raCrossT = rbCross(ra, tangent)
-  const invMassSumT = body.invMass + raCrossT * raCrossT * body.invInertia
-  if (invMassSumT === 0) return
-  const jt = -rbDot(velAfter, tangent) / invMassSumT
-  const mu = body.friction
-  const frictionImpulse =
-    Math.abs(jt) < j * mu ? rbMul(tangent, jt) : rbMul(tangent, -j * mu)
-  rbApplyImpulse(body, rbMul(frictionImpulse, -1), contact)
 }
 
 function rbGetLineWorld(l) {

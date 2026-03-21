@@ -4,10 +4,49 @@ function addVector(data, vec){
 }
 const SEP = -999999;
 const ITEM = -999998;
+const preserveUiOnLoad = true;
+
+function snapshotUi() {
+    return {
+        x: xinp?.value,
+        y: yinp?.value,
+        r: rinp?.value,
+        d: dinp?.value,
+        vx: vxinp?.value,
+        vy: vyinp?.value,
+        substeps: substeps?.value,
+        inf: getEl("infcheck")?.checked,
+        sbreak: sbreak?.checked,
+        bw: bwinp?.value,
+        bh: bhinp?.value,
+        ba: bainp?.value,
+        bm: bmassinp?.value,
+        bc: bcolinp?.value
+    }
+}
+
+function restoreUi(snap) {
+    if (!snap) return
+    if (xinp) xinp.value = snap.x
+    if (yinp) yinp.value = snap.y
+    if (rinp) rinp.value = snap.r
+    if (dinp) dinp.value = snap.d
+    if (vxinp) vxinp.value = snap.vx
+    if (vyinp) vyinp.value = snap.vy
+    if (substeps) substeps.value = snap.substeps
+    const infcheck = getEl("infcheck")
+    if (infcheck && snap.inf !== undefined) infcheck.checked = snap.inf
+    if (sbreak && snap.sbreak !== undefined) sbreak.checked = snap.sbreak
+    if (bwinp) bwinp.value = snap.bw
+    if (bhinp) bhinp.value = snap.bh
+    if (bainp) bainp.value = snap.ba
+    if (bmassinp) bmassinp.value = snap.bm
+    if (bcolinp) bcolinp.value = snap.bc
+}
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0004)
+    data.push(0x0005)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -98,6 +137,32 @@ function encodeNewFile(){
         data.push(SEP)
     })
     data.push(ITEM)
+    if (typeof rigidbodies !== "undefined"){
+        rigidbodies.forEach(rb=>{
+            data.push(rb.localVerts.length)
+            rb.localVerts.forEach(v=>{
+                data.push(v.x)
+                data.push(v.y)
+            })
+            data.push(rb.p.x)
+            data.push(rb.p.y)
+            data.push(rb.pp.x)
+            data.push(rb.pp.y)
+            data.push(rb.angle)
+            data.push(rb.pAngle)
+            data.push(rb.mass)
+            data.push(rb.restitution)
+            data.push(rb.friction)
+            data.push(rb.static ? 1 : 0)
+            if (rb.color){
+                data.push(rb.color[0], rb.color[1], rb.color[2])
+            } else {
+                data.push(200, 200, 200)
+            }
+            data.push(SEP)
+        })
+    }
+    data.push(ITEM)
     data.push(parseFloat(xinp.value))
     data.push(parseFloat(yinp.value))
     data.push(parseFloat(rinp.value))
@@ -146,9 +211,13 @@ function downloadMatFile(arr){
  * @param {ArrayBuffer} arr 
  */
 function decodeNewFile(data){
+    const uiSnap = preserveUiOnLoad ? snapshotUi() : null
     const arr = Array.from(new Float32Array(data))
         let idx = 1
-    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004){
+    if (typeof rbClear === "function"){
+        rbClear()
+    }
+    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -298,7 +367,50 @@ function decodeNewFile(data){
             })
         }
     }
-    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004){
+    if (arr[0] == 0x0005){
+        const rbEnd = arr.indexOf(ITEM, idx)
+        const rbdata = arr.slice(idx, rbEnd)
+        idx = rbEnd + 1
+        let rbReadArr = [[]]
+        let last = rbReadArr[0]
+        for (let i = 0; i < rbdata.length; i++){
+            if (rbdata[i] == SEP){
+                rbReadArr.push([])
+                last = rbReadArr[rbReadArr.length-1]
+            } else {
+                last.push(rbdata[i])
+            }
+        }
+        rbReadArr.pop()
+        rbReadArr.forEach(r=>{
+            if (r.length < 1) return
+            const vlen = r[0]
+            let ofs = 1
+            const verts = []
+            for (let i = 0; i < vlen; i++){
+                verts.push({x:r[ofs], y:r[ofs+1]})
+                ofs += 2
+            }
+            const p = {x:r[ofs], y:r[ofs+1]}; ofs += 2
+            const pp = {x:r[ofs], y:r[ofs+1]}; ofs += 2
+            const angle = r[ofs]; ofs += 1
+            const pAngle = r[ofs]; ofs += 1
+            const mass = r[ofs]; ofs += 1
+            const restitution = r[ofs]; ofs += 1
+            const friction = r[ofs]; ofs += 1
+            const stat = r[ofs] == 1; ofs += 1
+            const col = [r[ofs], r[ofs+1], r[ofs+2]]
+            const body = rbAddBody(verts, p, { mass, restitution, friction, color: col, static: stat })
+            body.pp = pp
+            body.angle = angle
+            body.pAngle = pAngle
+            body.updateWorldVerts()
+        })
+    }
+    if (arr[0] < 0x0005 && typeof logOut === "function"){
+        logOut("Note: This save version doesn't include rigidbodies. Resave with the latest version to keep boxes.")
+    }
+    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005){
         const metaEnd = arr.indexOf(ITEM, idx)
         const mdata = arr.slice(idx, metaEnd)
         idx = metaEnd + 1
@@ -352,6 +464,9 @@ function decodeNewFile(data){
                 loadTex(str2,str1)
             })
         }
+    }
+    if (preserveUiOnLoad){
+        restoreUi(uiSnap)
     }
 }
 async function listDirectory(path){
