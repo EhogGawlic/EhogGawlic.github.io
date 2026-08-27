@@ -397,13 +397,6 @@ function run() {
         }
       }
     }
-    if (dragging) {
-      const b = objs[dragging];
-      b.p.x = mx;
-      b.p.y = my;
-      b.pp.x = mx;
-      b.pp.y = my;
-    }
   }
   if (ml) {
     switch (ltype) {
@@ -445,6 +438,7 @@ function run() {
           );
         }
     }
+
   }
   if (fp && af && cn == 1) {
     const dir = norm(subVec({ x: mx, y: my }, fp));
@@ -468,6 +462,17 @@ function run() {
     ctx.fillStyle = "red";
     ctx.drawImage(bomsrc, bomb.x - 16 + emv.x, bomb.y - 16 + emv.y, 32, 32);
   });
+  if (dragging) {
+    const b = objs[dragging];
+    b.p.x = mx;
+    b.p.y = my;
+    b.pp.x = mx;
+    b.pp.y = my;
+  }
+  if (!inf){
+    emv.x = 0
+    emv.y=0
+  }
   //
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
