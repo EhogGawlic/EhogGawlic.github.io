@@ -406,7 +406,7 @@ function rbResolveWorldObjects() {
       for (let j = 0; j < valves.length; j++) {
         const v = valves[j]
         if (v.o) continue
-        rbResolveBodyCircle(body, v.p, v.r, 0, body.restitution, body.friction, null)
+        rbResolveBodyCircle(body, v, v.r, 0, body.restitution, body.friction)
       }
     }
   }
