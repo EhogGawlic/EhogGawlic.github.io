@@ -397,6 +397,13 @@ function run() {
         }
       }
     }
+    if (dragging) {
+      const b = objs[dragging];
+      b.p.x = mx;
+      b.p.y = my;
+      b.pp.x = mx;
+      b.pp.y = my;
+    }
   }
   if (ml) {
     switch (ltype) {
