@@ -332,7 +332,6 @@ function rbResolveBounds(body) {
 
   if (bounds.minX < 0) resolvePlane({ x: 1, y: 0 }, -bounds.minX)
   if (bounds.maxX > width) resolvePlane({ x: -1, y: 0 }, bounds.maxX - width)
-  if (bounds.minY < 0) resolvePlane({ x: 0, y: 1 }, -bounds.minY)
   if (bounds.maxY > height) resolvePlane({ x: 0, y: -1 }, bounds.maxY - height)
 
   if (collided) body.updateWorldVerts()
@@ -354,8 +353,10 @@ function rbResolveAll() {
     }
   }
   rbResolveWorldObjects()
-  for (let i = 0; i < rigidbodies.length; i++) {
-    rbResolveBounds(rigidbodies[i])
+  if (!inf){
+    for (let i = 0; i < rigidbodies.length; i++) {
+      rbResolveBounds(rigidbodies[i])
+    }
   }
 }
 

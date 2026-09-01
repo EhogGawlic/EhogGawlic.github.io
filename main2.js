@@ -1186,6 +1186,7 @@ clearufbtn.addEventListener("click", () => {
   for (let d = deleted.length; d > 0; d--) {
     objs.splice(deleted[d - 1], 1);
   }
+  rbClear()
   ropes = [];
   springs = [];
   bars = [];
