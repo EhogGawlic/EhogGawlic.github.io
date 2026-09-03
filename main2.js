@@ -462,12 +462,19 @@ function run() {
     ctx.fillStyle = "red";
     ctx.drawImage(bomsrc, bomb.x - 16 + emv.x, bomb.y - 16 + emv.y, 32, 32);
   });
-  if (dragging) {
+  if (dragging !== undefined && dragging !== null) {
     const b = objs[dragging];
     b.p.x = mx;
     b.p.y = my;
     b.pp.x = mx;
     b.pp.y = my;
+  }
+  if (draggedRB !== null) {
+    draggedRB.p.x = mx;
+    draggedRB.p.y = my;
+    draggedRB.pp.x = mx;
+    draggedRB.pp.y = my;
+    draggedRB.updateWorldVerts();
   }
   if (!inf){
     emv.x = 0
@@ -559,7 +566,18 @@ canvas.addEventListener("contextmenu", (e) => {
 canvas.addEventListener("dblclick", () => {
   seperateLines(mx, my);
 });
-canvas.addEventListener("mousedown", () => {
+canvas.addEventListener("mousedown", (e) => {
+  mx = Math.round((e.clientX - offX) * ma) - emv.x;
+  my = Math.round((e.clientY - 75) * ma) - emv.y;
+  draggedValve = undefined;
+  if (typeof valves !== "undefined" && Array.isArray(valves)) {
+    for (let i = valves.length - 1; i >= 0; i--) {
+      if (dist({ x: mx, y: my }, valves[i].p) <= valves[i].r) {
+        draggedValve = valves[i];
+        break;
+      }
+    }
+  }
   if (!clicking) {
     sclick = { x: mx, y: my };
     semv = emv;
@@ -567,8 +585,16 @@ canvas.addEventListener("mousedown", () => {
   clicking = true;
   document.activeElement = canvas;
 });
-canvas.addEventListener("mouseup", () => {
+window.addEventListener("mouseup", () => {
+  suppressClick =
+    drawing ||
+    dragline.length > 0 ||
+    (dragging !== undefined && dragging !== null) ||
+    draggedRB !== null ||
+    draggedValve !== undefined;
   dragging = null;
+  draggedRB = null;
+  draggedValve = undefined;
   dragline = [];
   clicking = false;
 });
@@ -597,11 +623,23 @@ window.addEventListener("keydown", (e) => {
 });
 let pmx;
 let pmy;
+let draggedRB = null;
+let draggedValve;
+let suppressClick = false;
 canvas.addEventListener("mousemove", (e) => {
   mx = Math.round((e.clientX - offX) * ma) - emv.x;
   my = Math.round((e.clientY - 75) * ma) - emv.y;
   if (clicking) {
-    if (!drawing) {
+    if (draggedRB !== null) {
+      draggedRB.p.x = mx;
+      draggedRB.p.y = my;
+      draggedRB.pp.x = mx;
+      draggedRB.pp.y = my;
+      draggedRB.updateWorldVerts();
+    } else if (draggedValve !== undefined) {
+      draggedValve.p.x = mx;
+      draggedValve.p.y = my;
+    } else if (!drawing) {
       let p = selectLinePoint(mx, my);
       dragline.forEach((pt) => {
         p.push(pt);
@@ -618,16 +656,37 @@ canvas.addEventListener("mousemove", (e) => {
         }
       });
       if (p.length == 0) {
-        const sball = selectBall(mx, my);
-        if (sball) {
+        if (draggedRB === null && draggedValve === undefined) {
+          draggedRB =
+            typeof rbSelectBody === "function" ? rbSelectBody(mx, my) || null : null;
+          if (
+            draggedRB === null &&
+            typeof valves !== "undefined" &&
+            Array.isArray(valves)
+          ) {
+            const selectedValve = selectValve(mx, my);
+            if (selectedValve !== undefined) draggedValve = valves[selectedValve];
+          }
+        }
+        if (draggedRB !== null) {
+          draggedRB.p.x = mx;
+          draggedRB.p.y = my;
+          draggedRB.pp.x = mx;
+          draggedRB.pp.y = my;
+          draggedRB.updateWorldVerts();
+        } else if (draggedValve !== undefined) {
+          draggedValve.p.x = mx;
+          draggedValve.p.y = my;
+        } else {
+          const sball = selectBall(mx, my);
+          if (sball !== undefined) {
           const b = objs[sball];
           b.p.x = mx;
           b.p.y = my;
           b.pp.x = mx;
           b.pp.y = my;
           dragging = sball;
-        } else {
-          if (dragging) {
+          } else if (dragging !== undefined && dragging !== null) {
             const b = objs[dragging];
             b.p.x = mx;
             b.p.y = my;
@@ -650,6 +709,12 @@ canvas.addEventListener("mousemove", (e) => {
   pmx = mx;
 });
 window.onclick = (e) => {
+  if (suppressClick) {
+    suppressClick = false;
+    if (e.target === canvas) {
+      return;
+    }
+  }
   //
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
@@ -1186,6 +1251,7 @@ clearufbtn.addEventListener("click", () => {
   for (let d = deleted.length; d > 0; d--) {
     objs.splice(deleted[d - 1], 1);
   }
+  rbClear()
   ropes = [];
   springs = [];
   bars = [];

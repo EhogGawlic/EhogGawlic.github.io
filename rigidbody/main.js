@@ -187,6 +187,29 @@ function rbDrawAll() {
   }
 }
 
+function rbPointInBody(body, point) {
+  let inside = false
+  const verts = body.worldVerts
+  if (!verts || verts.length < 3) return false
+  for (let i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+    const vi = verts[i]
+    const vj = verts[j]
+    const intersects =
+      vi.y > point.y !== vj.y > point.y &&
+      point.x < ((vj.x - vi.x) * (point.y - vi.y)) / (vj.y - vi.y) + vi.x
+    if (intersects) inside = !inside
+  }
+  return inside
+}
+
+function rbSelectBody(x, y) {
+  if (!Array.isArray(rigidbodies)) return undefined
+  for (let i = rigidbodies.length - 1; i >= 0; i--) {
+    if (rbPointInBody(rigidbodies[i], { x, y })) return rigidbodies[i]
+  }
+  return undefined
+}
+
 function rbApplyImpulse(body, impulse, contact) {
   if (body.invMass === 0) return
   const v = rbSub(body.p, body.pp)
@@ -332,7 +355,6 @@ function rbResolveBounds(body) {
 
   if (bounds.minX < 0) resolvePlane({ x: 1, y: 0 }, -bounds.minX)
   if (bounds.maxX > width) resolvePlane({ x: -1, y: 0 }, bounds.maxX - width)
-  if (bounds.minY < 0) resolvePlane({ x: 0, y: 1 }, -bounds.minY)
   if (bounds.maxY > height) resolvePlane({ x: 0, y: -1 }, bounds.maxY - height)
 
   if (collided) body.updateWorldVerts()
@@ -354,8 +376,10 @@ function rbResolveAll() {
     }
   }
   rbResolveWorldObjects()
-  for (let i = 0; i < rigidbodies.length; i++) {
-    rbResolveBounds(rigidbodies[i])
+  if (!inf){
+    for (let i = 0; i < rigidbodies.length; i++) {
+      rbResolveBounds(rigidbodies[i])
+    }
   }
 }
 
