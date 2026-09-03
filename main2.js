@@ -462,7 +462,7 @@ function run() {
     ctx.fillStyle = "red";
     ctx.drawImage(bomsrc, bomb.x - 16 + emv.x, bomb.y - 16 + emv.y, 32, 32);
   });
-  if (dragging) {
+  if (dragging !== undefined && dragging !== null) {
     const b = objs[dragging];
     b.p.x = mx;
     b.p.y = my;
@@ -567,8 +567,11 @@ canvas.addEventListener("mousedown", () => {
   clicking = true;
   document.activeElement = canvas;
 });
-canvas.addEventListener("mouseup", () => {
-  suppressClick = dragging !== null && dragging !== undefined;
+window.addEventListener("mouseup", () => {
+  suppressClick =
+    drawing ||
+    dragline.length > 0 ||
+    (dragging !== undefined && dragging !== null);
   dragging = null;
   dragline = [];
   clicking = false;
@@ -621,21 +624,19 @@ canvas.addEventListener("mousemove", (e) => {
       });
       if (p.length == 0) {
         const sball = selectBall(mx, my);
-        if (sball) {
+        if (sball !== undefined) {
           const b = objs[sball];
           b.p.x = mx;
           b.p.y = my;
           b.pp.x = mx;
           b.pp.y = my;
           dragging = sball;
-        } else {
-          if (dragging) {
-            const b = objs[dragging];
-            b.p.x = mx;
-            b.p.y = my;
-            b.pp.x = mx;
-            b.pp.y = my;
-          }
+        } else if (dragging !== undefined && dragging !== null) {
+          const b = objs[dragging];
+          b.p.x = mx;
+          b.p.y = my;
+          b.pp.x = mx;
+          b.pp.y = my;
         }
       }
       if (hshift && (inf || infspace)) {
@@ -654,7 +655,9 @@ canvas.addEventListener("mousemove", (e) => {
 window.onclick = (e) => {
   if (suppressClick) {
     suppressClick = false;
-    return;
+    if (e.target === canvas) {
+      return;
+    }
   }
   //
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
