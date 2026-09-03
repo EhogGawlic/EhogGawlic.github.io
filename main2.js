@@ -469,6 +469,13 @@ function run() {
     b.pp.x = mx;
     b.pp.y = my;
   }
+  if (draggedRB !== null) {
+    draggedRB.p.x = mx;
+    draggedRB.p.y = my;
+    draggedRB.pp.x = mx;
+    draggedRB.pp.y = my;
+    draggedRB.updateWorldVerts();
+  }
   if (!inf){
     emv.x = 0
     emv.y=0
@@ -559,7 +566,18 @@ canvas.addEventListener("contextmenu", (e) => {
 canvas.addEventListener("dblclick", () => {
   seperateLines(mx, my);
 });
-canvas.addEventListener("mousedown", () => {
+canvas.addEventListener("mousedown", (e) => {
+  mx = Math.round((e.clientX - offX) * ma) - emv.x;
+  my = Math.round((e.clientY - 75) * ma) - emv.y;
+  draggedValve = undefined;
+  if (typeof valves !== "undefined" && Array.isArray(valves)) {
+    for (let i = valves.length - 1; i >= 0; i--) {
+      if (dist({ x: mx, y: my }, valves[i].p) <= valves[i].r) {
+        draggedValve = valves[i];
+        break;
+      }
+    }
+  }
   if (!clicking) {
     sclick = { x: mx, y: my };
     semv = emv;
@@ -619,8 +637,8 @@ canvas.addEventListener("mousemove", (e) => {
       draggedRB.pp.y = my;
       draggedRB.updateWorldVerts();
     } else if (draggedValve !== undefined) {
-      valves[draggedValve].p.x = mx;
-      valves[draggedValve].p.y = my;
+      draggedValve.p.x = mx;
+      draggedValve.p.y = my;
     } else if (!drawing) {
       let p = selectLinePoint(mx, my);
       dragline.forEach((pt) => {
@@ -640,13 +658,14 @@ canvas.addEventListener("mousemove", (e) => {
       if (p.length == 0) {
         if (draggedRB === null && draggedValve === undefined) {
           draggedRB =
-            typeof rbSelectBody === "function" ? rbSelectBody(mx, my) : null;
+            typeof rbSelectBody === "function" ? rbSelectBody(mx, my) || null : null;
           if (
             draggedRB === null &&
             typeof valves !== "undefined" &&
             Array.isArray(valves)
           ) {
-            draggedValve = selectValve(mx, my);
+            const selectedValve = selectValve(mx, my);
+            if (selectedValve !== undefined) draggedValve = valves[selectedValve];
           }
         }
         if (draggedRB !== null) {
@@ -656,8 +675,8 @@ canvas.addEventListener("mousemove", (e) => {
           draggedRB.pp.y = my;
           draggedRB.updateWorldVerts();
         } else if (draggedValve !== undefined) {
-          valves[draggedValve].p.x = mx;
-          valves[draggedValve].p.y = my;
+          draggedValve.p.x = mx;
+          draggedValve.p.y = my;
         } else {
           const sball = selectBall(mx, my);
           if (sball !== undefined) {
