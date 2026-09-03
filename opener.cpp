@@ -26,7 +26,7 @@ std::vector<char> ReadBinaryFile(const std::wstring& filePath) {
 // Function to upload the binary file to Netlify and get a short key back
 std::string UploadToNetlify(const std::vector<char>& fileData) {
     std::string responseBody = "";
-    HINTERNET hInternet = InternetOpenW(L"BoxSandOpener", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
+    HINTERNET hInternet = InternetOpenW(L"BoxsandOpener", INTERNET_OPEN_TYPE_DIRECT, NULL, NULL, 0);
     if (!hInternet) return responseBody;
 
     // Connect to your Netlify site domain
@@ -56,7 +56,7 @@ std::string UploadToNetlify(const std::vector<char>& fileData) {
 }
 
 int wmain(int argc, wchar_t* argv[]) {
-    std::string baseUrl = "https://netlify.app";
+    std::string baseUrl = "https://boxsand.netlify.app/main";
     
     if (argc > 1) {
         std::wstring filePath = argv[1];
