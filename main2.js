@@ -571,8 +571,12 @@ window.addEventListener("mouseup", () => {
   suppressClick =
     drawing ||
     dragline.length > 0 ||
-    (dragging !== undefined && dragging !== null);
+    (dragging !== undefined && dragging !== null) ||
+    draggedRB !== null ||
+    draggedValve !== undefined;
   dragging = null;
+  draggedRB = null;
+  draggedValve = undefined;
   dragline = [];
   clicking = false;
 });
@@ -601,12 +605,23 @@ window.addEventListener("keydown", (e) => {
 });
 let pmx;
 let pmy;
+let draggedRB = null;
+let draggedValve;
 let suppressClick = false;
 canvas.addEventListener("mousemove", (e) => {
   mx = Math.round((e.clientX - offX) * ma) - emv.x;
   my = Math.round((e.clientY - 75) * ma) - emv.y;
   if (clicking) {
-    if (!drawing) {
+    if (draggedRB !== null) {
+      draggedRB.p.x = mx;
+      draggedRB.p.y = my;
+      draggedRB.pp.x = mx;
+      draggedRB.pp.y = my;
+      draggedRB.updateWorldVerts();
+    } else if (draggedValve !== undefined) {
+      valves[draggedValve].p.x = mx;
+      valves[draggedValve].p.y = my;
+    } else if (!drawing) {
       let p = selectLinePoint(mx, my);
       dragline.forEach((pt) => {
         p.push(pt);
@@ -623,20 +638,42 @@ canvas.addEventListener("mousemove", (e) => {
         }
       });
       if (p.length == 0) {
-        const sball = selectBall(mx, my);
-        if (sball !== undefined) {
+        if (draggedRB === null && draggedValve === undefined) {
+          draggedRB =
+            typeof rbSelectBody === "function" ? rbSelectBody(mx, my) : null;
+          if (
+            draggedRB === null &&
+            typeof valves !== "undefined" &&
+            Array.isArray(valves)
+          ) {
+            draggedValve = selectValve(mx, my);
+          }
+        }
+        if (draggedRB !== null) {
+          draggedRB.p.x = mx;
+          draggedRB.p.y = my;
+          draggedRB.pp.x = mx;
+          draggedRB.pp.y = my;
+          draggedRB.updateWorldVerts();
+        } else if (draggedValve !== undefined) {
+          valves[draggedValve].p.x = mx;
+          valves[draggedValve].p.y = my;
+        } else {
+          const sball = selectBall(mx, my);
+          if (sball !== undefined) {
           const b = objs[sball];
           b.p.x = mx;
           b.p.y = my;
           b.pp.x = mx;
           b.pp.y = my;
           dragging = sball;
-        } else if (dragging !== undefined && dragging !== null) {
-          const b = objs[dragging];
-          b.p.x = mx;
-          b.p.y = my;
-          b.pp.x = mx;
-          b.pp.y = my;
+          } else if (dragging !== undefined && dragging !== null) {
+            const b = objs[dragging];
+            b.p.x = mx;
+            b.p.y = my;
+            b.pp.x = mx;
+            b.pp.y = my;
+          }
         }
       }
       if (hshift && (inf || infspace)) {
