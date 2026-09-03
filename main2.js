@@ -1726,3 +1726,40 @@ excontain.addEventListener("click", (e) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 })
+import { getStore } from "@netlify/blobs"; // Native lightweight caching
+import { randomUUID } from "crypto";
+
+export default async (req, context) => {
+  const method = req.method;
+
+  if (method === "POST") {
+    const fileBuffer = await req.arrayBuffer();
+    const fileId = randomUUID();
+
+    const store = getStore("temporary-psv-files");
+    
+    await store.set(fileId, fileBuffer);
+
+    return new Response(fileId, { status: 200 });
+  }
+
+  if (method === "GET") {
+    const url = new URL(req.url);
+    const fileId = url.searchParams.get("id");
+
+    if (!fileId) return new Response("Missing ID", { status: 400 });
+
+    const store = getStore("temporary-psv-files");
+    const fileData = await store.get(fileId, { type: "arrayBuffer" });
+
+    if (!fileData)
+      return new Response("File Expired or Not Found", { status: 404 });
+
+    return new Response(fileData, {
+      status: 200,
+      headers: { "Content-Type": "application/octet-stream" },
+    });
+  }
+
+  return new Response("Method not allowed", { status: 405 });
+};
