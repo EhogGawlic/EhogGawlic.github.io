@@ -568,6 +568,7 @@ canvas.addEventListener("mousedown", () => {
   document.activeElement = canvas;
 });
 canvas.addEventListener("mouseup", () => {
+  suppressClick = dragging !== null && dragging !== undefined;
   dragging = null;
   dragline = [];
   clicking = false;
@@ -597,6 +598,7 @@ window.addEventListener("keydown", (e) => {
 });
 let pmx;
 let pmy;
+let suppressClick = false;
 canvas.addEventListener("mousemove", (e) => {
   mx = Math.round((e.clientX - offX) * ma) - emv.x;
   my = Math.round((e.clientY - 75) * ma) - emv.y;
@@ -650,6 +652,10 @@ canvas.addEventListener("mousemove", (e) => {
   pmx = mx;
 });
 window.onclick = (e) => {
+  if (suppressClick) {
+    suppressClick = false;
+    return;
+  }
   //
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
