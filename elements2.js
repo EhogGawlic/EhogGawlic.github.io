@@ -96,6 +96,7 @@ const ctx = canvas.getContext("2d"),
       pcol = getEl("pcol"),
       pdens = getEl("pdens"),
       pcanv = getEl("polycanvas"),
+      abarbtn = getEl("abarbtn"),
       pctx = pcanv.getContext("2d")
       pcanv.width=parseInt(pcanv.style.width)
       pcanv.height=parseInt(pcanv.style.height)
@@ -192,6 +193,7 @@ req.onsuccess = ()=>{
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
+        bars = data.bars || []
         polys= data.polys ? data.polys : []
         polys = data.polys.map(p =>
             (p instanceof Polygon)
@@ -204,6 +206,7 @@ req.onsuccess = ()=>{
             fans = []
             valves = []
             tcans = []
+            bars = []
             polys=[]
         }
         if (localStorage.getItem("save") && localStorage.getItem("save").split(";").length==4){

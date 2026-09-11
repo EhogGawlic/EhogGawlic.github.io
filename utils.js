@@ -252,7 +252,8 @@ function addRope(b1,b2){
     ropes.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
 }
 function addBar(b1,b2){
-    bars.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+    const minLength = (objs[b1].r || 0) + (objs[b2].r || 0)
+    bars.push({b1,b2, l:Math.max(dist(objs[b1].p, objs[b2].p), minLength)})
 }
 function addSpring(b1,b2){
     springs.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
@@ -799,6 +800,7 @@ async function setCloudData() {
                 data.fans=fans
                 data.valves=valves
                 data.tcans=tcans
+                data.bars=bars
                 data.polys=polys
                 data.speedos=speedos
                 const putRequest = objectStore.put(data, saveslot)
@@ -1233,4 +1235,3 @@ function switchRBarPanel(id){
   }
   document.querySelector("#idkcntn #"+id).style.display = "block";
 }
-
