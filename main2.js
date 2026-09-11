@@ -92,15 +92,13 @@ function run() {
             let cy = f.p.y + d * (p2.y - f.p.y);
             const dbcp = dist(obj.p, { x: cx, y: cy });
             const dfcp = dist(f.p, { x: cx, y: cy });
-            /*try{
-                    const rfd = {x:Math.round(f.dir.x*100)*0.01,y:Math.round(f.dir.y*100)*0.01}
-                    const nbf = norm(subVec(f.p, {x:cx,y:cy}))
-                    const cfd = {x:Math.round(nbf.x*100)*0.01,y:Math.round(nbf.y*100)*0.01}*/
-            if (dbcp <= 30 && dfcp <= f.md) {
-              // && rfd.x===cfd.x&&rfd.y===cfd.y){
+            //i am being honest, I do not know what the above code does
+            if (dbcp <= 30 && dfcp <= f.md && !(f.s<0 && dfcp<=0)) {
+              if (f.s < 0){
+                f.s *= -1
+              }
               obj.addForce(10, multVecCon(f.dir, (f.s * f.md) / (dfcp * f.md)));
             }
-            //}catch(e){alert(e)}
           }
         }
         tcans.forEach((tc) => {
