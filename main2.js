@@ -138,6 +138,12 @@ function run() {
           springs.splice(i, 1);
         }
       }
+      // remove bars referencing the removed object (iterate backwards to avoid skipping after splice)
+      for (let i = bars.length - 1; i >= 0; i--) {
+        if (bars[i].b1 === rem || bars[i].b2 === rem) {
+          bars.splice(i, 1);
+        }
+      }
       objs.splice(rem, 1);
       for (let i = 0; i < objs.length; i++) {
         if (i >= rem) {
