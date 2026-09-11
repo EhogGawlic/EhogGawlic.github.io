@@ -55,14 +55,9 @@ class Obj {
       this.p = addVec(this.p, this.v);
 
       this.a = { x: 0, y: (meterPixRatio * grav) / targetRate };
-      this.rot += this.rotv;
-      this.rotv *= 0.985;
-      this.rotv += this.rota;
+      this.rot = 0;
+      this.rotv = 0;
       this.rota = 0;
-      const maxSpin = 18;
-      if (Math.abs(this.rotv) > maxSpin) {
-        this.rotv = Math.sign(this.rotv) * maxSpin;
-      }
       for (const speedo of speedos) {
         const d = dist(this.p, speedo);
         if (d < this.r + 10) {
@@ -144,9 +139,6 @@ class Obj {
       const vt = relVel.x * tangent.x + relVel.y * tangent.y;
 
       if (Math.abs(vt) > 0.0001) {
-        const desiredSpin = vt / this.r;
-        const spinCorrection = (desiredSpin - this.rotv) * 0.2;
-        this.rotv += spinCorrection;
         this.v.x += tangent.x * (-vt * 0.1);
         this.v.y += tangent.y * (-vt * 0.1);
       }
@@ -241,31 +233,29 @@ class Obj {
           const invMass2 = 1 / Math.max(b.w, 1);
           const invMassSum = invMass1 + invMass2;
 
-          const restitution = Math.min(this.b, b.b, 0.75);
+          if (vn < 0) {
+            const restitution = Math.min(this.b, b.b, 0.75);
 
-          // normal impulse
-          const jn = (-(1 + restitution) * vn) / invMassSum;
+            // normal impulse
+            const jn = (-(1 + restitution) * vn) / invMassSum;
 
-          // friction impulse (clamped to a realistic limit)
-          const mu = 0.18;
-          const maxFriction = Math.abs(jn) * mu;
-          const jt = Math.max(
-            -maxFriction,
-            Math.min(maxFriction, -vt / invMassSum),
-          );
+            // friction impulse (clamped to a realistic limit)
+            const mu = 0.18;
+            const maxFriction = Math.abs(jn) * mu;
+            const jt = Math.max(
+              -maxFriction,
+              Math.min(maxFriction, -vt / invMassSum),
+            );
 
-          const normalImpulse = multVecCon(collNorm, jn);
-          const frictionImpulse = multVecCon(tangent, jt);
+            const normalImpulse = multVecCon(collNorm, jn);
+            const frictionImpulse = multVecCon(tangent, jt);
 
-          this.v = addVec(this.v, multVecCon(normalImpulse, 1));
-          b.v = subVec(b.v, multVecCon(normalImpulse, 1));
+            this.v = addVec(this.v, multVecCon(normalImpulse, 1));
+            b.v = subVec(b.v, multVecCon(normalImpulse, 1));
 
-          this.v = addVec(this.v, frictionImpulse);
-          b.v = subVec(b.v, frictionImpulse);
-
-          // very small spin reaction, not a main force
-          this.rotv -= (jt * 0.02) / Math.max(this.r, 8);
-          b.rotv += (jt * 0.02) / Math.max(b.r, 8);
+            this.v = addVec(this.v, frictionImpulse);
+            b.v = subVec(b.v, frictionImpulse);
+          }
 
           const adjdist = d - (this.r + b.r);
           const mb = 1 / (invMass1 + invMass2);
