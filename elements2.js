@@ -193,7 +193,7 @@ req.onsuccess = ()=>{
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
-        bars = data.bars || []
+        bars = []
         polys= data.polys ? data.polys : []
         polys = data.polys.map(p =>
             (p instanceof Polygon)

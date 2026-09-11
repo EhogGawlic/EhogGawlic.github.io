@@ -359,6 +359,9 @@
             - Note: Use Styrofoam material or set density to 2 and use default
             radius<br />
             <button id="abarbtn">Add bar (select 2 balls)</button><br />
+            <button onclick="bars=[...springs];springs=[]">Replace springs with bars</button><br />
+            <button onclick="addTriLattice('bar')">Add triangle bars</button>
+            <button onclick="addTriLattice('spring')">Add triangle springs</button><br />
             <button
               onclick="
                 const sx = jtw.value;
@@ -406,6 +409,8 @@
               <input id="jty" type="number" value="50" /><br />
               <label for="jbr">Ball radius</label><br />
               <input id="jbr" type="number" value="50" /><br />
+              <label for="hcsize">Lattice spacing</label><br />
+              <input id="hcsize" type="number" value="30" /><br />
               <label for="jba">Ball # for springy ball</label><br />
               <input id="jba" type="number" value="10" /><br />
             </div>
@@ -694,7 +699,7 @@
                 "
                 >Open comic</span
               ><br>
-              <span onclick="console.style.display='block'">Console</span>
+              <span onclick="getEl('console').style.display='block'">Console</span>
             </div>
           </button>
           <button>

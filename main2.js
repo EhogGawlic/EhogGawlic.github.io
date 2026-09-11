@@ -364,8 +364,8 @@ function run() {
             if (invSum === 0) return;
 
             const diff = (d - bar.l) / d;
-            const stiffness = 0.2;
-            const maxCorrection = 2;
+            const stiffness = 1;
+            const maxCorrection = 5;
             let cx = dx * diff * stiffness;
             let cy = dy * diff * stiffness;
             const correctionLength = Math.hypot(cx, cy);
