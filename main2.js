@@ -1726,19 +1726,3 @@ excontain.addEventListener("click", (e) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 })
-const urlParams = new URLSearchParams(window.location.search);
-const fileId = urlParams.get("fileId");
-
-if (fileId) {
-  // Request binary array stream back from Netlify Function
-  fetch(`/.netlify/functions/upload-psv?id=${fileId}`)
-    .then((response) => {
-      if (!response.ok) throw new Error("File fetching failed.");
-      return response.arrayBuffer(); // Get raw binary data stream
-    })
-    .then((arrayBuffer) => {
-      // Load arrayBuffer cleanly directly into your custom WebGL/WASM Physics Engine loader
-      loadPhysicsSimulation(arrayBuffer);
-    })
-    .catch((err) => console.error(err));
-}

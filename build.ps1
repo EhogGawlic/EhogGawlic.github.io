@@ -1,1 +1,0 @@
-g++ -o opener.exe opener.cpp -municode -lwininet
