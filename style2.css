@@ -131,7 +131,7 @@ button {
   bottom: 0;
   left: 10px;
   border-top: 1px solid black;
-  width: 100%;
+  width: calc(100%-20px);
 }
 #tpbarbtns button {
   width: 60px;

@@ -92,15 +92,13 @@ function run() {
             let cy = f.p.y + d * (p2.y - f.p.y);
             const dbcp = dist(obj.p, { x: cx, y: cy });
             const dfcp = dist(f.p, { x: cx, y: cy });
-            /*try{
-                    const rfd = {x:Math.round(f.dir.x*100)*0.01,y:Math.round(f.dir.y*100)*0.01}
-                    const nbf = norm(subVec(f.p, {x:cx,y:cy}))
-                    const cfd = {x:Math.round(nbf.x*100)*0.01,y:Math.round(nbf.y*100)*0.01}*/
-            if (dbcp <= 30 && dfcp <= f.md) {
-              // && rfd.x===cfd.x&&rfd.y===cfd.y){
+            //i am being honest, I do not know what the above code does
+            if (dbcp <= 30 && dfcp <= f.md && !(f.s<0 && dfcp<=0)) {
+              if (f.s < 0){
+                f.s *= -1
+              }
               obj.addForce(10, multVecCon(f.dir, (f.s * f.md) / (dfcp * f.md)));
             }
-            //}catch(e){alert(e)}
           }
         }
         tcans.forEach((tc) => {
@@ -138,6 +136,12 @@ function run() {
       for (let i = springs.length - 1; i >= 0; i--) {
         if (springs[i].b1 === rem || springs[i].b2 === rem) {
           springs.splice(i, 1);
+        }
+      }
+      // remove bars referencing the removed object (iterate backwards to avoid skipping after splice)
+      for (let i = bars.length - 1; i >= 0; i--) {
+        if (bars[i].b1 === rem || bars[i].b2 === rem) {
+          bars.splice(i, 1);
         }
       }
       objs.splice(rem, 1);
@@ -249,11 +253,13 @@ function run() {
       ctx.stroke();
       ctx.lineWidth = 1;
     });
-    bars.forEach((rope) => {
-      const b1 = objs[rope.b1];
-      const b2 = objs[rope.b2];
-      ctx.strokeStyle = "gray";
-      ctx.lineWidth = 2;
+    bars.forEach((bar) => {
+      const b1 = objs[bar.b1];
+      const b2 = objs[bar.b2];
+      if (!b1 || !b2) return;
+
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 4;
       ctx.beginPath();
       ctx.moveTo(b1.p.x + emv.x, b1.p.y + emv.y);
       ctx.lineTo(b2.p.x + emv.x, b2.p.y + emv.y);
@@ -348,48 +354,62 @@ function run() {
             b2.pp = subVec(b2.pp, multVecCon(totalForce, 1 / b2.w));
           });
           // handle bars constraints (inelastic/limited-bounce)
-          bars.forEach((rope) => {
-            const b1 = objs[rope.b1];
-            const b2 = objs[rope.b2];
-            const delta = subVec(b2.p, b1.p);
-            const d = Math.max(1e-6, Math.hypot(delta.x, delta.y));
-            const diff = d - rope.l;
-            if (Math.abs(diff) < 1e-6) return;
-            const dir = { x: delta.x / d, y: delta.y / d };
+          bars.forEach((bar) => {
+            const b1 = objs[bar.b1];
+            const b2 = objs[bar.b2];
+            if (!b1 || !b2) return;
 
-            const m1 = b1.m !== undefined ? b1.m : 1;
-            const m2 = b2.m !== undefined ? b2.m : 1;
-            const invSum = 1 / (m1 + m2);
+            const dx = b2.p.x - b1.p.x;
+            const dy = b2.p.y - b1.p.y;
+            const d = Math.hypot(dx, dy);
+            if (d < 1e-6) return;
 
-            const correction = multVecCon(dir, diff);
-            const corr1 = multVecCon(correction, -(m2 * invSum));
-            const corr2 = multVecCon(correction, m1 * invSum);
-            const maxCorrection = 4;
-            const clamp = (v) => {
-              const L = Math.hypot(v.x, v.y);
-              if (L > maxCorrection) {
-                const s = maxCorrection / L;
-                return { x: v.x * s, y: v.y * s };
-              }
-              return v;
-            };
-            const c1 = clamp(corr1);
-            const c2 = clamp(corr2);
-            b1.pp = addVec(b1.pp, c1);
-            b2.pp = subVec(b2.pp, c2);
+            const inv1 = b1.f ? 0 : 1 / Math.max(b1.w || 1, 1);
+            const inv2 = b2.f ? 0 : 1 / Math.max(b2.w || 1, 1);
+            const invSum = inv1 + inv2;
+            if (invSum === 0) return;
 
-            // limit bounce along the link to at most gravity-derived speed
-            const v1 = subVec(b1.p, b1.pp);
-            const v2 = subVec(b2.p, b2.pp);
-            const relVel = (v2.x - v1.x) * dir.x + (v2.y - v1.y) * dir.y;
-            if (relVel < 0) {
-              const maxBounce = (Math.abs(grav) * meterPixRatio) / targetRate;
-              const correctionVel = Math.min(-relVel, maxBounce);
-              const dp1 = multVecCon(dir, correctionVel * (m2 * invSum));
-              const dp2 = multVecCon(dir, -correctionVel * (m1 * invSum));
-              b1.pp = addVec(b1.pp, dp1);
-              b2.pp = addVec(b2.pp, dp2);
+            const diff = (d - bar.l) / d;
+            const stiffness = 1;
+            const maxCorrection = 5;
+            let cx = dx * diff * stiffness;
+            let cy = dy * diff * stiffness;
+            const correctionLength = Math.hypot(cx, cy);
+            if (correctionLength > maxCorrection) {
+              const correctionScale = maxCorrection / correctionLength;
+              cx *= correctionScale;
+              cy *= correctionScale;
             }
+
+            const move1 = inv1 / invSum;
+            const move2 = inv2 / invSum;
+
+            b1.p.x += cx * move1;
+            b1.p.y += cy * move1;
+            b1.pp.x += cx * move1;
+            b1.pp.y += cy * move1;
+
+            b2.p.x -= cx * move2;
+            b2.p.y -= cy * move2;
+            b2.pp.x -= cx * move2;
+            b2.pp.y -= cy * move2;
+
+            const nx = dx / d;
+            const ny = dy / d;
+            const v1x = b1.p.x - b1.pp.x;
+            const v1y = b1.p.y - b1.pp.y;
+            const v2x = b2.p.x - b2.pp.x;
+            const v2y = b2.p.y - b2.pp.y;
+            const relVel = (v2x - v1x) * nx + (v2y - v1y) * ny;
+            const dv1x = nx * relVel * move1;
+            const dv1y = ny * relVel * move1;
+            const dv2x = -nx * relVel * move2;
+            const dv2y = -ny * relVel * move2;
+
+            b1.pp.x -= dv1x;
+            b1.pp.y -= dv1y;
+            b2.pp.x -= dv2x;
+            b2.pp.y -= dv2y;
           });
         }
         if (typeof rbResolveAll === "function") {
@@ -552,6 +572,10 @@ window.addEventListener("keypress", (e) => {
       case "s":
         arope.ia = true;
         arope.t = 2;
+        break;
+      case "b":
+        arope.ia = true;
+        arope.t = 3;
         break;
       case "d":
         deleting = true;
@@ -973,6 +997,11 @@ window.onclick = (e) => {
                 springs.splice(i, 1);
               }
             }
+            for (let i = bars.length - 1; i >= 0; i--) {
+              if (bars[i].b1 === selecteda || bars[i].b2 === selecteda) {
+                bars.splice(i, 1);
+              }
+            }
             objs.splice(selecteda, 1);
             for (let i = 0; i < objs.length; i++) {
               if (i >= selecteda) {
@@ -1115,6 +1144,9 @@ window.onclick = (e) => {
           if (arope.t == 2) {
             addSpring(s1b, s2b);
           }
+          if (arope.t == 3) {
+            addBar(s1b, s2b);
+          }
           arope.ia = false;
           cn = 0;
         }
@@ -1126,6 +1158,10 @@ window.onclick = (e) => {
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   //
 };
+abarbtn.addEventListener("click", () => {
+  arope.ia = true;
+  arope.t = 3;
+});
 rinp.addEventListener("change", () => {
   winp.value = Math.PI * parseFloat(rinp.value) ** 2 * parseFloat(dinp.value);
 });
@@ -1726,19 +1762,3 @@ excontain.addEventListener("click", (e) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 })
-const urlParams = new URLSearchParams(window.location.search);
-const fileId = urlParams.get("fileId");
-
-if (fileId) {
-  // Request binary array stream back from Netlify Function
-  fetch(`/.netlify/functions/upload-psv?id=${fileId}`)
-    .then((response) => {
-      if (!response.ok) throw new Error("File fetching failed.");
-      return response.arrayBuffer(); // Get raw binary data stream
-    })
-    .then((arrayBuffer) => {
-      // Load arrayBuffer cleanly directly into your custom WebGL/WASM Physics Engine loader
-      loadPhysicsSimulation(arrayBuffer);
-    })
-    .catch((err) => console.error(err));
-}

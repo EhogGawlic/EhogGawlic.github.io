@@ -252,10 +252,74 @@ function addRope(b1,b2){
     ropes.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
 }
 function addBar(b1,b2){
-    bars.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+    const minLength = (objs[b1].r || 0) + (objs[b2].r || 0)
+    bars.push({b1,b2, l:Math.max(dist(objs[b1].p, objs[b2].p), minLength)})
 }
 function addSpring(b1,b2){
     springs.push({b1,b2, l:dist(objs[b1].p, objs[b2].p)})
+}
+function addTriLattice(kind){
+    const cols = Math.max(2, parseInt(jtw.value) || 2)
+    const rows = Math.max(2, parseInt(jth.value) || 2)
+    const startX = (parseFloat(jtx.value) || 0) * meterPixRatio
+    const startY = (parseFloat(jty.value) || 0) * meterPixRatio
+    const ballRadius = parseFloat(rinp.value) * meterPixRatio
+    const spacing = Math.max(
+        (parseFloat(getEl("hcsize").value) || 30) * meterPixRatio,
+        ballRadius * 2
+    )
+    const grid = []
+    const edges = new Set()
+
+    function addLatticeBall(x, y){
+        addObj(
+            x,
+            y,
+            ballRadius,
+            parseFloat(binp.value),
+            HEXRGB(cinp.value),
+            parseFloat(vxinp.value) * meterPixRatio,
+            parseFloat(vyinp.value) * meterPixRatio,
+            parseFloat(winp.value)
+        )
+        return objs.length - 1
+    }
+
+    function connect(a, b){
+        if (a === b) return
+        const key = a < b ? a + "," + b : b + "," + a
+        if (edges.has(key)) return
+        edges.add(key)
+        if (kind === "spring"){
+            addSpring(a, b)
+        } else {
+            addBar(a, b)
+        }
+    }
+
+    for (let row = 0; row < rows; row++){
+        grid[row] = []
+        for (let col = 0; col < cols; col++){
+            const x = startX + (col + (row % 2) * 0.5) * spacing
+            const y = startY + row * spacing * Math.sqrt(3) * 0.5
+            grid[row][col] = addLatticeBall(x, y)
+        }
+    }
+
+    for (let row = 0; row < rows; row++){
+        for (let col = 0; col < cols; col++){
+            const here = grid[row][col]
+            if (col + 1 < cols) connect(here, grid[row][col + 1])
+            if (row + 1 < rows) {
+                connect(here, grid[row + 1][col])
+                if (row % 2 === 0 && col > 0) connect(here, grid[row + 1][col - 1])
+                if (row % 2 === 1 && col + 1 < cols) connect(here, grid[row + 1][col + 1])
+            }
+        }
+    }
+}
+function addHoneycomb(kind){
+    addTriLattice(kind)
 }
 function addSpeedo(pos){
     speedos.push({x:pos.x,y:pos.y,v:0})
@@ -799,6 +863,7 @@ async function setCloudData() {
                 data.fans=fans
                 data.valves=valves
                 data.tcans=tcans
+                data.bars=[]
                 data.polys=polys
                 data.speedos=speedos
                 const putRequest = objectStore.put(data, saveslot)
@@ -1233,4 +1298,3 @@ function switchRBarPanel(id){
   }
   document.querySelector("#idkcntn #"+id).style.display = "block";
 }
-
