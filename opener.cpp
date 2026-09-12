@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <cctype>
 
 #pragma comment(lib, "wininet.lib")
 
@@ -23,6 +24,18 @@ std::vector<char> ReadBinaryFile(const std::wstring& filePath) {
     return {};
 }
 
+bool IsUuid(const std::string& value) {
+    if (value.size() != 36) return false;
+    for (size_t i = 0; i < value.size(); ++i) {
+        if (i == 8 || i == 13 || i == 18 || i == 23) {
+            if (value[i] != '-') return false;
+        } else if (!std::isxdigit(static_cast<unsigned char>(value[i]))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Function to upload the binary file to Netlify and get a short key back
 std::string UploadToNetlify(const std::vector<char>& fileData) {
     std::string responseBody = "";
@@ -33,7 +46,7 @@ std::string UploadToNetlify(const std::vector<char>& fileData) {
     HINTERNET hConnect = InternetConnectW(hInternet, L"boxsand.netlify.app", INTERNET_DEFAULT_HTTPS_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
     if (hConnect) {
         // Targeted Netlify Function endpoint
-        HINTERNET hRequest = HttpOpenRequestW(hConnect, L"POST", L"/.netlify/functions/upload-psv", NULL, NULL, NULL, INTERNET_FLAG_SECURE, 0);
+        HINTERNET hRequest = HttpOpenRequestW(hConnect, L"POST", L"/.netlify/functions/upload_psv", NULL, NULL, NULL, INTERNET_FLAG_SECURE, 0);
         if (hRequest) {
             std::wstring headers = L"Content-Type: application/octet-stream";
             
@@ -64,7 +77,7 @@ int wmain(int argc, wchar_t* argv[]) {
         
         if (!data.empty()) {
             std::string fileId = UploadToNetlify(data);
-            if (!fileId.empty()) {
+            if (IsUuid(fileId)) {
                 // Attach the temporary file id 
                 baseUrl += "?fileId=" + fileId;
             }

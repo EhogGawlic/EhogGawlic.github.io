@@ -11,7 +11,7 @@ export default async (req, context) => {
 
     const store = getStore("temporary-psv-files");
     // Cache the binary payload into Netlify Blobs
-    await store.set(fileId, fileBuffer);
+    await store.set(fileId, fileBuffer);.
 
     return new Response(fileId, { status: 200 });
   }
@@ -19,7 +19,7 @@ export default async (req, context) => {
   // 2. The Browser Website is retrieving the binary data
   if (method === "GET") {
     const url = new URL(req.url);
-    const fileId = url.searchParams.get("id");
+    const fileId = url.searchParams.get("fileId") || url.searchParams.get("id");
 
     if (!fileId) return new Response("Missing ID", { status: 400 });
 

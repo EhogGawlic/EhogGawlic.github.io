@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/EhogGawlic/EhogGawlic.github.io#readme",
   "dependencies": {
+    "@netlify/blobs": "^11.0.3",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "jsonwebtoken": "^9.0.3",
