@@ -1,5 +1,15 @@
 function applyMagneticForces() {
-  objs.forEach((obj) => {
+  const magneticAccelerations = objs.map(() => ({ x: 0, y: 0 }));
+  const addMagneticForce = (index, force) => {
+    const obj = objs[index];
+    const denominator = obj.w * 2 * obj.r;
+    if (!Number.isFinite(denominator) || denominator <= 0) return;
+    const scale = 100000 / denominator;
+    magneticAccelerations[index].x += force.x * scale;
+    magneticAccelerations[index].y += force.y * scale;
+  };
+
+  objs.forEach((obj, index) => {
     obj.magnetism *= 0.98;
     magnets.forEach((mag) => {
       const d = dist(obj.p, mag);
@@ -11,7 +21,7 @@ function applyMagneticForces() {
         if (d > contactDistance) {
           const radial = norm(subVec(mag, obj.p));
           const strength = 1000 / d ** 2;
-          obj.addForce(100000, multVecCon(radial, strength));
+          addMagneticForce(index, multVecCon(radial, strength));
         }
       }
     });
@@ -29,9 +39,21 @@ function applyMagneticForces() {
       const direction = norm(subVec(second.p, first.p));
       const strength = 500 * first.magnetism * second.magnetism / distance ** 2;
       const force = multVecCon(direction, strength);
-      first.addForce(100000, force);
-      second.addForce(100000, multVecCon(force, -1));
+      addMagneticForce(firstIndex, force);
+      addMagneticForce(secondIndex, multVecCon(force, -1));
     }
+  }
+
+  const maxMagneticAcceleration = 5;
+  for (let i = 0; i < objs.length; i++) {
+    const acceleration = magneticAccelerations[i];
+    const magnitude = Math.hypot(acceleration.x, acceleration.y);
+    if (magnitude > maxMagneticAcceleration) {
+      const scale = maxMagneticAcceleration / magnitude;
+      acceleration.x *= scale;
+      acceleration.y *= scale;
+    }
+    objs[i].a = addVec(objs[i].a, acceleration);
   }
 }
 

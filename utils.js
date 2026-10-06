@@ -1,3 +1,12 @@
+//wire error output
+
+window.addEventListener("onerror",(e)=>{
+logOut(JSON.parse(e))
+})
+
+
+
+
 const server = "https://mailman-destiny-tender-corn.trycloudflare.com";
 let token = sessionStorage.getItem('accessToken') || ''
 let ntexname = 1
