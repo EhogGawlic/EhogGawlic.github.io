@@ -17,6 +17,7 @@ class Obj {
     rot = 0
     rotv = 0
     rota=0
+    magnetism = 0
     friction=0.5
     texture = null
     constructor(x, y, r, c, w, vx, vy, b, l, st, f) {
@@ -243,11 +244,12 @@ class Obj {
             }
         }
     }
-    collall(){
-        
-        for (let i = 0; i < objs.length; i++){
-            if (i!==this.n){
-                this.collideball(objs[i])
+    collall(includeBallCollisions = true){
+        if (includeBallCollisions){
+            for (let i = 0; i < objs.length; i++){
+                if (i!==this.n){
+                    this.collideball(objs[i])
+                }
             }
         }
 
@@ -261,6 +263,26 @@ class Obj {
                     this.p = addVec(this.p, v.p)
                 }
             }
+        })
+        magnets.forEach(mag=>{
+            const d = dist(this.p, mag)
+            const contactDistance = this.r + 32
+            if (d < contactDistance){
+                let normal
+                if (d > 0) {
+                    normal = norm(subVec(this.p, mag))
+                } else {
+                    const speed = Math.hypot(this.v.x, this.v.y)
+                    normal = speed > 0 ? norm(this.v) : {x: 1, y: 0}
+                }
+                this.p = addVec(mag, multVecCon(normal, contactDistance))
+                const radialVelocity = this.v.x * normal.x + this.v.y * normal.y
+                const tangentialVelocity = subVec(this.v, multVecCon(normal, radialVelocity))
+                const reboundVelocity = Math.max(0, radialVelocity) * 0.1
+                this.v = addVec(tangentialVelocity, multVecCon(normal, reboundVelocity))
+                this.pp = subVec(this.p, this.v)
+            }
+
         })
     }
     draw(){

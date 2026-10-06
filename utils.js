@@ -170,6 +170,7 @@ let lines = [],
     cc,
     cs,
     bombs=[],
+    magnets=[],
     fliprows = 500/cellsize+1,
     flipcols = fliprows+1,
     waterBlur=1,
@@ -863,7 +864,7 @@ async function setCloudData() {
                 data.fans=fans
                 data.valves=valves
                 data.tcans=tcans
-                data.bars=[]
+                data.magnets=magnets
                 data.polys=polys
                 data.speedos=speedos
                 const putRequest = objectStore.put(data, saveslot)
@@ -1100,6 +1101,7 @@ function clear(){
     springs=[]
     bars=[]
     speedos=[]
+    magnets=[]
     if (typeof rbClear === "function") {
         rbClear()
     }

@@ -165,11 +165,16 @@ switch(getCookie("btype")){
         liq = false
         rinp.value=5
         stinp.value=0
+        break
+    case "\"sp\"":
+        dinp.value=1.5
+        cinp.value="#5050FF"
 }
 const fan1 = imgSrc("fan1.png")
 const fan2 = imgSrc("fan2.png")
 const bomsrc = imgSrc('bom.png')
 const speedosrc = imgSrc('speedo.png')
+const magsrc = imgSrc('magnet.png')
 if (!localStorage.getItem("saveslot")){
     localStorage.setItem("saveslot", 1)
 }
@@ -193,7 +198,7 @@ req.onsuccess = ()=>{
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
-        bars = []
+        magnets = data.magnets
         polys= data.polys ? data.polys : []
         polys = data.polys.map(p =>
             (p instanceof Polygon)
@@ -206,7 +211,7 @@ req.onsuccess = ()=>{
             fans = []
             valves = []
             tcans = []
-            bars = []
+            magnets = []
             polys=[]
         }
         if (localStorage.getItem("save") && localStorage.getItem("save").split(";").length==4){
@@ -234,15 +239,16 @@ req.onupgradeneeded = (event) => {
     objectStore.createIndex("valves", "valves", { unique: false })
     objectStore.createIndex("tcans", "tcans", { unique: false })
     objectStore.createIndex("polys", "polys", { unique: false })
+    objectStore.createIndex("magnets", "magnets", { unique: false })
     objectStore.transaction.oncomplete = (event) => {
         const saveObjectStore = db
             .transaction("saves", "readwrite")
             .objectStore("saves")
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
-        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], magnets:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], magnets:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], magnets:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], magnets:[], speedos:[]})
+        saveObjectStore.add({lines:[], fans:[], valves:[], tcans:[], polys:[], magnets:[], speedos:[]})
     }
 }
 

@@ -1,3 +1,40 @@
+function applyMagneticForces() {
+  objs.forEach((obj) => {
+    obj.magnetism *= 0.98;
+    magnets.forEach((mag) => {
+      const d = dist(obj.p, mag);
+      const isMagnetic =
+        obj.c && obj.c[0] === obj.c[1] && obj.c[1] === obj.c[2] && obj.c[0] < 240;
+      if (d < 200 && d > 0 && isMagnetic) {
+        obj.magnetism = Math.max(obj.magnetism, 1 - d / 200);
+        const contactDistance = obj.r + 32;
+        if (d > contactDistance) {
+          const radial = norm(subVec(mag, obj.p));
+          const strength = 1000 / d ** 2;
+          obj.addForce(100000, multVecCon(radial, strength));
+        }
+      }
+    });
+  });
+
+  for (let firstIndex = 0; firstIndex < objs.length; firstIndex++) {
+    const first = objs[firstIndex];
+    if (first.magnetism <= 0) continue;
+    for (let secondIndex = firstIndex + 1; secondIndex < objs.length; secondIndex++) {
+      const second = objs[secondIndex];
+      if (second.magnetism <= 0) continue;
+      const d = dist(first.p, second.p);
+      if (d === 0) continue;
+      const distance = Math.max(d, first.r + second.r);
+      const direction = norm(subVec(second.p, first.p));
+      const strength = 500 * first.magnetism * second.magnetism / distance ** 2;
+      const force = multVecCon(direction, strength);
+      first.addForce(100000, force);
+      second.addForce(100000, multVecCon(force, -1));
+    }
+  }
+}
+
 let a = 0;
 let t = 0;
 let tsl = 0.1;
@@ -76,6 +113,8 @@ function run() {
       ctx.stroke();
       ctx.lineWidth = 1;
     });
+    if (!paused) applyMagneticForces();
+
     objs.forEach((obj) => {
       obj.draw();
 
@@ -92,12 +131,15 @@ function run() {
             let cy = f.p.y + d * (p2.y - f.p.y);
             const dbcp = dist(obj.p, { x: cx, y: cy });
             const dfcp = dist(f.p, { x: cx, y: cy });
-            //i am being honest, I do not know what the above code does
-            if (dbcp <= 30 && dfcp <= f.md && !(f.s<0 && dfcp<=0)) {
-              if (f.s < 0){
-                f.s *= -1
+            if (dbcp <= 30 && dfcp <= f.md) {
+              let ns = Math.abs(f.s)
+              if (f.s > 0){
+                obj.addForce(10, multVecCon(f.dir, ns / dfcp));
+              } else {
+                if (dfcp > 0) {
+                  obj.addForce(10, multVecCon(f.dir, ns / dfcp));
+                }
               }
-              obj.addForce(10, multVecCon(f.dir, (f.s * f.md) / (dfcp * f.md)));
             }
           }
         }
@@ -286,12 +328,18 @@ function run() {
     });
     if (!paused || ceinp.checked) {
       for (let n = 0; n < parseInt(substeps.value); n++) {
+        const wasmHandledBallCollisions = beginWasmBallCollisions(objs);
         for (let i = 0; i < objs.length; i++) {
           const obj = objs[i];
-          obj.collall();
+          const wasmHandledObjectCollisions =
+            wasmHandledBallCollisions && runWasmBallCollisionsForObject(i, obj);
+          obj.collall(!wasmHandledObjectCollisions);
           obj.collwall();
           obj.surfTens();
           obj.tb = [];
+          if (wasmHandledObjectCollisions) {
+            syncWasmBallPosition(i, obj);
+          }
         }
         // relax constraints iteratively to improve stability
         const constraintIters = parseInt(substeps.value);
@@ -481,6 +529,9 @@ function run() {
   bombs.forEach((bomb) => {
     ctx.fillStyle = "red";
     ctx.drawImage(bomsrc, bomb.x - 16 + emv.x, bomb.y - 16 + emv.y, 32, 32);
+  });
+  magnets.forEach((magnet) => {
+    ctx.drawImage(magsrc, magnet.x -32 + emv.x, magnet.y - 32 + emv.y, 64, 64);
   });
   if (dragging !== undefined && dragging !== null) {
     const b = objs[dragging];
@@ -1085,6 +1136,11 @@ window.onclick = (e) => {
               lines[lninp.value].rail.t = 0;
               adding.ia = false;
           }
+          break;
+        case 5:
+          magnets.push({ x: mx, y: my });
+          adding.ia = false;
+          break;
       }
       return;
     }
@@ -1231,6 +1287,14 @@ presets.addEventListener("change", () => {
       liq = false;
       rinp.value = 5;
       stinp.value = 0;
+      break;
+    case "sp":
+      dinp.value = 1.5;
+      cinp.value = "#5050FF";
+      binp.value = 0.4;
+      rinp.value = 5;
+      liq=false;
+      stinp.value=0;
   }
   winp.value = Math.PI * parseFloat(rinp.value) ** 2 * parseFloat(dinp.value);
   document.cookie = "btype=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -1329,6 +1393,14 @@ okbtn.addEventListener("click", () => {
       getEl("crv").style.display = "none";
       getEl("mtr").style.display = "none";
       getEl("rail").style.display = "block";
+      break;
+    case "mag":
+      adding.ia = true;
+      adding.t = 5;
+      getEl("crv").style.display = "none";
+      getEl("mtr").style.display = "none";
+      getEl("rail").style.display = "none";
+      break;
   }
 });
 asinp.onchange = function () {
