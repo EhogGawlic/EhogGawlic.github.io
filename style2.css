@@ -236,8 +236,9 @@ html{
 }
 #FPS{
   position: absolute;
-  top: 5px;
-  right: 5px;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
 }
 #idkcntn{
   position: absolute;
