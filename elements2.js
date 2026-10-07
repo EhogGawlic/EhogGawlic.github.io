@@ -198,7 +198,7 @@ req.onsuccess = ()=>{
         fans = data.fans
         valves = data.valves
         tcans = data.tcans
-        magnets = data.magnets
+        magnets = Array.isArray(data.magnets) ? data.magnets : []
         polys= data.polys ? data.polys : []
         polys = data.polys.map(p =>
             (p instanceof Polygon)
