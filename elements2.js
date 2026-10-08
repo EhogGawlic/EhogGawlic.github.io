@@ -223,6 +223,9 @@ req.onsuccess = ()=>{
                 localStorage.removeItem("save")
             }
         }
+        if (getEl("sballsch").checked){
+            restoreFullSave(saveslot)
+        }
         loading=false
     }
 
@@ -285,3 +288,5 @@ loadTex("./textures/domer.png","domer")
 loadTex("./textures/bol2.png","bol2")
 loadTex("./textures/plastic.png","plastic")
 loadTex("./textures/potato.png","potato")
+
+    saveslotinp.value = saveslot;

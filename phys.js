@@ -1,4 +1,4 @@
-let frict = 0.995
+const airDrag = 0.005
 class Obj {
     p
     pp
@@ -44,10 +44,12 @@ class Obj {
                 this.v.x *= s
                 this.v.y *= s
             }
-            // slight damping to dissipate energy from constraint corrections
-            
-            this.v.x *= frict
-            this.v.y *= frict
+            const drag = Math.min(
+                0.01,
+                (airDrag * this.r * 2) / Math.max(this.w, 1)
+            )
+            this.v.x *= 1 - drag
+            this.v.y *= 1 - drag
 
             this.pp=this.p
             this.p=addVec(this.p, this.v)

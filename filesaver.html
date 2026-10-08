@@ -17,14 +17,13 @@
   const origin = location.origin;
   let pending = null;
   const ninp = document.getElementById("fnameinp")
-  // tell opener we are ready
   window.opener?.postMessage({ type: "FS_READY" }, origin);
 
   window.addEventListener("message", (e) => {
     if (e.origin !== origin) return;
     if (e.data?.type !== "FS_SAVE") return;
     pending = e.data; // { buffer, fileName, mime }
-    fnameinp.value=pending.fileName
+    ninp.value=pending.fileName
   });
 
   function saveNow() {
@@ -34,7 +33,7 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    const typedName = (fnameinp.value || pending.fileName || "save").trim();
+    const typedName = (ninp.value || pending.fileName || "save").trim();
     a.download = typedName || "save.psv";
     a.click();
     URL.revokeObjectURL(url);

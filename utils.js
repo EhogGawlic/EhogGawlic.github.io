@@ -830,13 +830,7 @@ String.prototype.removeCharAt = function (i) {
     return tmp.join(''); // reconstruct the string
 }
 function saveData(data, name) {
-    if(localStorage.getItem(name) !== null){
-        localStorage.clear()
-        localStorage.setItem(name, data);
-    }
-    else{
-        localStorage.setItem(name, data);
-    }
+    localStorage.setItem(name, data);
 }
 async function setCloudData() {
     return new Promise((resolve, reject) => {
@@ -1132,42 +1126,46 @@ function textToHTML(text){
     return text.replace("\n", "<br>")
 }
 function loadSave(slot){
-    const transaction = db.transaction(["saves"], "readonly")
-    const objectStore = transaction.objectStore("saves")
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["saves"], "readonly")
+        const objectStore = transaction.objectStore("saves")
+        const getRequest = objectStore.get(slot)
 
-    const getRequest = objectStore.get(slot)
-
-    getRequest.onsuccess = function(event) {
-        const data = event.target.result
-        lines = data.lines
-        fans = data.fans
-        valves = data.valves
-        tcans = data.tcans
-        lines.forEach(l=>{
-            if (!l.rail){
-                l.rail={
-                    has:false,
-                    kfs:[],
-                    t:0
+        getRequest.onsuccess = function(event) {
+            const data = event.target.result
+            if (data){
+                lines = data.lines || []
+                fans = data.fans || []
+                valves = data.valves || []
+                tcans = data.tcans || []
+                lines.forEach(l=>{
+                    if (!l.rail){
+                        l.rail={
+                            has:false,
+                            kfs:[],
+                            t:0
+                        }
+                    }
+                })
+                polys = (data.polys || []).map(p =>
+                    (p instanceof Polygon)
+                        ? p
+                        : new Polygon(p.vertices, p.color, p.position, p.angle, p.angularVelocity, p.velocity)
+                )
+                if (data.speedos){
+                    speedos = data.speedos
                 }
             }
-        })
-        // Example for loading:
-polys = data.polys.map(p =>
-    (p instanceof Polygon)
-        ? p
-        : new Polygon(p.vertices, p.color, p.position, p.angle, p.angularVelocity, p.velocity)
-);
-if (data.speedos){
-    speedos = data.speedos
-}
-    }
+            const infs = getStorage("infspace")
+            getEl("infspace").checked = infs === "true"
+            resolve(data)
+        }
 
-    getRequest.onerror = function() {
-        console.error("Failed to retrieve data.")
-    }
-    const infs = getStorage("infspace")
-    getEl("infspace").checked = infs === "true" ? true : false
+        getRequest.onerror = function() {
+            console.error("Failed to retrieve data.")
+            reject(getRequest.error)
+        }
+    })
 }
 
 function compareArr(arr1, arr2){

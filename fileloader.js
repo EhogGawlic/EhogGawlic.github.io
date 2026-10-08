@@ -46,7 +46,7 @@ function restoreUi(snap) {
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0005)
+    data.push(0x0006)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -163,6 +163,13 @@ function encodeNewFile(){
         })
     }
     data.push(ITEM)
+    bars.forEach(bar=>{
+        data.push(bar.b1)
+        data.push(bar.b2)
+        data.push(bar.l)
+        data.push(SEP)
+    })
+    data.push(ITEM)
     data.push(parseFloat(xinp.value))
     data.push(parseFloat(yinp.value))
     data.push(parseFloat(rinp.value))
@@ -185,6 +192,48 @@ function encodeNewFile(){
     })
     data.push(255) //padding to prevent cutoff
     return data
+}
+function encodeNewFileBase64(){
+    const bytes = new Uint8Array(new Float32Array(encodeNewFile()).buffer)
+    let binary = ""
+    const chunkSize = 0x8000
+    for (let offset = 0; offset < bytes.length; offset += chunkSize){
+        binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize))
+    }
+    return btoa(binary)
+}
+function decodeNewFileBase64(encoded){
+    let binary
+    let bytes
+    try{
+        binary = atob(encoded)
+        bytes = Uint8Array.from(binary, char => char.charCodeAt(0))
+    } catch {
+        return false
+    }
+    let data
+    if (bytes.byteLength % Float32Array.BYTES_PER_ELEMENT === 0){
+        data = new Float32Array(bytes.buffer)
+    }
+    if (!data || ![0, 1, 2, 3, 4, 5, 6].includes(data[0])){
+        const values = binary.split(",").map(Number)
+        if (!values.length || values.some(value => !Number.isFinite(value)) || ![0, 1, 2, 3, 4, 5].includes(values[0])) return false
+        data = new Float32Array(values)
+    }
+    objs = []
+    lines = []
+    fans = []
+    valves = []
+    tcans = []
+    springs = []
+    bars = []
+    decodeNewFile(data.buffer)
+    return true
+}
+function restoreFullSave(slot){
+    const encoded = localStorage.getItem(`fullsave${slot}`)
+    if (!encoded) return false
+    return decodeNewFileBase64(encoded)
 }
 function downloadFile(arr){
     const url = URL.createObjectURL(new Blob([new Float32Array(arr)], {type: 'application/octet-stream'}))
@@ -217,7 +266,7 @@ function decodeNewFile(data){
     if (typeof rbClear === "function"){
         rbClear()
     }
-    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005){
+    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005 || arr[0] == 0x0006){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -367,7 +416,7 @@ function decodeNewFile(data){
             })
         }
     }
-    if (arr[0] == 0x0005){
+    if (arr[0] == 0x0005 || arr[0] == 0x0006){
         const rbEnd = arr.indexOf(ITEM, idx)
         const rbdata = arr.slice(idx, rbEnd)
         idx = rbEnd + 1
@@ -407,10 +456,31 @@ function decodeNewFile(data){
             body.updateWorldVerts()
         })
     }
+    if (arr[0] >= 0x0006){
+        const barsEnd = arr.indexOf(ITEM, idx)
+        const barData = arr.slice(idx, barsEnd)
+        idx = barsEnd + 1
+        let barReadArr = [[]]
+        let last = barReadArr[0]
+        for (let i = 0; i < barData.length; i++){
+            if (barData[i] == SEP){
+                barReadArr.push([])
+                last = barReadArr[barReadArr.length-1]
+            } else {
+                last.push(barData[i])
+            }
+        }
+        barReadArr.pop()
+        barReadArr.forEach(bar=>{
+            if (bar.length >= 3){
+                bars.push({b1:bar[0],b2:bar[1],l:bar[2]})
+            }
+        })
+    }
     if (arr[0] < 0x0005 && typeof logOut === "function"){
         logOut("Note: This save version doesn't include rigidbodies. Resave with the latest version to keep boxes.")
     }
-    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005){
+    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005 || arr[0] == 0x0006){
         const metaEnd = arr.indexOf(ITEM, idx)
         const mdata = arr.slice(idx, metaEnd)
         idx = metaEnd + 1

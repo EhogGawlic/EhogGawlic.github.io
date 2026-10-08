@@ -1528,6 +1528,9 @@ acb.oncclick = function () {
 };
 window.addEventListener("beforeunload", () => {
   saveData(btoa(encode()), "save");
+  if (getEl("sballsch").checked) {
+    localStorage.setItem(`fullsave${saveslot}`, encodeNewFileBase64());
+  }
 });
 cresinp.addEventListener("change", () => {
   cres = cresinp.value;
@@ -1541,16 +1544,22 @@ tsbtn.onclick = () => {
 };
 saveslotinp.addEventListener("change", async () => {
   await setCloudData();
+  if (getEl("sballsch").checked) {
+    localStorage.setItem(`fullsave${saveslot}`, encodeNewFileBase64());
+  }
   lines = [];
   valves = [];
   fans = [];
   tcans = [];
   objs = [];
   polys = [];
-  localStorage.setItem("saveslot", saveslotinp.value);
   saveslot = parseInt(saveslotinp.value);
+  localStorage.setItem("saveslot", saveslot);
   saveData(saveslot, "saveslot");
-  loadSave(saveslot);
+  await loadSave(saveslot);
+  if (getEl("sballsch").checked) {
+    restoreFullSave(saveslot);
+  }
 });
 bldok.addEventListener("click", () => {
   const color = HEXRGB(btypeinp.value);
