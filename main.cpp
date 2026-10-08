@@ -88,3 +88,99 @@ void collideAllBalls(float* balls, int count){
         collideBallForObject(balls, count, i);
     }
 }
+
+// ---------------------------------------------------------------------------
+// Uniform grid broad phase
+// ---------------------------------------------------------------------------
+static constexpr int GRID_MAX  = 128;                     // max cells per axis (before +1)
+static constexpr int GRID_DIM  = GRID_MAX + 1;
+static constexpr int MAX_CELLS = GRID_DIM * GRID_DIM;
+
+// Number of ints JS must reserve for the scratch area.
+WASM_EXPORT
+int gridScratchInts(int count){
+    return 2 * count + MAX_CELLS + 1;   // cellOf[count] + order[count] + cellStart[MAX_CELLS + 1]
+}
+
+//please dont get mad at me for using ai
+WASM_EXPORT
+void collideAllBallsGrid(float* balls, int count, int* scratch){
+    int* cellOf    = scratch;                 // cell index per ball, -1 = skipped
+    int* order     = scratch + count;         // ball indices sorted by cell
+    int* cellStart = scratch + 2 * count;     // MAX_CELLS + 1 entries
+
+    // 1. bounds + largest radius (ignore balls with radius <= 0, collideBalls ignores them too)
+    float minX = 1e30f, minY = 1e30f, maxX = -1e30f, maxY = -1e30f, maxR = 0.0f;
+    int active = 0;
+    for (int i = 0; i < count; ++i) {
+        const float* b = balls + i * BALL_STRIDE;
+        if (b[2] <= 0) continue;
+        ++active;
+        if (b[0] < minX) minX = b[0];
+        if (b[0] > maxX) maxX = b[0];
+        if (b[1] < minY) minY = b[1];
+        if (b[1] > maxY) maxY = b[1];
+        if (b[2] > maxR) maxR = b[2];
+    }
+    if (active < 2) return;
+
+    // 2. cell size: >= 2*maxR so any overlapping pair is within neighbouring cells,
+    //    and large enough that we never exceed GRID_MAX cells per axis
+    const float extentX = maxX - minX;
+    const float extentY = maxY - minY;
+    float cell = 2.0f * maxR;
+    const float minCell = (extentX > extentY ? extentX : extentY) / (float)GRID_MAX;
+    if (minCell > cell) cell = minCell;
+    const float inv = 1.0f / cell;
+    int gw = (int)(extentX * inv) + 1;
+    int gh = (int)(extentY * inv) + 1;
+    if (gw > GRID_DIM) gw = GRID_DIM;
+    if (gh > GRID_DIM) gh = GRID_DIM;
+    const int cells = gw * gh;
+
+    // 3. counting sort of balls into cells
+    for (int c = 0; c <= cells; ++c) cellStart[c] = 0;
+    for (int i = 0; i < count; ++i) {
+        const float* b = balls + i * BALL_STRIDE;
+        if (b[2] <= 0) { cellOf[i] = -1; continue; }
+        int cx = (int)((b[0] - minX) * inv);
+        int cy = (int)((b[1] - minY) * inv);
+        if (cx >= gw) cx = gw - 1;
+        if (cy >= gh) cy = gh - 1;
+        const int c = cy * gw + cx;
+        cellOf[i] = c;
+        ++cellStart[c + 1];
+    }
+    for (int c = 0; c < cells; ++c) cellStart[c + 1] += cellStart[c];
+    // cellStart[c] is now the first slot of cell c; use a moving write cursor stored in-place
+    // (cursor trick: fill using cellStart[c]++ then shift back afterwards)
+    for (int i = 0; i < count; ++i) {
+        const int c = cellOf[i];
+        if (c >= 0) order[cellStart[c]++] = i;
+    }
+    // after filling, cellStart[c] == end of cell c == start of cell c+1; shift right by one
+    for (int c = cells; c > 0; --c) cellStart[c] = cellStart[c - 1];
+    cellStart[0] = 0;
+
+    // 4. narrow phase: same pairwise rule as collideAllBalls, but only against the 3x3 neighbourhood
+    for (int i = 0; i < count; ++i) {
+        const int ci = cellOf[i];
+        if (ci < 0) continue;
+        float* a = balls + i * BALL_STRIDE;
+        const int cx = ci % gw;
+        const int cy = ci / gw;
+        const int y0 = cy > 0 ? cy - 1 : 0;
+        const int y1 = cy < gh - 1 ? cy + 1 : gh - 1;
+        const int x0 = cx > 0 ? cx - 1 : 0;
+        const int x1 = cx < gw - 1 ? cx + 1 : gw - 1;
+        for (int ny = y0; ny <= y1; ++ny) {
+            for (int nx = x0; nx <= x1; ++nx) {
+                const int c = ny * gw + nx;
+                for (int k = cellStart[c]; k < cellStart[c + 1]; ++k) {
+                    const int j = order[k];
+                    if (j != i) collideBalls(a, balls + j * BALL_STRIDE);
+                }
+            }
+        }
+    }
+}

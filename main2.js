@@ -137,6 +137,7 @@ function run() {
     });
     if (!paused) applyMagneticForces();
 
+    if (!paused) stepFlip(objs); 
     objs.forEach((obj) => {
       obj.draw();
 
@@ -350,18 +351,15 @@ function run() {
     });
     if (!paused || ceinp.checked) {
       for (let n = 0; n < parseInt(substeps.value); n++) {
-        const wasmHandledBallCollisions = beginWasmBallCollisions(objs);
-        for (let i = 0; i < objs.length; i++) {
-          const obj = objs[i];
-          const wasmHandledObjectCollisions =
-            wasmHandledBallCollisions && runWasmBallCollisionsForObject(i, obj);
-          obj.collall(!wasmHandledObjectCollisions);
+        
+
+        // in the substep loop:
+        const wasmOk = collideAllWasm(objs);
+        for (const obj of objs) {
+          obj.collall(!wasmOk);   // valves + magnets (+ JS balls if wasm failed)
           obj.collwall();
           obj.surfTens();
           obj.tb = [];
-          if (wasmHandledObjectCollisions) {
-            syncWasmBallPosition(i, obj);
-          }
         }
         // relax constraints iteratively to improve stability
         const constraintIters = parseInt(substeps.value);

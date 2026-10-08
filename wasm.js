@@ -1,6 +1,7 @@
 let wasmCollisionReady = false;
 let wasmCollisionExports;
 let wasmCollisionOffset = 0;
+let wasmScratchOffset = 0;
 const wasmBallStride = 7;
 
 async function initializeWasmCollisions() {
@@ -35,7 +36,12 @@ function beginWasmBallCollisions(objects) {
   try {
     const memory = wasmCollisionExports.memory;
     const floatCount = objects.length * wasmBallStride;
-    const requiredBytes = wasmCollisionOffset + floatCount * Float32Array.BYTES_PER_ELEMENT;
+    const ballBytes = floatCount * Float32Array.BYTES_PER_ELEMENT;
+    // grid scratch (cell ids, sorted order, cell starts) lives right after the balls
+    wasmScratchOffset = (wasmCollisionOffset + ballBytes + 15) & ~15;
+    const scratchBytes =
+      wasmCollisionExports.gridScratchInts(objects.length) * Int32Array.BYTES_PER_ELEMENT;
+    const requiredBytes = wasmScratchOffset + scratchBytes;
     const missingBytes = requiredBytes - memory.buffer.byteLength;
     if (missingBytes > 0) {
       memory.grow(Math.ceil(missingBytes / 65536));
@@ -96,4 +102,35 @@ function syncWasmBallPosition(index, object) {
   const offset = index * wasmBallStride;
   balls[offset] = object.p.x;
   balls[offset + 1] = object.p.y;
+}
+
+// One wasm call per substep: upload, grid-accelerated collisions, copy everything back.
+function collideAllWasm(objects) {
+  if (!beginWasmBallCollisions(objects)) return false;
+  try {
+    const fn = wasmCollisionExports.collideAllBallsGrid;
+    if (fn) {
+      fn(wasmCollisionOffset, objects.length, wasmScratchOffset);
+    } else {
+      wasmCollisionExports.collideAllBalls(wasmCollisionOffset, objects.length);
+    }
+    const balls = new Float32Array(
+      wasmCollisionExports.memory.buffer,
+      wasmCollisionOffset,
+      objects.length * wasmBallStride,
+    );
+    for (let i = 0; i < objects.length; i++) {
+      const o = objects[i];
+      const k = i * wasmBallStride;
+      o.p.x = balls[k];
+      o.p.y = balls[k + 1];
+      o.a.x = balls[k + 5];
+      o.a.y = balls[k + 6];
+    }
+    return true;
+  } catch (error) {
+    wasmCollisionReady = false;
+    console.error("WASM collision call failed; using JavaScript", error);
+    return false;
+  }
 }

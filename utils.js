@@ -131,9 +131,6 @@ let lines = [],
     curp = [],
     ms=1,
     consolehist = [],
-    flipP=[],
-    flipR=[],
-    flipW=[],
     bars=[],
     disfans =false,
     motor2s=[],                                                                                                                                                
@@ -189,24 +186,7 @@ let lines = [],
     hshift = false,
     semv = {x:0,y:0},
     sclick = {x:0,y:0}
-for (let y = 0; y < fliprows; y++){
-    flipP.push([])
-    for (let x = 0; x < flipcols; x++){
-        flipP[y].push({x:null,y:null})
-    }
-}
-for (let y = 0; y < fliprows; y++){
-    flipR.push([])
-    for (let x = 0; x < flipcols; x++){
-        flipR[y].push({x:null,y:null})
-    }
-}
-for (let y = 0; y < fliprows; y++){
-    flipW.push([])
-    for (let x = 0; x < flipcols; x++){
-        flipW[y].push({w1:null,w2:null,w3:null,w4:null})
-    }
-}
+
 
 const hRGBa = {"0":0,"1":1,"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"a":10,"b":11,"c":12,"d":13,"e":14,"f":15}
 const rHEXa = ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"]

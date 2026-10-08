@@ -144,55 +144,6 @@ class Obj {
             this.collline(l)
         })
     }
-    getFLIPpos(){
-        return {x: Math.floor(this.p.x/cellsize), y: Math.floor(this.p.y/cellsize)}
-    }
-    getFLIPweights(dx,dy){
-        const dxc = dx/cellsize
-        const dyc = dy/cellsize
-        const w1 = (1-dxc)*(1-dyc)
-        const w2 = dxc*(1-dyc)
-        const w3 = dxc*dyc
-        const w4 = (1-dxc)*dyc
-        return [w1,w2,w3,w4]
-    }
-    getFLIPQP(weights, cell){
-        const q1 = flipP[cell.y][cell.x]
-        const q2 = flipP[cell.y][cell.x+1]
-        const q4 = flipP[cell.y+1][cell.x]
-        const q3 = flipP[cell.y+1][cell.x+1]
-
-        let result = divVecCon(
-            addVec(addVec(addVec(
-            multVecCon(q1, weights[0]),
-            multVecCon(q2, weights[1])),
-            multVecCon(q3, weights[2])),
-            multVecCon(q4, weights[3])),
-        
-            weights[0]+
-            weights[1]+
-            weights[2]+
-            weights[3]
-        )
-        result.y -= cellsize*0.5
-        return {r:result,q:[q1,q2,q3,q4]}
-    }
-    flip(){
-        const cell = this.getFLIPpos()
-        const d = subVec(this.p, multVecCon(cell,cellsize))
-        const weights = this.getFLIPweights(d.x, d.y)
-        const result = this.getFLIPQP(weights, cell)
-        const r = result.r
-        const q = result.q
-        flipP[cell.y][cell.x] = q[0]
-        flipP[cell.y][cell.x+1] = q[1]
-        flipP[cell.y+1][cell.x] = q[3]
-        flipP[cell.y+1][cell.x+1] = q[2]
-        flipR[cell.y][cell.x] += r[0]*weights[0]
-        flipR[cell.y][cell.x+1] += r[1]*weights[1]
-        flipR[cell.y+1][cell.x] += r[3]*weights[3]
-        flipR[cell.y+1][cell.x+1] += r[2]*weights[2]
-    }
     collideball(b){
         //ua+ab=va+vb
         //v' = (m1v1 + m2v2)/m1 + m2.
@@ -362,47 +313,5 @@ function addFan(x,y,speed,d,mp){
         s:speed,
         dir:d,
         md:dist({x,y},mp)
-    })
-}
-function runFLIP(){
-    for (let y = 0; y < fliprows; y++){
-        for (let x = 0; x < flipcols; x++){
-            flipP[y][x]={x:null,y:null}
-        }
-    }
-    for (let y = 0; y < fliprows; y++){
-        for (let x = 0; x < flipcols; x++){
-            flipR[y][x]=null
-        }
-    }
-    objs.forEach(o => {
-        if (o.liquid){
-            o.flip()
-        }
-    })
-    for (let i = 0; i < substeps; i++){
-        for (let y = 0; y < fliprows; y++){
-            for (let x = 0; x < flipcols; x++){
-                const cell = flipP[y][x]
-                const r1 = flipR[y][x]
-                let q1 = flipP[y][x]
-                let q2 = flipP[y][x+1]
-                const r2 = flipR[y][x+1]
-                let q4 = flipP[y+1][x]
-                const r4 = flipR[y+1][x]
-                let q3 = flipP[y+1][x+1]
-                const r3 = flipR[y+1][x+1]
-                q1 = divVecCon(q1, r1)
-                q2 = divVecCon(q2, r2)
-                q3 = divVecCon(q3, r3)
-                q4 = divVecCon(q4, r4)
-
-            }
-        }
-    }   
-    objs.forEach(o => {
-        if (o.liquid){
-            
-        }
     })
 }
