@@ -111,7 +111,7 @@ function base64ToArrayBuffer(base64) {
 }
 //and from now on is my code :)
 let meterPixRatio = innerHeight/500
-let targetRate=250
+let targetRate=60
 const filterS = 10
 let frameTime = 0, lastLoop = Date.now(), thisLoop, fps, pfps
 let fric = 1.001
@@ -124,6 +124,7 @@ let lines = [],
     emv = {x:0,y:0},
     curp = [],
     ms=1,
+    gpuLoaded=false,
     consolehist = [],
     bars=[],
     disfans =false,
@@ -198,12 +199,12 @@ function loadJSON(files){
  */
 function HEXRGB(from){
     let c = [0,0,0]
-    c[0]=hRGBa[from.charAt(1)]*16
-    c[0]+=hRGBa[from.charAt(2)]
-    c[1]=hRGBa[from.charAt(3)]*16
-    c[1]+=hRGBa[from.charAt(4)]
-    c[2]=hRGBa[from.charAt(5)]*16
-    c[2]+=hRGBa[from.charAt(6)]
+    c[0]=hRGBa[from.charAt(1)]*16 // the fact--------|
+    c[0]+=hRGBa[from.charAt(2)]+1 // that this is----|
+    c[1]=hRGBa[from.charAt(3)]*16 // straightis------|
+    c[1]+=hRGBa[from.charAt(4)]+1 // oddly satisfying|
+    c[2]=hRGBa[from.charAt(5)]*16 // though this-----|
+    c[2]+=hRGBa[from.charAt(6)]+1 // text isn't :(---|
     
     return c
 }

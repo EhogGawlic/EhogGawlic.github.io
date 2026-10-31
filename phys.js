@@ -1,3 +1,7 @@
+// Reading window.innerHeight is a native DOM getter call; doing it per ball per substep is very
+// slow. Cache it and refresh only when the window actually changes size.
+let wallEdge = innerHeight - 75
+addEventListener("resize", () => { wallEdge = innerHeight - 75 })
 const airDrag = 0.005
 class Obj {
     p
@@ -129,12 +133,12 @@ class Obj {
     }
     collwall(){
         if (!inf){
-            if (this.p.y>=innerHeight-this.r-75){
-                this.p.y=innerHeight-this.r-75
+            if (this.p.y>=wallEdge-this.r){
+                this.p.y=wallEdge-this.r
                 this.pp.y = this.p.y+this.v.y*this.b
             }
-            if (this.p.x>=innerHeight-this.r-75){
-                this.p.x=innerHeight-this.r-75
+            if (this.p.x>=wallEdge-this.r){
+                this.p.x=wallEdge-this.r
                 this.pp.x = this.p.x+this.v.x*this.b
             }
             if (this.p.x<=this.r){
@@ -142,9 +146,29 @@ class Obj {
                 this.pp.x = this.p.x+this.v.x*this.b
             }
         }
-        lines.forEach(l => {
-            this.collline(l)
-        })
+        // Lines: uses the per-substep cache built by prepareLines() (call it once per substep,
+        // before the ball loop). Same math as collline(), with no allocations and a cheap
+        // bounding-box reject so most balls skip most lines.
+        const L = lineCache
+        const r = this.r
+        for (let i = 0, o = 0; i < lineCacheN; i++, o += LINE_STRIDE) {
+            const px = this.p.x, py = this.p.y
+            const hw = L[o + 5]
+            const m = r + hw
+            if (px + m < L[o + 6] || px - m > L[o + 7] || py + m < L[o + 8] || py - m > L[o + 9]) continue
+            const x1 = L[o], y1 = L[o + 1], dx = L[o + 2], dy = L[o + 3]
+            let t = ((px - x1) * dx + (py - y1) * dy) * L[o + 4]
+            t = t < 0 ? 0 : (t > 1 ? 1 : t)                 // closest point on the segment
+            const ex = px - (x1 + t * dx)
+            const ey = py - (y1 + t * dy)
+            const d2 = ex * ex + ey * ey
+            if (d2 <= m * m && d2 > 0) {
+                const d = Math.sqrt(d2)
+                const k = (r + hw - d) / d                  // push out along the contact normal
+                this.p.x = px + ex * k
+                this.p.y = py + ey * k
+            }
+        }
     }
     collideball(b){
         //ua+ab=va+vb
@@ -316,4 +340,47 @@ function addFan(x,y,speed,d,mp){
         dir:d,
         md:dist({x,y},mp)
     })
+}
+
+// ---------------------------------------------------------------------------
+// Per-substep line cache. Call prepareLines() once per substep BEFORE looping over balls.
+// Per line (stride 10): x1, y1, dx, dy, 1/len^2, halfWidth, minX, maxX, minY, maxY
+// (world space, after rotation about l.m.p and the rail offset).
+// ---------------------------------------------------------------------------
+const LINE_STRIDE = 10
+let lineCache = new Float64Array(0)
+let lineCacheN = 0
+function prepareLines() {
+    const n = lines.length
+    if (lineCache.length < n * LINE_STRIDE) lineCache = new Float64Array(n * LINE_STRIDE)
+    for (let i = 0, o = 0; i < n; i++, o += LINE_STRIDE) {
+        const l = lines[i]
+        let npx = 0, npy = 0
+        const rail = l.rail
+        if (rail && rail.has && rail.kfs.length) {
+            let rl = 0
+            for (const kf of rail.kfs) rl += Math.hypot(kf.ep.x - kf.sp.x, kf.ep.y - kf.sp.y)
+            let td = rail.t / rl
+            if (td > 1) td = 2 - td
+            const k0 = rail.kfs[0]
+            npx = (k0.ep.x - k0.sp.x) * td
+            npy = (k0.ep.y - k0.sp.y) * td
+        }
+        const c = Math.cos(l.m.t), s = Math.sin(l.m.t), mp = l.m.p
+        const ax = l.p1.x - mp.x, ay = l.p1.y - mp.y
+        const bx = l.p2.x - mp.x, by = l.p2.y - mp.y
+        const x1 = ax * c - ay * s + mp.x + npx
+        const y1 = ax * s + ay * c + mp.y + npy
+        const x2 = bx * c - by * s + mp.x + npx
+        const y2 = bx * s + by * c + mp.y + npy
+        const dx = x2 - x1, dy = y2 - y1
+        const len2 = dx * dx + dy * dy
+        lineCache[o] = x1;     lineCache[o + 1] = y1
+        lineCache[o + 2] = dx; lineCache[o + 3] = dy
+        lineCache[o + 4] = len2 > 0 ? 1 / len2 : 0
+        lineCache[o + 5] = l.w / 2
+        lineCache[o + 6] = Math.min(x1, x2); lineCache[o + 7] = Math.max(x1, x2)
+        lineCache[o + 8] = Math.min(y1, y2); lineCache[o + 9] = Math.max(y1, y2)
+    }
+    lineCacheN = n
 }

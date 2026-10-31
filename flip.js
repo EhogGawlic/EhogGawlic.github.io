@@ -51,8 +51,8 @@ class FlipFluid {
     this.walls = Object.assign({ left: true, right: true, bottom: true, top: false }, o.walls);
 
     // tuning knobs
-    this.flipRatio  = o.flipRatio  ?? 0.9;   // 0 = pure PIC (smooth, viscous), 1 = pure FLIP (lively, noisy)
-    this.iterations = o.iterations ?? 30;    // Gauss-Seidel passes; more = more incompressible, slower
+    this.flipRatio  = o.flipRatio  ?? 0.95;   // 0 = pure PIC (smooth, viscous), 1 = pure FLIP (lively, noisy)
+    this.iterations = o.iterations ?? 70;    // Gauss-Seidel passes; more = more incompressible, slower
     this.overRelax  = o.overRelax  ?? 1.9;   // 1..2, speeds up convergence
     this.driftK     = o.driftK     ?? 0.25;  // how hard to push particles apart where they're too dense
     // particles per cell when packed hexagonally; compression above this gets pushed out

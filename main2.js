@@ -1,3 +1,7 @@
+
+initWebGPU().then(()=>{
+  gpuLoaded=true
+})
 function applyMagneticForces() {
   const magneticAccelerations = objs.map(() => ({ x: 0, y: 0 }));
   const addMagneticForce = (index, force) => {
@@ -64,16 +68,16 @@ setInterval(() => {
   setCloudData();
   saveData(getEl("infcheck").checked ? "true" : "", "infspace");
 }, sps.value * 1000);
-function run() {
+async function run() {
   getEl("main").style.display = "block";
   const div = getEl("lrt");
-  const r = (t * 200) / 250;
+  const r = (t * 200) / 60;
   div.style.webkitTransform = "rotate(" + r + "deg)";
   div.style.mozTransform = "rotate(" + r + "deg)";
   div.style.msTransform = "rotate(" + r + "deg)";
   div.style.oTransform = "rotate(" + r + "deg)";
   div.style.transform = "rotate(" + r + "deg)";
-  if (loading) {
+  if (loading && gpuLoaded) {
   } else {
     tsl += Math.sin((tsl / targetRate) * Math.PI * 0.5) * 3 + 0.35;
     if (tsl >= targetRate) {
@@ -353,10 +357,10 @@ function run() {
       for (let n = 0; n < parseInt(substeps.value); n++) {
         
 
-        // in the substep loop:
-        const wasmOk = collideAllWasm(objs);
+        prepareLines();
+        const accelOk = (await collideAllGPU(objs, 1)) || collideAllWasm(objs);
         for (const obj of objs) {
-          obj.collall(!wasmOk);   // valves + magnets (+ JS balls if wasm failed)
+          obj.collall(!accelOk);
           obj.collwall();
           obj.surfTens();
           obj.tb = [];
@@ -576,8 +580,10 @@ function run() {
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
   //
+  requestAnimationFrame(run)
 }
-let loop = setInterval(run, 1000 / targetRate);
+setTimeout(run, 2000)
+
 abbtn.addEventListener("click", () => {
   addObj(
     parseFloat(xinp.value) * meterPixRatio,

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <canvas></canvas>
+    <script src="./wgpu.js"></script>
+    <script>
+      const canvas = document.querySelector("canvas")
+      canvas.width=800
+      canvas.height=600
+      const ctx = canvas.getContext("2d")
+      async function doSh() {
+        await initWebGPU()
+        const bodies = []
+        for (let i = 0; i < 2000; i++) {
+            bodies.push({ x: Math.random() * 800, y: Math.random() * 600,
+                          vx: (Math.random() - 0.5) * 200, vy: (Math.random() - 0.5) * 200, r: 4 })
+        }
+        await initBuffers(packBodies(bodies), [800, 600])
+
+        async function frame() {
+            const out = await runCollisionsWithSubsteps(8)   // 8 substeps, state stays on the GPU between frames
+            // draw `out` here: out[i*6] = x, out[i*6+1] = y, out[i*6+4] = radius
+            for (let i = 0; i < 2000; i++){
+              const x = out[i*6]
+              const y = out[i*6+1]
+              const r = out[i*6+4]
+              ctx.beginPath()
+              ctx.arc(x,y,r, 0, 2 * Math.PI)
+              ctx.stroke()
+              ctx.fill()
+            }
+            requestAnimationFrame(frame)
+        }
+        frame()
+      }
+      doSh()
+    </script>
+</body>
+</html>

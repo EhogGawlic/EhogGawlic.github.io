@@ -46,7 +46,7 @@ function restoreUi(snap) {
 
 function encodeNewFile(){
     const data = []//new Float32Array()
-    data.push(0x0006)
+    data.push(0x0007)
     objs.forEach(obj => {
         data.push(obj.n)
         addVector(data, obj.p)
@@ -170,6 +170,7 @@ function encodeNewFile(){
         data.push(SEP)
     })
     data.push(ITEM)
+    
     data.push(parseFloat(xinp.value))
     data.push(parseFloat(yinp.value))
     data.push(parseFloat(rinp.value))
@@ -189,6 +190,11 @@ function encodeNewFile(){
 
         data.push(...stringToArr(name),...stringToArr(val))
         data.push(0x676767)
+    })
+    data.push(ITEM)
+    magnets.forEach(mag =>{
+        data.push(mag.x)
+        data.push(mag.y)
     })
     data.push(255) //padding to prevent cutoff
     return data
@@ -266,7 +272,7 @@ function decodeNewFile(data){
     if (typeof rbClear === "function"){
         rbClear()
     }
-    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005 || arr[0] == 0x0006){
+    if (arr[0] == 0 || arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005 || arr[0] == 0x0006 || arr[0] == 0x0007){
         {
             const ballsEnd = arr.indexOf(ITEM, idx)
             const balls = arr.slice(idx, ballsEnd)
@@ -350,7 +356,7 @@ function decodeNewFile(data){
                     md:f[5]
                 })
             })
-            //good enough lets 𝗻𝗼𝘁 stop
+            //good enough lets 𝙣𝙤𝙩 stop
         }
         {
             const valvesEnd = arr.indexOf(ITEM, idx)
@@ -416,7 +422,7 @@ function decodeNewFile(data){
             })
         }
     }
-    if (arr[0] == 0x0005 || arr[0] == 0x0006){
+    if (arr[0] >= 0x0005){
         const rbEnd = arr.indexOf(ITEM, idx)
         const rbdata = arr.slice(idx, rbEnd)
         idx = rbEnd + 1
@@ -480,7 +486,7 @@ function decodeNewFile(data){
     if (arr[0] < 0x0005 && typeof logOut === "function"){
         logOut("Note: This save version doesn't include rigidbodies. Resave with the latest version to keep boxes.")
     }
-    if (arr[0] == 0x0001 || arr[0] == 0x0002 || arr[0] == 0x0003 || arr[0] == 0x0004 || arr[0] == 0x0005 || arr[0] == 0x0006){
+    if (arr[0] >= 0x0001){
         const metaEnd = arr.indexOf(ITEM, idx)
         const mdata = arr.slice(idx, metaEnd)
         idx = metaEnd + 1
@@ -533,6 +539,10 @@ function decodeNewFile(data){
                 console.log(str1,str2)
                 loadTex(str2,str1)
             })
+        }
+        if (arr[0] >= 0x0007){
+            // whatever
+            // TODO: Add magnet saving
         }
     }
     if (preserveUiOnLoad){

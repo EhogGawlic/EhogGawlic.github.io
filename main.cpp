@@ -1,20 +1,27 @@
 #define WASM_EXPORT extern "C" __attribute__((visibility("default")))
 #include <stdint.h>
 
-static uint64_t state0 = 0x123456789ABCDEF0ULL;
-static uint64_t state1 = 0xFEDCBA9876543210ULL;
+static uint64_t state0 = 123456789ULL;
+static uint64_t state1 = 987654321ULL;
 
 static uint64_t xorshift128plus(void) {
     uint64_t s1 = state0;
     const uint64_t s0 = state1;
     state0 = s0;
-    s1 ^= s1 << 23; // shift a
-    state1 = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5); // shift b, shift c
+    s1 ^= s1 << 23; 
+    state1 = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5); 
     return state1 + s0;
 }
 
-static float randomFloat() {
-    return (float)(xorshift128plus() & 0xFFFFFFFF) / (float)0x100000000;
+static float randomFloat(void) {
+    uint64_t r = xorshift128plus();
+    // 1. Get 23 random bits for the float mantissa
+    uint32_t bits = (uint32_t)(r & 0x7FFFFF);
+    // 2. Combine with the exponent bits for the range [1.0, 2.0)
+    bits |= 0x3F800000;
+    // 3. Cast back to float and subtract 1.0 to get the range [0.0, 1.0)
+    union { uint32_t i; float f; } u = { bits };
+    return u.f - 1.0f;
 }
 
 static constexpr int BALL_STRIDE = 7;
@@ -102,7 +109,6 @@ int gridScratchInts(int count){
     return 2 * count + MAX_CELLS + 1;   // cellOf[count] + order[count] + cellStart[MAX_CELLS + 1]
 }
 
-//please dont get mad at me for using ai
 WASM_EXPORT
 void collideAllBallsGrid(float* balls, int count, int* scratch){
     int* cellOf    = scratch;                 // cell index per ball, -1 = skipped
