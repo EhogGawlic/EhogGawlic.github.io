@@ -139,7 +139,6 @@ function run() {
 
     if (!paused) stepFlip(objs); 
     objs.forEach((obj) => {
-      obj.draw();
 
       if (!paused) {
         if (!disfans) {
@@ -182,6 +181,7 @@ function run() {
         obj.phys();
       }
     });
+    renderAllBalls()
     if (typeof rbDrawAll === "function") {
       rbDrawAll();
       if (!paused) {

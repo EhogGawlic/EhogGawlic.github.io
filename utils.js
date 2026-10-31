@@ -1,9 +1,3 @@
-//wire error output
-
-window.addEventListener("onerror",(e)=>{
-logOut(JSON.parse(e))
-})
-
 
 
 

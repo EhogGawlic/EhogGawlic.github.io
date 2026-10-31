@@ -5,13 +5,14 @@
 button {
   cursor: pointer;
 }
-#canvas {
+#canvas, #glCanv {
   position: absolute;
   left: 0;
   bottom: 0;
   top: 75px;
   cursor: pointer;
 }
+
 #main {
   position: absolute;
   top: 0;

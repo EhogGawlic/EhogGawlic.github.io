@@ -20,6 +20,7 @@
 
 <body>
   <div id="main">
+    <canvas id="glCanv"></canvas>
     <canvas id="canvas"> UR CANVAS (loading) </canvas>
 
     <div id="leftmenu">
@@ -119,6 +120,7 @@
             offX = 0;
             rmenu.style.left = canvas.width + 'px';
             canvas.style.left = '0';
+            glCanv.style.left = '0';
           ">
         X
       </button>
@@ -566,6 +568,7 @@
                   offX = 300;
                   rmenu.style.left = offX + canvas.width + 'px';
                   canvas.style.left = '300px';
+                  glCanv.style.left = '300px';
                 ">Left bar</span><br/>
             <span onclick="settings.style.display = 'block'">Settings</span><br/>
             <span onclick="bottommenu.style.display = 'block'">Bottom bar</span><br/>
@@ -598,6 +601,7 @@
   </div>
   <div id="footer">v3.7.11</div>
   <script src="elements2.js"></script>
+  <script src="webgl.js"></script>
   <script src="phys.js"></script>
   <script src="polygon.js"></script>
   <script src="wasm.js"></script>
