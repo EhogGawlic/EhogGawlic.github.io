@@ -656,6 +656,11 @@ window.addEventListener("keypress", (e) => {
         break;
       case "d":
         deleting = true;
+        break;
+      case "z":
+        if (e.ctrlKey){
+          lines.splice(lines.length - 1, 1)
+        }
     }
   }
 });
@@ -1234,15 +1239,11 @@ window.onclick = (e) => {
         }
     }
   }
-  //
-  // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-  // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-  // GYATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
-  //
 };
 abarbtn.addEventListener("click", () => {
   arope.ia = true;
   arope.t = 3;
+  
 });
 rinp.addEventListener("change", () => {
   winp.value = Math.PI * parseFloat(rinp.value) ** 2 * parseFloat(dinp.value);
