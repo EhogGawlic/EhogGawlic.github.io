@@ -1326,18 +1326,6 @@ presets.addEventListener("change", () => {
   document.cookie = "btype=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   document.cookie = 'btype="' + presets.value + '"; path=/;';
 });
-selectbtn.addEventListener("click", () => {
-  if (selecting) {
-    selecting = false;
-    ball = null;
-    canvas.style.cursor = "crosshair";
-  } else {
-    selecting = true;
-    canvas.style.cursor = "grab";
-  }
-
-  selectbtn.style.backgroundColor = selecting ? "green" : "gray";
-});
 rbbtn.addEventListener("click", () => {
   if (!sil) {
     objs.splice(selected, 1);
