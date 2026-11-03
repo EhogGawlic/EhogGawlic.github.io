@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test w/ three.js</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="leftbar">
+        <div class="section">
+            <button id="add-ball" type="button">Add Ball</button><br>
+            <button id="add-box" type="button">Add Box</button><br>
+            Show CoACD hulls <input type="checkbox" id="show-collider"><br>
+            Fixed <input type="checkbox" id="fxchk"><br>
+            Color <input type="color" id="bclr"><br><br>
+            <div class="inp">Width <input type="number" value="20" id="bwidi"></div>
+            <div class="inp">Height <input type="number" value="20" id="bheii"></div>
+            <div class="inp">Depth <input type="number" value="20" id="bdepi"></div>
+            <div class="inp">X <input type="number" value="0" id="bxi"></div>
+            <div class="inp">Y <input type="number" value="0" id="byi"></div>
+            <div class="inp">Z <input type="number" value="0" id="bzi"></div>
+        </div>
+        <div class="section">
+            <button id="clearbtn" type="button">CLEAR</button><br>
+            Modes: <br>
+            <button id="modetrans">Transform</button><br>
+            <button id="modescale">Scale</button><br>
+            <button id="moderot">Rotate</button><br>
+        </div>
+        <div class="section">
+            <button id="wbtn">Weld</button>
+        </div>
+        <div class="section">
+            Fixed <input type="checkbox" id="fxchk2">
+        </div>
+    </div>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+                "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.webgpu.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
