@@ -2,7 +2,7 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {Engine} from "./Fizks/main.js"
+import {Engine} from "https://raw.githubusercontent.com/EhogGawlic/3D-physics-lib/refs/heads/main/main.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
