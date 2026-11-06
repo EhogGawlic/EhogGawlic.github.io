@@ -27,7 +27,7 @@ renderer.shadowMap.enabled = true
 renderer.setSize(WIDTH, HEIGHT)
 renderer.setClearColor(0xdddddd, 1)
 document.body.appendChild(renderer.domElement)
-
+let paused = false
 await renderer.init()
 
 const scene = new THREE.Scene()
@@ -409,6 +409,9 @@ $("bmp").addEventListener("change", function(e){
 $("pauplaybtn").addEventListener("click", ()=>{
     paused = !paused
     $("pauplaybtn").style.backgroundColor = paused ? "#820000" : "#118200"
+})
+$("cbalsbtn").addEventListener("click", ()=>{
+    clearB()
 })
 for (let i = 0; i < 100; i++){
     addBoxRnd()
