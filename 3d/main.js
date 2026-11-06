@@ -161,17 +161,17 @@ function addBoxRnd(fixed=false, options={color: '#ff95dd'}){
     initCb({ x: Math.random()*5, y: Math.random()*5, z: Math.random()*5, w: 30, h: 20, d: 30, mass: 60, fixed, ...options })
 }
 
-function addBall(fixed=false){
-    const radius = 8
+function addBall(fixed=false,rad=8, color="#18a8d1"){
+    const radius = rad
     const x = am.position.x
     const z = am.position.z
     const y = am.position.y-25
     
-    engine.addObj({ x, y, z, rad: radius, mass: 2, bounce: 0.1, fixed })
-
+    engine.addObj({ x, y, z, rad: radius, mass: radius**2*Math.PI, bounce: 0.1, fixed })
+    const nclr = new THREE.Color(color)
     const mesh = new THREE.Mesh(
         new THREE.SphereGeometry(radius, 20, 14),
-        new THREE.MeshStandardMaterial({ color: 0x18a8d1, roughness: 0.55 })
+        new THREE.MeshStandardMaterial({ color: nclr, roughness: 0.55 })
     )
     mesh.castShadow = true
     mesh.receiveShadow = true
@@ -218,13 +218,31 @@ function clear(){
     gcube.position.set(0, -200, 0)
     scene.add(gcube)
 }
+function clearB(){
+    if (transformControls) {
+        transformControls.detach()
+    }
+    for (const item of balls) {
+        scene.remove(item.mesh)
+        if (item.mesh.geometry) item.mesh.geometry.dispose()
+        if (item.mesh.material) item.mesh.material.dispose()
+    }
+    balls = []
+    engine.objs = []
+    selectedObject = { type: 'box', index: 0 }
+}
 const fchkbx = document.getElementById("fxchk")
 const fchkbx2 = document.getElementById("fxchk2")
 const clrinp = document.getElementById("bclr")
-document.getElementById('add-ball').addEventListener('click', ()=>{addBall(fchkbx.checked)})
+document.getElementById('add-ball').addEventListener('click', () => {
+    const isFixed = fchkbx.checked
+    const radius = parseFloat(document.getElementById('bri').value) || 8
+    const ballColor = clrinp.value
+    addBall(isFixed, radius, ballColor)
+})
 document.getElementById('clearbtn').addEventListener('click', clear)
 document.getElementById('add-box').addEventListener('click', ()=>{
-    initCb({ x: parseFloat(bxi.value), y: parseFloat(byi.value), z: parseFloat(bzi.value), w: parseFloat(bwidi.value), h: parseFloat(bheii.value), d: parseFloat(bdepi.value), mass: 60, fixed: fchkbx.checked, color:parseInt(clrinp.value.replace('#', ''), 16) })
+    initCb({ x: parseFloat(bxi.value), y: parseFloat(byi.value), z: parseFloat(bzi.value), w: parseFloat(bwidi.value), h: parseFloat(bheii.value), d: parseFloat(bdepi.value), mass: parseFloat(bwidi.value)*parseFloat(bheii.value)*parseFloat(bdepi.value), fixed: fchkbx.checked, color:parseInt(clrinp.value.replace('#', ''), 16) })
 })
 document.getElementById('modetrans').addEventListener('click', ()=>{
     transformControls.setMode('translate')
@@ -239,19 +257,170 @@ document.getElementById('wbtn').addEventListener('click', ()=>{
     welding=true
 })
 fchkbx2.addEventListener("change", ()=>{
-    
+    //let selectedObject = { type: 'box', index: 0 }
+    switch(selectedObject.type){
+        case 'box':
+            engine.rigidbodies[selectedObject.index].f=fchkbx2.checked
+            break
+        case 'ball':
+            engine.objs[selectedObject.index].f=fchkbx2.checked
+            break
+    }
+})
+//ykw?
+const $ = document.getElementById.bind(document)
+
+function updProps(){
+    const typ = selectedObject.type
+    const ind = selectedObject.index
+    const rb = engine.rigidbodies
+    const bs = engine.objs
+    if (!paused){
+        fchkbx2.checked = typ=="box" ? rb[ind].f : bs[ind].f
+        $("bxip").value = typ=="box" ? rb[ind].cx.toFixed(3) : bs[ind].p.x.toFixed(3)
+        $("byip").value = typ=="box" ? rb[ind].cy.toFixed(3) : bs[ind].p.y.toFixed(3)
+        $("bzip").value = typ=="box" ? rb[ind].cz.toFixed(3) : bs[ind].p.z.toFixed(3)
+        $("brp").value = typ=="box" ? 0 : bs[ind].r
+        $("bclr2").value = typ=="box" ? rb[ind].color : rgbToHex(...bs[ind].c)
+        $("bmp").value = typ=="box" ? rb[ind].mass : bs[ind].m.toFixed(3)
+    }
+    if (!paused){
+        $("bxip").readOnly=true
+        $("byip").readOnly=true
+        $("bzip").readOnly=true
+        $("brp").readOnly=true
+        $("bclr2").readOnly=true
+        $("bmp").readOnly=true
+    } else {
+        $("bxip").readOnly=false
+        $("byip").readOnly=false
+        $("bzip").readOnly=false
+        $("brp").readOnly=false
+        $("bclr2").readOnly=false
+        $("bmp").readOnly=false
+    }
+}
+$("bxip").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        const bs = engine.objs
+        if (typ == "box"){
+            const part = cubeParts[ind]
+            const rb = part.body
+            const pc = partCenter(part)
+            
+            const dx = this.value - pc.x
+            if (dx !== 0) {
+                for (const point of rb.pts) {
+                    point.p.x += dx
+                    point.pp.x += dx
+                }
+            }
+        } 
+        if (typ == "ball"){
+            bs[ind].p.x = this.value
+            bs[ind].pp.x = this.value
+        }
+    }
+})
+$("byip").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        const bs = engine.objs
+        if (typ == "box"){
+            const part = cubeParts[ind]
+            const rb = part.body
+            const pc = partCenter(part)
+            
+            const dy = this.value - pc.y
+            if (dy !== 0) {
+                for (const point of rb.pts) {
+                    point.p.y += dy
+                    point.pp.y += dy
+                }
+            }
+        } 
+        if (typ == "ball"){
+            bs[ind].p.y = this.value
+            bs[ind].pp.y = this.value
+        }
+    }
+})
+$("bzip").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        const bs = engine.objs
+        if (typ == "box"){
+            const part = cubeParts[ind]
+            const rb = part.body
+            const pc = partCenter(part)
+            
+            const dz = this.value - pc.z
+            if (dz !== 0) {
+                for (const point of rb.pts) {
+                    point.p.z += dz
+                    point.pp.z += dz
+                }
+            }
+        } 
+        if (typ == "ball"){
+            bs[ind].p.z = this.value
+            bs[ind].pp.z = this.value
+        }
+    }
+})
+$("brp").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        const bs = engine.objs
+        if (typ == "ball"){
+            const lr = bs[ind].r
+            const mesh = balls[ind].mesh
+            bs[ind].r = parseFloat(this.value)
+            mesh.scale.copy(new THREE.Vector3(this.value/lr,this.value/lr,this.value/lr))
+        }
+    }
+})
+$("bclr2").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        if (typ=="box"){
+            cubes[ind].material.color.set(this.value)
+        }
+        if (typ=="ball"){
+            balls[ind].mesh.material.color.set(this.value)
+        }
+    }
+})
+$("bmp").addEventListener("change", function(e){
+    if (!this.readOnly){
+        const typ = selectedObject.type
+        const ind = selectedObject.index
+        if (typ=="ball"){
+            balls[ind].body.m=parseFloat(this.value)
+        }
+    }
+})
+$("pauplaybtn").addEventListener("click", ()=>{
+    paused = !paused
+    $("pauplaybtn").style.backgroundColor = paused ? "#820000" : "#118200"
 })
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
 
-const transformControls = new TransformControls(camera, renderer.domElement);
+const transformControls = new THREE.TransformControls(camera, renderer.domElement);
 transformControls.attach(cubes[selectedObject.index]);
-transformControls.translationSnap = 10
+transformControls.translationSnap = 5
 transformControls.rotationSnap = Math.PI / 12 //15 deg
-scene.add(transformControls.getHelper())
+scene.add(transformControls)
 
-const GRID_SNAP_UNIT = 5.0
+const GRID_SNAP_UNIT = 10.0
 
 transformControls.addEventListener('objectChange', () => {
     const mesh = transformControls.object
@@ -396,7 +565,7 @@ transformControls.addEventListener('dragging-changed', (event) => {
 engine.rigidbodies[0].f=true
 
 
-window.addEventListener('pointerdown', (event) => {
+renderer.domElement.addEventListener('pointerdown', (event) => {
     const canvasBounds = renderer.domElement.getBoundingClientRect()
     mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
     mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
@@ -460,8 +629,10 @@ gcube.receiveShadow = true
 gcube.position.set(0, -200, 0)
 scene.add(gcube)
 function render() {
-    engine.step()
-    engine.collideAllBalls()
+    if (!paused){
+        engine.step()
+        engine.collideAllBalls()
+    }
     boxToCubeALL()
     for (const { body, mesh } of balls) {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
@@ -470,4 +641,5 @@ function render() {
     renderer.render(scene, camera)
     requestAnimationFrame(render)
 }
+setInterval(updProps,100)
 render()
