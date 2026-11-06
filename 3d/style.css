@@ -11,35 +11,88 @@ canvas {
     font-family: 'Courier New', Courier, monospace;
 }
 button{
-    background-color: gray;
+    background-color: #4d4d4d;
+    width: calc(100% - 10px);
+    height: 30px;
+    border: 1px solid #282828;
+    border-radius: 3px;
+    cursor:pointer;
+}
+button:active {
+    background-color: #3d699e;
+    color: white;
+}
+button:hover {
+    background-color: #5d5d5d;
 }
 #leftbar{
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 300px;
     bottom: 0;
-    background-color: rgb(61, 61, 61);
+    background-color: #2e2e2e;
+    overflow: scroll;
 }
 #leftbar * {
     margin: 5px;
 }
 .section{
     border-radius: 3px;
-    border: 1px solid gray;
-    background-color: rgb(96, 96, 96);
-    padding: 5px;
+    border: 1px solid #1a1a1a;
+    background-color: #3b3b3b;
+    padding:5px;
 }
 .section * {
     margin: 5px;
 }
 .inp{
-    text-align: right;
-    padding-right: 10px;
+    display: flex;
+    align-items: stretch;
+    
 }
+label {width: 40%;text-align:right;
+    margin:0;}
 input{
-    background-color: rgb(69, 69, 69);
-    border: 1px solid gray;
+    display: inline;
+    background-color: #232323;
+    border: 1px solid #1c1c1c;
     border-radius: 2px;
-    color: white;
+    color: #e6e6e6;
+    margin:0;
+    width: 60%;
+}
+input[readonly] {
+  background-color: #4d4d4d;
+  color: #6e6e6e;
+  cursor: not-allowed;
+    border: 1px solid #232323;
+}
+hr {
+    border: 2px solid #5d5d5d ;
+    background-color:#5d5d5d;
+}
+#toolmenutop{
+    position: fixed;
+    left:300px;
+    height:34px;
+    top:0;
+    width: calc(100% - 300px);
+}
+.tool{
+    height:24px;
+    background-color: #282828;
+    border: 1px solid #5d5d5d;
+    border-radius: 2px;
+    margin:5px;
+    padding:2px;
+    display: inline;
+    width:24px;
+}
+.tool img{
+    margin:0;
+}
+#pauplaybtn{
+
+    background-color: #118200;
 }
