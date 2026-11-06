@@ -83,7 +83,7 @@ hr {
 }
 #toolmenutop .tool{
     height:20px;
-    background-color: #282828;
+    background-color: #404040;
     border: 1px solid #5d5d5d;
     border-radius: 2px;
     margin:1px;
@@ -151,7 +151,7 @@ hr {
 }
 #toolmenuright .tool{
     height:36px;
-    background-color: #282828;
+    background-color: #404040;
     border-radius: 3px;
     margin:1px;
     padding:1px;
