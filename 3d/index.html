@@ -22,16 +22,6 @@
             <div class="inp"><label>Z</label> <input type="number" value="0" id="bzi"></div>
             <div class="inp"><label>Radius</label> <input type="number" value="8" id="bri"></div>
         </details>
-        <details class="section">
-            <summary>Tools</summary>
-            <button id="clearbtn" type="button">CLEAR</button><br>
-            <h4>Modes:</h4>
-            <button id="modetrans">Transform</button><br>
-            <button id="modescale">Scale</button><br>
-            <button id="moderot">Rotate</button><br>
-            <hr>
-            <button id="wbtn">Weld</button>
-        </details>
         <details class="section" open>
             <summary>Properties</summary>
             <div class="inp"><label>Fixed</label> <input type="checkbox" id="fxchk2"></div>
@@ -44,8 +34,27 @@
         </details>
     </div>
     <div id="toolmenutop">
-        <button class="tool" id="pauplaybtn"><img src="./pp.png"></button>
-        <button class="tool" id="cbalsbtn"><img src="./cb.png"></button>
+        <button class="tool" id="pauplaybtn"><img src="./pplay.png"></button>
+        <button class="tool" id="cbalsbtn"><img src="./cballs.png"></button>
+        <button class="tool" onclick="openPopup()"><img src="./resize.png"></button>
+        <button class="tool" id="delbtn"><img src="./del.png"></button>
+    </div>
+    <div id="toolmenuright">
+        <button class="tool" id="modetrans"><img src="./transform.png"></button>
+        <button class="tool" id="moderot"><img src="./rotate.png"></button>
+        <button class="tool" id="modescale"><img src="./scale.png"></button>
+        <button class="tool" id="clearbtn"><img src="./del.png"></button>
+        <button class="tool" id="wbtn"><img src="./weld.png"></button>
+
+    </div>
+    <div id="popup">
+        <div id="popupHead">Resize boundraries</div>
+        <div id="popupContent">
+            <div class="inp"><label>Width</label> <input type="number" value="20" id="wwid"></div>
+            <div class="inp"><label>Height</label> <input type="number" value="20" id="whei"></div>
+            <div class="inp"><label>Depth</label> <input type="number" value="20" id="wdep"></div>
+            <button id="rszbtn">Resize</button>
+        </div>
     </div>
     <script type="importmap">
         {
@@ -56,6 +65,8 @@
             }
         }
     </script>
+    <script src="./utils.js"></script>
+    <script src="./drag.js"></script>
     <script type="module" src="main.js"></script>
 </body>
 </html>

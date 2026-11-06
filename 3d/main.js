@@ -10,11 +10,11 @@ const loader = new GLTFLoader()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-let selectedObject = { type: 'box', index: 0 }
+selectedObject = { type: 'box', index: 0 }
 let welding = false
 let sobj0,sobjn=0
 const BOX = { x0: -200, y0: -200, x1: 200, y1: 200, z0: -200, z1: 200 }
-const engine = new Engine({
+engine = new Engine({
     mode: 'plain',
     dimensions: 3,
     walltype: 'square',
@@ -52,10 +52,10 @@ scene.add(keyLight)
 const grid = new THREE.GridHelper(800, 40, 0xff0000, 0xffffff)
 grid.position.y = -199.2
 scene.add(grid)
-let cubes = []
+cubes = []
 let VCMs = []
 let cubeParts = []
-let balls = []
+balls = []
 const controls = new OrbitControls( camera, renderer.domElement )
 camera.position.set( 0, 20, 100 )
 controls.update()
@@ -206,17 +206,6 @@ function clear(){
     engine.objs = []
     engine.rigidbodies = []
     selectedObject = { type: 'box', index: 0 }
-    const ggeo = new THREE.BoxGeometry(400, 1, 400)
-    ggeo.attributes.position.setUsage(THREE.DynamicDrawUsage)
-    const gmaterial = new THREE.MeshStandardMaterial({
-        color: 0x999999,
-        roughness: 0.72
-    })
-    const gcube = new THREE.Mesh(ggeo, gmaterial)
-    gcube.castShadow = true
-    gcube.receiveShadow = true
-    gcube.position.set(0, -200, 0)
-    scene.add(gcube)
 }
 function clearB(){
     if (transformControls) {
@@ -229,6 +218,36 @@ function clearB(){
     }
     balls = []
     engine.objs = []
+    selectedObject = { type: 'box', index: 0 }
+}
+function delCur(){
+    const typ = selectedObject.type
+    const ind = selectedObject.index
+    const rb = engine.rigidbodies
+    const bs = engine.objs
+    if (typ == "box") {
+        const slccb = cubes[ind]
+        if (slccb) {
+            scene.remove(slccb)
+            if (slccb.geometry) slccb.geometry.dispose()
+            if (slccb.material) slccb.material.dispose()
+            rb.splice(ind, 1)
+            cubes.splice(ind, 1)
+            VCMs.splice(ind, 1)
+            cubeParts.splice(ind, 1)
+        }
+    }
+    if (typ == "ball") {
+        const slctd = balls[ind]
+        if (slctd) {
+            scene.remove(slctd.mesh)
+            if (slctd.mesh.geometry) slctd.mesh.geometry.dispose()
+            if (slctd.mesh.material) slctd.mesh.material.dispose()
+            bs.splice(ind, 1)
+            balls.splice(ind, 1)
+        }
+    }
+    transformControls.detach()
     selectedObject = { type: 'box', index: 0 }
 }
 const fchkbx = document.getElementById("fxchk")
@@ -267,8 +286,6 @@ fchkbx2.addEventListener("change", ()=>{
             break
     }
 })
-//ykw?
-const $ = document.getElementById.bind(document)
 
 function updProps(){
     const typ = selectedObject.type
@@ -281,23 +298,26 @@ function updProps(){
         $("byip").value = typ=="box" ? rb[ind].cy.toFixed(3) : bs[ind].p.y.toFixed(3)
         $("bzip").value = typ=="box" ? rb[ind].cz.toFixed(3) : bs[ind].p.z.toFixed(3)
         $("brp").value = typ=="box" ? 0 : bs[ind].r
-        $("bclr2").value = typ=="box" ? rb[ind].color : rgbToHex(...bs[ind].c)
-        $("bmp").value = typ=="box" ? rb[ind].mass : bs[ind].m.toFixed(3)
+        $("bclr2").value = typ=="box" ? rb[ind].color : rgbToHex2(balls[ind].mesh.material.color.r,balls[ind].mesh.material.color.g,balls[ind].mesh.material.color.b)
+        $("bmp").value = typ=="box" ? 0 : bs[ind].m.toFixed(3)
     }
-    if (!paused){
-        $("bxip").readOnly=true
-        $("byip").readOnly=true
-        $("bzip").readOnly=true
-        $("brp").readOnly=true
-        $("bclr2").readOnly=true
-        $("bmp").readOnly=true
-    } else {
+    const fxd =  typ=="box" ? rb[ind].f : bs[ind].f
+    if (paused || fxd){
         $("bxip").readOnly=false
         $("byip").readOnly=false
         $("bzip").readOnly=false
-        $("brp").readOnly=false
-        $("bclr2").readOnly=false
-        $("bmp").readOnly=false
+    } else {
+        $("bxip").readOnly=true
+        $("byip").readOnly=true
+        $("bzip").readOnly=true
+    }
+    if (typ == "box"){
+        $("brp").parentElement.style.display="none"
+        $("bmp").parentElement.style.display="none"
+    } else {
+
+        $("brp").parentElement.style.display="block"
+        $("bmp").parentElement.style.display="block"
     }
 }
 $("bxip").addEventListener("change", function(e){
@@ -408,11 +428,26 @@ $("bmp").addEventListener("change", function(e){
 })
 $("pauplaybtn").addEventListener("click", ()=>{
     paused = !paused
-    $("pauplaybtn").style.backgroundColor = paused ? "#820000" : "#118200"
+    $("pauplaybtn").style.backgroundColor = paused ? "#7d7d7d" : "#282828"
 })
 $("cbalsbtn").addEventListener("click", ()=>{
     clearB()
 })
+$("rszbtn").addEventListener("click", ()=>{
+
+    const winp = parseFloat($('wwid').value)
+    const hinp = parseFloat($('whei').value)
+    const dinp = parseFloat($('wdep').value)
+    const walls = [-winp*0.5, -hinp*0.5,winp*0.5, hinp*0.5,-dinp*0.5, dinp*0.5]
+    engine.walls=walls
+    ggeo = new THREE.BoxGeometry(winp, 1, dinp)
+    ggeo.attributes.position.setUsage(THREE.DynamicDrawUsage)
+    gcube.geometry=ggeo
+    gcube.position.set(0, -hinp*0.5, 0)
+    grid.position.y = -hinp*0.5+1
+    closePopup()
+})
+$("delbtn").addEventListener("click", delCur)
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
@@ -620,13 +655,13 @@ addEventListener("resize", e=>{
 })
 const br = renderer.domElement.getBoundingClientRect()
 updateSize(br.width, br.height)
-const ggeo = new THREE.BoxGeometry(400, 1, 400)
+ggeo = new THREE.BoxGeometry(400, 1, 400)
 ggeo.attributes.position.setUsage(THREE.DynamicDrawUsage)
 const gmaterial = new THREE.MeshStandardMaterial({
     color: 0x999999,
     roughness: 0.72
 })
-const gcube = new THREE.Mesh(ggeo, gmaterial)
+gcube = new THREE.Mesh(ggeo, gmaterial)
 gcube.castShadow = true
 gcube.receiveShadow = true
 gcube.position.set(0, -200, 0)
