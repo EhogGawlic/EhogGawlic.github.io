@@ -45,8 +45,8 @@ keyLight.shadow.camera.left = -400
 keyLight.shadow.camera.right = 400
 keyLight.shadow.camera.near = 0.5
 keyLight.shadow.camera.far = 2000
-keyLight.shadow.mapSize.width = 2048
-keyLight.shadow.mapSize.height = 2048
+keyLight.shadow.mapSize.width = 1024
+keyLight.shadow.mapSize.height = 1024
 scene.background = new THREE.Color(0x1a1a1a)
 scene.add(keyLight)
 const grid = new THREE.GridHelper(800, 40, 0xff0000, 0xffffff)
