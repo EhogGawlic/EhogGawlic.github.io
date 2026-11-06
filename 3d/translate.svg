@@ -1,0 +1,15 @@
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+    <path d="M4 64 L32 64 M4 64 L20 48 M4 64 L20 80" style="fill:none; stroke: black; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"></path>
+    <path d="M124 64 L96 64 M124 64 L108 48 M124 64 L108 80" style="fill:none; stroke: black; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"></path>
+    <path d="M64 4 L64 32 M64 4 L48 20 M64 4 L80 20" style="fill:none; stroke: black; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"></path>
+    <path d="M64 124 L64 96 M64 124 L48 108 M64 124 L80 108" style="fill:none; stroke: black; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"></path>
+    
+</svg>

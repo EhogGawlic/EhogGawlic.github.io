@@ -1,0 +1,9 @@
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="80" cy="64" r="32" fill="white" stroke="black" stroke-width="8" />
+    <path d="M4 124 L32 32 L64 100 L96 64 L124 124 L4 124" style="fill:black; stroke: black; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"/>
+    <path d="M4 4 L124 124 M124 4 L4 124" style="fill:none; stroke: red; stroke-width:8"
+        stroke-linejoin="round" 
+        stroke-linecap="round"/>
+</svg>
