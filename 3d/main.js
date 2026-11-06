@@ -22,7 +22,7 @@ const engine = new Engine({
     gravity: -0.098,
     substeps: 8
 })
-const renderer = new THREE.WebGPURenderer({ antialias: true })
+const renderer = new THREE.WebGPURenderer({ antialias: true, forceWebGL: true  })
 renderer.shadowMap.enabled = true
 renderer.setSize(WIDTH, HEIGHT)
 renderer.setClearColor(0xdddddd, 1)
