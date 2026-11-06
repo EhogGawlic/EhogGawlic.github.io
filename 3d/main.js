@@ -414,7 +414,7 @@ for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
 
-const transformControls = new THREE.TransformControls(camera, renderer.domElement);
+const transformControls = new TransformControls(camera, renderer.domElement);
 transformControls.attach(cubes[selectedObject.index]);
 transformControls.translationSnap = 5
 transformControls.rotationSnap = Math.PI / 12 //15 deg
