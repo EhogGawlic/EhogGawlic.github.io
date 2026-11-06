@@ -421,7 +421,7 @@ const transformControls = new TransformControls(camera, renderer.domElement);
 transformControls.attach(cubes[selectedObject.index]);
 transformControls.translationSnap = 5
 transformControls.rotationSnap = Math.PI / 12 //15 deg
-scene.add(transformControls)
+scene.add(transformControls.getHelper())
 
 const GRID_SNAP_UNIT = 10.0
 
