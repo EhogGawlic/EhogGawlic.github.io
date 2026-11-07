@@ -341,8 +341,8 @@ function updProps(){
         $("bmp").parentElement.style.display="none"
     } else {
 
-        $("brp").parentElement.style.display="block"
-        $("bmp").parentElement.style.display="block"
+        $("brp").parentElement.style.display="flex"
+        $("bmp").parentElement.style.display="flex"
     }
 }
 $("bxip").addEventListener("change", function(e){
