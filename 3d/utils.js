@@ -16,3 +16,12 @@ function rgbToHex(r, g, b) {
 function rgbToHex2(r, g, b) {
   return "#" + componentToHex2(r) + componentToHex2(g) + componentToHex2(b);
 }
+const tbtns = document.querySelectorAll('#toolmenuright .tool')
+tbtns.forEach(btn => {
+  btn.addEventListener('click', function() {
+    tbtns.forEach(btn => btn.classList.remove('active'))
+    this.classList.add('active')
+  })
+})
+
+tbtns[0].classList.add('active')

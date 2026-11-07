@@ -163,3 +163,13 @@ hr {
     width:32px;
     height:32px;
 }
+
+#toolmenuright .tool.active{
+    height:36px;
+    background-color: #4772b3;
+    border-radius: 3px;
+    margin:1px;
+    padding:1px;
+    display: inline;
+    width:36px;
+}

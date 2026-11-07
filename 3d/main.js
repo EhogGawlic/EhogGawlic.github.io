@@ -2,10 +2,12 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@latest/main.js"
+import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@c6b9c955247e84ea10058aec06bf49960952fa9c/rigid.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+import { pass, uniform } from 'three/tsl'
+import { outline } from 'three/addons/tsl/display/OutlineNode.js'
 const loader = new GLTFLoader()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
@@ -88,6 +90,25 @@ loader.load(
         console.error('An error happened', error)
     }
 )
+const selectedForOutline = []
+const outlinePass = outline(scene, camera, {
+    selectedObjects: selectedForOutline,
+    edgeThickness: uniform(1.0),
+    edgeGlow: uniform(0.0)
+})
+const { visibleEdge, hiddenEdge } = outlinePass
+
+const edgeStrength = uniform(4.0)
+const visibleEdgeColor = uniform(new THREE.Color('#4772b3'))
+const hiddenEdgeColor = uniform(new THREE.Color('#4772b3'))
+
+const outlineColor = visibleEdge.mul(visibleEdgeColor)
+    .add(hiddenEdge.mul(hiddenEdgeColor))
+    .mul(edgeStrength)
+
+const scenePass = pass(scene, camera)
+const renderPipeline = new THREE.RenderPipeline(renderer)
+renderPipeline.outputNode = outlineColor.add(scenePass)
 function initCb(options){
     const geo = new THREE.BoxGeometry(options.w, options.h, options.d)
     geo.attributes.position.setUsage(THREE.DynamicDrawUsage)
@@ -274,6 +295,8 @@ document.getElementById('moderot').addEventListener('click', ()=>{
 })
 document.getElementById('wbtn').addEventListener('click', ()=>{
     welding=true
+    transformControls.visible = false
+    transformControls.detach(); 
 })
 fchkbx2.addEventListener("change", ()=>{
     //let selectedObject = { type: 'box', index: 0 }
@@ -298,7 +321,7 @@ function updProps(){
         $("byip").value = typ=="box" ? rb[ind].cy.toFixed(3) : bs[ind].p.y.toFixed(3)
         $("bzip").value = typ=="box" ? rb[ind].cz.toFixed(3) : bs[ind].p.z.toFixed(3)
         $("brp").value = typ=="box" ? 0 : bs[ind].r
-        $("bclr2").value = typ=="box" ? rb[ind].color : rgbToHex2(balls[ind].mesh.material.color.r,balls[ind].mesh.material.color.g,balls[ind].mesh.material.color.b)
+        $("bclr2").value = typ=="box" ? "#"+rb[ind].color.toString(16).slice(-6) : rgbToHex2(balls[ind].mesh.material.color.r,balls[ind].mesh.material.color.g,balls[ind].mesh.material.color.b)
         $("bmp").value = typ=="box" ? 0 : bs[ind].m.toFixed(3)
     }
     const fxd =  typ=="box" ? rb[ind].f : bs[ind].f
@@ -306,10 +329,12 @@ function updProps(){
         $("bxip").readOnly=false
         $("byip").readOnly=false
         $("bzip").readOnly=false
+        $("bclr2").readOnly=false
     } else {
         $("bxip").readOnly=true
         $("byip").readOnly=true
         $("bzip").readOnly=true
+        $("bclr2").readOnly=true
     }
     if (typ == "box"){
         $("brp").parentElement.style.display="none"
@@ -411,6 +436,7 @@ $("bclr2").addEventListener("change", function(e){
         const ind = selectedObject.index
         if (typ=="box"){
             cubes[ind].material.color.set(this.value)
+            engine.rigidbodies[ind].color = parseInt(this.value.substr(1), 16)
         }
         if (typ=="ball"){
             balls[ind].mesh.material.color.set(this.value)
@@ -486,7 +512,9 @@ transformControls.addEventListener('objectChange', () => {
     if (dx !== 0 || dy !== 0 || dz !== 0) {
         for (const point of rb.pts) {
             point.p.x += dx; point.p.y += dy; point.p.z += dz
-            point.pp.x += dx; point.pp.y += dy; point.pp.z += dz
+            point.pp.x = point.p.x
+            point.pp.y = point.p.y
+            point.pp.z = point.p.z
         }
     }
 
@@ -549,14 +577,9 @@ transformControls.addEventListener('objectChange', () => {
             point.p.x = pc.x + currentOffset.x
             point.p.y = pc.y + currentOffset.y
             point.p.z = pc.z + currentOffset.z
-
-            previousOffset.set(point.pp.x - previousCenterX, point.pp.y - previousCenterY, point.pp.z - previousCenterZ)
-                .applyQuaternion(inverseRotation)
-                .multiply(scaleRatio)
-                .applyQuaternion(nextRotation)
-            point.pp.x = previousCenterX + previousOffset.x
-            point.pp.y = previousCenterY + previousOffset.y
-            point.pp.z = previousCenterZ + previousOffset.z
+            point.pp.x = point.p.x
+            point.pp.y = point.p.y
+            point.pp.z = point.p.z
         }
         rb.resetRest()
         previousScale.copy(nextScale)
@@ -583,12 +606,9 @@ transformControls.addEventListener('objectChange', () => {
             point.p.x = pc.x + currentOffset.x
             point.p.y = pc.y + currentOffset.y
             point.p.z = pc.z + currentOffset.z
-
-            previousOffset.set(point.pp.x - previousCenterX, point.pp.y - previousCenterY, point.pp.z - previousCenterZ)
-                .applyQuaternion(rotationDelta)
-            point.pp.x = previousCenterX + previousOffset.x
-            point.pp.y = previousCenterY + previousOffset.y
-            point.pp.z = previousCenterZ + previousOffset.z
+            point.pp.x = point.p.x
+            point.pp.y = point.p.y
+            point.pp.z = point.p.z
         }
         previousRotation.copy(nextRotation)
         mesh.userData.physicsRotation = previousRotation
@@ -622,20 +642,30 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
 
         if (am && am.getObjectById(clickedMesh.id) === clickedMesh) {
             selectedObject = { type: 'adder', index: 0 }
-            transformControls.attach(am)
+            if (!welding) transformControls.attach(am)
         } else if (meshIndex !== -1) {
             selectedObject = { type: 'box', index: meshIndex }
-            transformControls.attach(clickedMesh)
+            if (!welding) transformControls.attach(clickedMesh)
             if (welding){
                 if (sobjn == 0){
                     sobj0 = meshIndex
                     sobjn = 1
+                    outlinePass.selectedObjects = [cubes[sobj0]]
                 } else {
                     const bodyA = cubeParts[sobj0].body
                     const bodyB = cubeParts[meshIndex].body
                     if (bodyA !== bodyB) engine.weld(bodyA, bodyB)
-                    welding=false
-                    sobjn=0
+                    welding = false
+                    sobjn = 0
+
+                    tbtns.forEach(btn => btn.classList.remove('active'))
+                    tbtns[0].classList.add('active')
+
+                    outlinePass.selectedObjects = [cubes[sobj0], cubes[meshIndex]]
+                    setTimeout(() => {
+                        outlinePass.selectedObjects = []
+                        transformControls.visible = true
+                    }, 1000)
                 }
             }
         } else if (ballIndex !== -1) {
@@ -649,7 +679,7 @@ function updateSize(newWidth, newHeight){
     camera.aspect = newWidth / newHeight
     camera.updateProjectionMatrix();
 }
-addEventListener("resize", e=>{
+window.addEventListener("resize", e=>{
     const br = renderer.domElement.getBoundingClientRect()
     updateSize(br.width, br.height)
 })
@@ -667,6 +697,23 @@ gcube.receiveShadow = true
 gcube.position.set(0, -200, 0)
 scene.add(gcube)
 function render() {
+    const typ = selectedObject.type
+    const ind = selectedObject.index
+    if (transformControls.dragging){
+        if (typ == "box"){
+            engine.rigidbodies[ind].f=true
+        }
+        if (typ=="ball"){
+            engine.objs[ind].f=true
+        }
+    } else {
+        if (typ == "box"){
+            engine.rigidbodies[ind].f=false
+        }
+        if (typ=="ball"){
+            engine.objs[ind].f=false
+        }
+    }
     if (!paused){
         engine.step()
         engine.collideAllBalls()
@@ -676,7 +723,7 @@ function render() {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
     }
     controls.update()
-    renderer.render(scene, camera)
+    renderPipeline.render()
     requestAnimationFrame(render)
 }
 setInterval(updProps,100)
