@@ -68,6 +68,22 @@ input[readonly] {
     cursor: not-allowed;
     border: 1px solid #232323;
 }
+select{
+    display: inline;
+    background-color: #232323;
+    border: 1px solid #1c1c1c;
+    border-radius: 2px;
+    color: #e6e6e6;
+    margin:0;
+    width: 60%;
+}
+select .readonly {
+    background-color: #4d4d4d;
+    color: #6e6e6e;
+    cursor: not-allowed;
+    border: 1px solid #232323;
+}
+
 hr {
     border: 2px solid #5d5d5d ;
     background-color:#5d5d5d;
@@ -164,7 +180,7 @@ hr {
     height:32px;
 }
 
-#toolmenuright .tool.active{
+#toolmenuright .tool.active:not(#delbtn){
     height:36px;
     background-color: #4772b3;
     border-radius: 3px;
@@ -172,4 +188,20 @@ hr {
     padding:1px;
     display: inline;
     width:36px;
+}
+@media (prefers-color-scheme: light) {
+  div, input:not(input[type="checkbox"]), select {
+    filter: invert(1) hue-rotate(180deg);
+  }
+
+  img, 
+  video, 
+  iframe,
+  summary,
+  .exclude-invert {
+    filter: invert(1) hue-rotate(180deg);
+  }
+}
+.hidden{
+    display: none;
 }

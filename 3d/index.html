@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>test w/ three.js</title>
+    <title>𝟥ᴅ ᴘʜʏꜱɪᴄꜱ</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
 </head>
 <body>
     <div id="leftbar">
         <details class="section" open>
-            <summary>Adding</summary>
+            <summary>Dynamic objects</summary>
             <button id="add-ball" type="button">Add Ball</button><br>
             <button id="add-box" type="button">Add Box</button><br>
             <div class="inp"><label>Fixed</label> <input type="checkbox" id="fxchk"></div>
@@ -32,18 +34,37 @@
             <div class="inp"><label>Color</label> <input type="color" id="bclr2"></div>
             <div class="inp"><label>Mass</label> <input type="number" value="0" id="bmp"></div>
         </details>
+        <details class="section">
+            <summary>Add other</summary>
+            <div class="inp"><label>Type</label><select id="aothersel">
+                <option value="fan">Fan</option>
+                <option value="tcan">Trash can</option>
+            </select></div>
+
+            <div id="fanutils">
+                <div class="inp"><label>Speed</label> <input type="number" value="100" id="fspd" step="any"></div>
+                <div class="inp"><label>Radius</label> <input type="number" value="20" id="frad" min="0.01" step="any"></div>
+                <div class="inp" title="How much the cone of air tapers, in radians."><label>Taper</label> <input type="number" value="0.05" id="ftap" min="-1.57" max="1.57" step="0.01"></div>
+            </div>
+
+            <div id="tcanutils" class="hidden">
+                <div class="inp"><label>Size</label> <input type="number" value="20" id="tcanSize" min="0.01" step="any"></div>
+            </div>
+            <p id="fanstatus" aria-live="polite"></p>
+            <button id="fanaddok" type="button">Place fan</button>
+        </details>
     </div>
     <div id="toolmenutop">
-        <button class="tool" id="pauplaybtn"><img src="./pplay.png"></button>
-        <button class="tool" id="cbalsbtn"><img src="./cballs.png"></button>
-        <button class="tool" onclick="openPopup()"><img src="./resize.png"></button>
+        <button class="tool" id="pauplaybtn"><img src="./pplay.svg"></button>
+        <button class="tool" id="cbalsbtn"><img src="./cballs.svg"></button>
+        <button class="tool" onclick="openPopup()"><img src="./resize.svg"></button>
         <button class="tool" id="clearbtn"><img src="./delscene.svg"></button>
     </div>
     <div id="toolmenuright">
         <button class="tool" id="modetrans"><img src="./transform.png" class="active"></button>
         <button class="tool" id="moderot"><img src="./rotate.png"></button>
         <button class="tool" id="modescale"><img src="./scale.png"></button>
-        <button class="tool" id="clearbtn"><img src="./del.png"></button>
+        <button class="tool" id="delbtn"><img src="./del.png"></button>
         <button class="tool" id="wbtn"><img src="./weld.png"></button>
 
     </div>

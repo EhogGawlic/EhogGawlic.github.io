@@ -2,7 +2,8 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@c6b9c955247e84ea10058aec06bf49960952fa9c/main.js"
+//import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@05a3e12f29d038a169424a209c19fcda0a24ad3a/main.js"
+import {Engine} from "./fizks/main.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
@@ -12,9 +13,10 @@ const loader = new GLTFLoader()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-selectedObject = { type: 'box', index: 0 }
+selectedObject = { type: 'box', index: 0, fxd: false }
 let welding = false
 let sobj0,sobjn=0
+let adding = "none"
 const BOX = { x0: -200, y0: -200, x1: 200, y1: 200, z0: -200, z1: 200 }
 engine = new Engine({
     mode: 'plain',
@@ -62,6 +64,14 @@ const controls = new OrbitControls( camera, renderer.domElement )
 camera.position.set( 0, 20, 100 )
 controls.update()
 let am
+let storedFanMdl
+let storedCurMdl
+let storedTcanMdl
+let fanPlacement = null
+let fanVisuals = []
+let tcanVisuals = []
+let fanAirVisual = null
+let fanAirVisualData = null
 loader.load(
     'Adder.glb',
     function (gltf) {
@@ -82,6 +92,88 @@ loader.load(
             scale: am.scale.clone()
         }
         scene.add(am)
+    },
+    function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+    },
+    function (error) {
+        console.error('An error happened', error)
+    }
+)
+loader.load(
+    'fan.glb',
+    function (gltf) {
+        storedFanMdl = gltf.scene
+        storedFanMdl.traverse(function (child) {
+            if (child.isMesh) {
+                child.material.vertexColors = true
+                if (child.material.color) {
+                    child.material.color.setHex(0xffffff)
+                }
+                child.material.needsUpdate = true
+            }
+        })
+        storedFanMdl.scale.set(20, 20, 20)
+        storedFanMdl.userData.initialTransform = {
+            position: storedFanMdl.position.clone(),
+            quaternion: storedFanMdl.quaternion.clone(),
+            scale: storedFanMdl.scale.clone()
+        }
+    },
+    function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+    },
+    function (error) {
+        console.error('An error happened', error)
+    }
+)
+loader.load(
+    'tcan.glb',
+    function (gltf) {
+        storedTcanMdl = gltf.scene
+        storedTcanMdl.traverse(function (child) {
+            if (child.isMesh) {
+                child.material.vertexColors = true
+                if (child.material.color) {
+                    child.material.color.setHex(0xffffff)
+                }
+                child.material.needsUpdate = true
+            }
+        })
+        storedTcanMdl.scale.set(20, 20, 20)
+        storedTcanMdl.userData.initialTransform = {
+            position: storedTcanMdl.position.clone(),
+            quaternion: storedTcanMdl.quaternion.clone(),
+            scale: storedTcanMdl.scale.clone()
+        }
+    },
+    function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+    },
+    function (error) {
+        console.error('An error happened', error)
+    }
+)
+
+loader.load(
+    'cursor.glb',
+    function (gltf) {
+        storedCurMdl = gltf.scene
+        storedCurMdl.traverse(function (child) {
+            if (child.isMesh) {
+                child.material.vertexColors = true
+                if (child.material.color) {
+                    child.material.color.setHex(0xffffff)
+                }
+                child.material.needsUpdate = true
+            }
+        })
+        storedCurMdl.scale.set(20, 20, 20)
+        storedCurMdl.userData.initialTransform = {
+            position: storedCurMdl.position.clone(),
+            quaternion: storedCurMdl.quaternion.clone(),
+            scale: storedCurMdl.scale.clone()
+        }
     },
     function (xhr) {
         console.log((xhr.loaded / xhr.total * 100) + '% loaded')
@@ -199,7 +291,214 @@ function addBall(fixed=false,rad=8, color="#18a8d1"){
     scene.add(mesh)
     balls.push({ body: engine.objs[engine.objs.length - 1], mesh })
 }
+function fanAirLength(fan){
+    const position = fan.pos
+    const direction = fan.dir
+    const walls = engine.walls
+    const distances = [
+        direction.x > 1e-8 ? (walls[2] - position.x) / direction.x : direction.x < -1e-8 ? (walls[0] - position.x) / direction.x : Infinity,
+        direction.y > 1e-8 ? (walls[3] - position.y) / direction.y : direction.y < -1e-8 ? (walls[1] - position.y) / direction.y : Infinity,
+        direction.z > 1e-8 ? (walls[5] - position.z) / direction.z : direction.z < -1e-8 ? (walls[4] - position.z) / direction.z : Infinity
+    ].filter(distance => Number.isFinite(distance) && distance > 0)
+    const fallbackLength = Math.max(
+        walls[2] - walls[0],
+        walls[3] - walls[1],
+        walls[5] - walls[4]
+    )
+    const distance = distances.length ? Math.min(...distances) : fallbackLength
+    return Math.max(5, Math.ceil(distance / 5) * 5)
+}
+function updateFanAirVisual(){
+    if (selectedObject.type !== 'fan') {
+        if (fanAirVisual) fanAirVisual.visible = false
+        return
+    }
+
+    const fan = engine.fans[selectedObject.index]
+    if (!fan) {
+        if (fanAirVisual) fanAirVisual.visible = false
+        return
+    }
+
+    const length = fanAirLength(fan)
+    const geometryChanged = !fanAirVisualData ||
+        fanAirVisualData.fan !== fan ||
+        fanAirVisualData.length !== length ||
+        fanAirVisualData.radius !== fan.r ||
+        fanAirVisualData.taper !== fan.focus
+
+    if (!fanAirVisual) {
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x31c8e8,
+            transparent: true,
+            opacity: 0.14,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        })
+        fanAirVisual = new THREE.Mesh(new THREE.BufferGeometry(), material)
+        fanAirVisual.renderOrder = 2
+        scene.add(fanAirVisual)
+    }
+
+    if (geometryChanged) {
+        if (fanAirVisual.geometry) fanAirVisual.geometry.dispose()
+        const farRadius = Math.max(0.01, fan.r + length * Math.tan(fan.focus))
+        fanAirVisual.geometry = new THREE.CylinderGeometry(farRadius, fan.r, length, 32, 12, true)
+        fanAirVisualData = { fan, length, radius: fan.r, taper: fan.focus }
+    }
+
+    const direction = new THREE.Vector3(fan.dir.x, fan.dir.y, fan.dir.z).normalize()
+    fanAirVisual.position.set(fan.pos.x, fan.pos.y, fan.pos.z)
+        .addScaledVector(direction, length / 2)
+    fanAirVisual.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction)
+    fanAirVisual.visible = true
+}
+function fanPlacementPoint(event, surfaceOffset = 0){
+    const bounds = renderer.domElement.getBoundingClientRect()
+    mouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
+    mouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1
+    raycaster.setFromCamera(mouse, camera)
+
+    const surfaces = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
+    if (gcube) surfaces.push(gcube)
+    if (am) surfaces.push(am)
+    scene.updateMatrixWorld(true)
+    const hit = raycaster.intersectObjects(surfaces, true)[0]
+    if (hit) {
+        const point = hit.point.clone()
+        if (surfaceOffset > 0 && hit.face) {
+            const normalMatrix = new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld)
+            const normal = hit.face.normal.clone().applyMatrix3(normalMatrix).normalize()
+            point.addScaledVector(normal, surfaceOffset)
+        }
+        return point
+    }
+
+    const normal = camera.getWorldDirection(new THREE.Vector3())
+    const placementPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(normal, controls.target)
+    return raycaster.ray.intersectPlane(placementPlane, new THREE.Vector3())
+}
+function setFanPlacementStatus(message){
+    const status = document.getElementById('fanstatus')
+    if (status) status.textContent = message
+}
+function cancelFanPlacement(){
+    if (!fanPlacement) return
+    for (const cursor of fanPlacement.cursors) scene.remove(cursor)
+    fanPlacement = null
+    adding = 'none'
+    controls.enabled = true
+    transformControls.visible = true
+    setFanPlacementStatus('')
+}
+function startFanPlacement(){
+    if (fanPlacement) {
+        cancelFanPlacement()
+        return
+    }
+    if (!storedCurMdl || !storedFanMdl) {
+        setFanPlacementStatus('Fan models are still loading.')
+        return
+    }
+    transformControls.detach()
+    const cursors = [storedCurMdl.clone(true), storedCurMdl.clone(true)]
+    for (const cursor of cursors) scene.add(cursor)
+    fanPlacement = { type: 'fan', cursors, stage: 'origin', origin: null }
+    adding = 'fan-origin'
+    controls.enabled = false
+    transformControls.visible = false
+    setFanPlacementStatus('Click the fan origin. Press Escape to cancel.')
+}
+function startTcanPlacement(){
+    if (fanPlacement) {
+        cancelFanPlacement()
+        return
+    }
+    if (!storedCurMdl || !storedTcanMdl) {
+        setFanPlacementStatus('Trash-can models are still loading.')
+        return
+    }
+    transformControls.detach()
+    const cursor = storedCurMdl.clone(true)
+    scene.add(cursor)
+    fanPlacement = { type: 'tcan', cursors: [cursor], stage: 'origin', origin: null }
+    adding = 'tcan'
+    controls.enabled = false
+    transformControls.visible = false
+    setFanPlacementStatus('Click the trash-can base. Press Escape to cancel.')
+}
+function handleFanPlacementClick(event){
+    if (fanPlacement.type === 'tcan') {
+        const point = fanPlacementPoint(event)
+        if (!point) return
+        const size = Number(document.getElementById('tcanSize').value)
+        if (!Number.isFinite(size) || size <= 0) {
+            setFanPlacementStatus('Enter a positive trash-can size.')
+            return
+        }
+
+        const position = { x: point.x, y: point.y + size / 2, z: point.z }
+        engine.addTcan(position, size)
+        const mesh = storedTcanMdl.clone(true)
+        mesh.scale.multiplyScalar(size / 20)
+        mesh.position.copy(point)
+        scene.add(mesh)
+        tcanVisuals.push({ mesh, size })
+        cancelFanPlacement()
+        return
+    }
+
+    const originOffset = fanPlacement.stage === 'origin'
+        ? Math.max(Number(document.getElementById('frad').value) || 0, 0)
+        : 0
+    const point = fanPlacementPoint(event, originOffset)
+    if (!point) return
+
+    if (fanPlacement.stage === 'origin') {
+        fanPlacement.origin = point.clone()
+        fanPlacement.cursors[0].position.copy(point)
+        fanPlacement.cursors[1].position.copy(point)
+        fanPlacement.stage = 'direction'
+        adding = 'fan-direction'
+        setFanPlacementStatus('Click the direction point.')
+        return
+    }
+
+    const direction = point.clone().sub(fanPlacement.origin)
+    fanPlacement.cursors[1].position.copy(point)
+    if (direction.lengthSq() < 1e-6) {
+        setFanPlacementStatus('Choose a direction point away from the origin.')
+        return
+    }
+
+    const speed = Number(document.getElementById('fspd').value)
+    const radius = Number(document.getElementById('frad').value)
+    const taper = Number(document.getElementById('ftap').value)
+    if (!Number.isFinite(speed) || !Number.isFinite(radius) || radius <= 0 ||
+        !Number.isFinite(taper) || Math.abs(taper) >= Math.PI / 2) {
+        setFanPlacementStatus('Enter a finite speed, positive radius, and taper between -1.57 and 1.57.')
+        return
+    }
+
+    direction.normalize()
+    const origin = fanPlacement.origin
+    engine.addFan(
+        { x: origin.x, y: origin.y, z: origin.z },
+        { x: direction.x, y: direction.y, z: direction.z },
+        speed,
+        taper,
+        { initialRadius: radius }
+    )
+
+    const visual = storedFanMdl.clone(true)
+    visual.position.copy(origin)
+    visual.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction)
+    scene.add(visual)
+    fanVisuals.push(visual)
+    cancelFanPlacement()
+}
 function clear(){
+    cancelFanPlacement()
     if (transformControls) {
         transformControls.detach()
     }
@@ -226,7 +525,17 @@ function clear(){
     balls = []
     engine.objs = []
     engine.rigidbodies = []
-    selectedObject = { type: 'box', index: 0 }
+    engine.fans = []
+    engine.tcans = []
+    for (const visual of fanVisuals) scene.remove(visual)
+    fanVisuals = []
+    for (const item of tcanVisuals) scene.remove(item.mesh)
+    tcanVisuals = []
+    selectedObject = { type: 'box', index: 0, fxd: false }
+    outlinePass.selectedObjects = []
+    welding = false
+    sobjn = 0
+    transformControls.visible = true
 }
 function clearB(){
     if (transformControls) {
@@ -239,7 +548,9 @@ function clearB(){
     }
     balls = []
     engine.objs = []
-    selectedObject = { type: 'box', index: 0 }
+    selectedObject = engine.rigidbodies.length
+        ? { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+        : { type: 'none', index: -1, fxd: false }
 }
 function delCur(){
     const typ = selectedObject.type
@@ -247,6 +558,7 @@ function delCur(){
     const rb = engine.rigidbodies
     const bs = engine.objs
     if (typ == "box") {
+        if (engine.rigidbodies.length < ind+1) return
         const slccb = cubes[ind]
         if (slccb) {
             scene.remove(slccb)
@@ -259,6 +571,7 @@ function delCur(){
         }
     }
     if (typ == "ball") {
+        if (engine.objs.length < ind + 1) return
         const slctd = balls[ind]
         if (slctd) {
             scene.remove(slctd.mesh)
@@ -268,8 +581,30 @@ function delCur(){
             balls.splice(ind, 1)
         }
     }
+    if (typ == "fan") {
+        if (ind < 0 || ind >= engine.fans.length) return
+        scene.remove(fanVisuals[ind])
+        engine.fans.splice(ind, 1)
+        fanVisuals.splice(ind, 1)
+    }
+    if (typ == "tcan") {
+        if (ind < 0 || ind >= engine.tcans.length) return
+        scene.remove(tcanVisuals[ind].mesh)
+        engine.tcans.splice(ind, 1)
+        tcanVisuals.splice(ind, 1)
+    }
     transformControls.detach()
-    selectedObject = { type: 'box', index: 0 }
+    if (engine.rigidbodies.length) {
+        selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+    } else if (engine.objs.length) {
+        selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+    } else if (engine.fans.length) {
+        selectedObject = { type: 'fan', index: 0, fxd: true }
+    } else if (engine.tcans.length) {
+        selectedObject = { type: 'tcan', index: 0, fxd: true }
+    } else {
+        selectedObject = { type: 'none', index: -1, fxd: false }
+    }
 }
 const fchkbx = document.getElementById("fxchk")
 const fchkbx2 = document.getElementById("fxchk2")
@@ -281,6 +616,17 @@ document.getElementById('add-ball').addEventListener('click', () => {
     addBall(isFixed, radius, ballColor)
 })
 document.getElementById('clearbtn').addEventListener('click', clear)
+document.getElementById('aothersel').addEventListener('change', event => {
+    const isFan = event.target.value === 'fan'
+    document.getElementById('fanutils').classList.toggle('hidden', !isFan)
+    document.getElementById('tcanutils').classList.toggle('hidden', isFan)
+    document.getElementById('fanaddok').textContent = isFan ? 'Place fan' : 'Place trash can'
+    setFanPlacementStatus('')
+})
+document.getElementById('fanaddok').addEventListener('click', () => {
+    if (document.getElementById('aothersel').value === 'tcan') startTcanPlacement()
+    else startFanPlacement()
+})
 document.getElementById('add-box').addEventListener('click', ()=>{
     initCb({ x: parseFloat(bxi.value), y: parseFloat(byi.value), z: parseFloat(bzi.value), w: parseFloat(bwidi.value), h: parseFloat(bheii.value), d: parseFloat(bdepi.value), mass: parseFloat(bwidi.value)*parseFloat(bheii.value)*parseFloat(bdepi.value), fixed: fchkbx.checked, color:parseInt(clrinp.value.replace('#', ''), 16) })
 })
@@ -302,10 +648,14 @@ fchkbx2.addEventListener("change", ()=>{
     //let selectedObject = { type: 'box', index: 0 }
     switch(selectedObject.type){
         case 'box':
+            if (engine.rigidbodies.length < selectedObject.index+1) return
             engine.rigidbodies[selectedObject.index].f=fchkbx2.checked
+            selectedObject.fxd = fchkbx2.checked
             break
         case 'ball':
+            if (engine.objs.length < selectedObject.index+1) return
             engine.objs[selectedObject.index].f=fchkbx2.checked
+            selectedObject.fxd = fchkbx2.checked
             break
     }
 })
@@ -315,6 +665,14 @@ function updProps(){
     const ind = selectedObject.index
     const rb = engine.rigidbodies
     const bs = engine.objs
+    const hasSelection = typ === 'box' ? ind < rb.length : typ === 'ball' ? ind < bs.length : false
+    if (!hasSelection) {
+        $("bxip").readOnly = true
+        $("byip").readOnly = true
+        $("bzip").readOnly = true
+        $("bclr2").readOnly = true
+        return
+    }
     if (!paused){
         fchkbx2.checked = typ=="box" ? rb[ind].f : bs[ind].f
         $("bxip").value = typ=="box" ? rb[ind].cx.toFixed(3) : bs[ind].p.x.toFixed(3)
@@ -351,6 +709,7 @@ $("bxip").addEventListener("change", function(e){
         const ind = selectedObject.index
         const bs = engine.objs
         if (typ == "box"){
+            if (engine.rigidbodies.length < ind+1) return
             const part = cubeParts[ind]
             const rb = part.body
             const pc = partCenter(part)
@@ -364,6 +723,7 @@ $("bxip").addEventListener("change", function(e){
             }
         } 
         if (typ == "ball"){
+            if (engine.objs.length < ind+1) return
             bs[ind].p.x = this.value
             bs[ind].pp.x = this.value
         }
@@ -375,6 +735,7 @@ $("byip").addEventListener("change", function(e){
         const ind = selectedObject.index
         const bs = engine.objs
         if (typ == "box"){
+            if (engine.rigidbodies.length < ind+1) return
             const part = cubeParts[ind]
             const rb = part.body
             const pc = partCenter(part)
@@ -388,6 +749,7 @@ $("byip").addEventListener("change", function(e){
             }
         } 
         if (typ == "ball"){
+            if (engine.objs.length < ind + 1) return
             bs[ind].p.y = this.value
             bs[ind].pp.y = this.value
         }
@@ -399,6 +761,7 @@ $("bzip").addEventListener("change", function(e){
         const ind = selectedObject.index
         const bs = engine.objs
         if (typ == "box"){
+            if (engine.rigidbodies.length < ind+1) return
             const part = cubeParts[ind]
             const rb = part.body
             const pc = partCenter(part)
@@ -412,6 +775,7 @@ $("bzip").addEventListener("change", function(e){
             }
         } 
         if (typ == "ball"){
+            if (engine.objs.length < ind + 1) return
             bs[ind].p.z = this.value
             bs[ind].pp.z = this.value
         }
@@ -423,6 +787,7 @@ $("brp").addEventListener("change", function(e){
         const ind = selectedObject.index
         const bs = engine.objs
         if (typ == "ball"){
+            if (engine.objs.length < ind + 1) return
             const lr = bs[ind].r
             const mesh = balls[ind].mesh
             bs[ind].r = parseFloat(this.value)
@@ -435,10 +800,12 @@ $("bclr2").addEventListener("change", function(e){
         const typ = selectedObject.type
         const ind = selectedObject.index
         if (typ=="box"){
+            if (engine.rigidbodies.length < ind+1) return
             cubes[ind].material.color.set(this.value)
             engine.rigidbodies[ind].color = parseInt(this.value.substr(1), 16)
         }
         if (typ=="ball"){
+            if (engine.objs.length < ind + 1) return
             balls[ind].mesh.material.color.set(this.value)
         }
     }
@@ -448,6 +815,7 @@ $("bmp").addEventListener("change", function(e){
         const typ = selectedObject.type
         const ind = selectedObject.index
         if (typ=="ball"){
+            if (engine.objs.length < ind + 1) return
             balls[ind].body.m=parseFloat(this.value)
         }
     }
@@ -498,6 +866,29 @@ transformControls.addEventListener('objectChange', () => {
         body.p.x += dx; body.pp.x += dx
         body.p.y += dy; body.pp.y += dy
         body.p.z += dz; body.pp.z += dz
+        return
+    }
+    if (selectedObject.type === 'fan') {
+        const fan = engine.fans[selectedObject.index]
+        if (!fan || fanVisuals[selectedObject.index] !== mesh) return
+        fan.pos.x = mesh.position.x
+        fan.pos.y = mesh.position.y
+        fan.pos.z = mesh.position.z
+        const direction = new THREE.Vector3(1, 0, 0)
+            .applyQuaternion(mesh.quaternion)
+            .normalize()
+        fan.dir.x = direction.x
+        fan.dir.y = direction.y
+        fan.dir.z = direction.z
+        return
+    }
+    if (selectedObject.type === 'tcan') {
+        const item = tcanVisuals[selectedObject.index]
+        const tcan = engine.tcans[selectedObject.index]
+        if (!item || !tcan || item.mesh !== mesh) return
+        tcan.pos.x = mesh.position.x
+        tcan.pos.y = mesh.position.y + item.size / 2
+        tcan.pos.z = mesh.position.z
         return
     }
     if (selectedObject.type === 'adder') return
@@ -621,16 +1012,22 @@ transformControls.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
 })
 engine.rigidbodies[0].f=true
+selectedObject.fxd = true
 
 
 renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (fanPlacement) {
+        handleFanPlacementClick(event)
+        return
+    }
+
     const canvasBounds = renderer.domElement.getBoundingClientRect()
     mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
     mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
 
     raycaster.setFromCamera(mouse, camera)
 
-    const selectableMeshes = [...cubes, ...balls.map(ball => ball.mesh)]
+    const selectableMeshes = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
     if (am) selectableMeshes.push(am)
     const intersects = raycaster.intersectObjects(selectableMeshes, true)
     if (intersects.length > 0) {
@@ -639,12 +1036,18 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
         const clickedMesh = intersects[0].object
         const meshIndex = cubes.indexOf(clickedMesh)
         const ballIndex = balls.findIndex(ball => ball.mesh === clickedMesh)
+        const fanIndex = fanVisuals.findIndex(fanMesh =>
+            fanMesh === clickedMesh || fanMesh.getObjectById(clickedMesh.id) === clickedMesh
+        )
+        const tcanIndex = tcanVisuals.findIndex(item =>
+            item.mesh === clickedMesh || item.mesh.getObjectById(clickedMesh.id) === clickedMesh
+        )
 
         if (am && am.getObjectById(clickedMesh.id) === clickedMesh) {
-            selectedObject = { type: 'adder', index: 0 }
+            selectedObject = { type: 'adder', index: 0, fxd: false }
             if (!welding) transformControls.attach(am)
         } else if (meshIndex !== -1) {
-            selectedObject = { type: 'box', index: meshIndex }
+            selectedObject = { type: 'box', index: meshIndex, fxd: engine.rigidbodies[meshIndex].f }
             if (!welding) transformControls.attach(clickedMesh)
             if (welding){
                 if (sobjn == 0){
@@ -669,11 +1072,68 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
                 }
             }
         } else if (ballIndex !== -1) {
-            selectedObject = { type: 'ball', index: ballIndex }
+            selectedObject = { type: 'ball', index: ballIndex, fxd: engine.objs[ballIndex].f }
             transformControls.attach(clickedMesh)
+        } else if (fanIndex !== -1) {
+            selectedObject = { type: 'fan', index: fanIndex, fxd: true }
+            transformControls.attach(fanVisuals[fanIndex])
+        } else if (tcanIndex !== -1) {
+            selectedObject = { type: 'tcan', index: tcanIndex, fxd: true }
+            transformControls.attach(tcanVisuals[tcanIndex].mesh)
         }
     }
 })
+renderer.domElement.addEventListener('pointermove', (event) => {
+    if (!fanPlacement) return
+    const originOffset = fanPlacement.type === 'fan' && fanPlacement.stage === 'origin'
+        ? Math.max(Number(document.getElementById('frad').value) || 0, 0)
+        : 0
+    const point = fanPlacementPoint(event, originOffset)
+    if (!point) return
+    const cursorIndex = fanPlacement.type === 'fan' && fanPlacement.stage === 'direction' ? 1 : 0
+    fanPlacement.cursors[cursorIndex].position.copy(point)
+})
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') cancelFanPlacement()
+})
+function processTcanCaptures(){
+    const removed = engine.doTcans()
+    if (!removed) return
+
+    for (const index of removed.dIndsO) {
+        const item = balls[index]
+        if (!item) continue
+        scene.remove(item.mesh)
+        item.mesh.geometry.dispose()
+        item.mesh.material.dispose()
+        balls.splice(index, 1)
+    }
+    for (const index of removed.dIndsR) {
+        const mesh = cubes[index]
+        if (!mesh) continue
+        scene.remove(mesh)
+        mesh.geometry.dispose()
+        mesh.material.dispose()
+        cubes.splice(index, 1)
+        VCMs.splice(index, 1)
+        cubeParts.splice(index, 1)
+    }
+
+    if (removed.dIndsO.length || removed.dIndsR.length) {
+        transformControls.detach()
+        if (engine.rigidbodies.length) {
+            selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+        } else if (engine.objs.length) {
+            selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+        } else if (engine.fans.length) {
+            selectedObject = { type: 'fan', index: 0, fxd: true }
+        } else if (engine.tcans.length) {
+            selectedObject = { type: 'tcan', index: 0, fxd: true }
+        } else {
+            selectedObject = { type: 'none', index: -1, fxd: false }
+        }
+    }
+}
 function updateSize(newWidth, newHeight){
     renderer.setSize(newWidth, newHeight)
     camera.aspect = newWidth / newHeight
@@ -700,28 +1160,30 @@ function render() {
     const typ = selectedObject.type
     const ind = selectedObject.index
     if (transformControls.dragging){
-        if (typ == "box"){
+        if (typ == "box" && ind < engine.rigidbodies.length){
             engine.rigidbodies[ind].f=true
         }
-        if (typ=="ball"){
+        if (typ=="ball" && ind < engine.objs.length){
             engine.objs[ind].f=true
         }
     } else {
-        if (typ == "box"){
-            engine.rigidbodies[ind].f=false
+        if (typ == "box" && ind < engine.rigidbodies.length){
+            engine.rigidbodies[ind].f=selectedObject.fxd
         }
-        if (typ=="ball"){
-            engine.objs[ind].f=false
+        if (typ=="ball" && ind < engine.objs.length){
+            engine.objs[ind].f=selectedObject.fxd
         }
     }
     if (!paused){
         engine.step()
         engine.collideAllBalls()
+        processTcanCaptures()
     }
     boxToCubeALL()
     for (const { body, mesh } of balls) {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
     }
+    updateFanAirVisual()
     controls.update()
     renderPipeline.render()
     requestAnimationFrame(render)
