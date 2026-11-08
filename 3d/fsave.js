@@ -2,6 +2,8 @@
 import * as THREE from "three/webgpu"
 import { Rigid3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/rigid.js";
 import { Obj3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/obj.js";
+import { Fan3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/fan.js";
+import { Tcan3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/tcan.js";
 function componentToHex(c) {
   var hex = c.toString(16);
   return hex.length == 1 ? "0" + hex : hex;
@@ -176,7 +178,7 @@ export function unpack(
     const mesh = new THREE.Mesh(
       new THREE.SphereGeometry(body.r, 20, 14),
       new THREE.MeshStandardMaterial({
-        color: new THREE.Color(body.c[0], body.c[1], body.c[2]),
+        color: new THREE.Color().setRGB(body.c[0]/255, body.c[1]/255, body.c[2]/255),
         roughness: 0.55
       })
     )
@@ -217,22 +219,22 @@ export function unpack(
       VCMs.push(new Int32Array(vertexMap))
     }
   }
-
   for (const fan of fans) {
     const visual = rebuildFanVisual(fan, storedFanMdl)
     if (visual) {
       scene.add(visual)
       fanVisuals.push(visual)
     }
-    engine.fans.push(fan)
+    const af = new Fan3(fan.pos,fan.dir,fan.type,fan.s,fan.focus,fan.r)
+    engine.fans.push(af)
   }
-
   for (const tcan of tcans) {
     const visual = rebuildTcanVisual(tcan, storedTcanMdl)
     if (visual) {
       scene.add(visual)
       tcanVisuals.push({ mesh: visual, size: tcan.sz })
     }
+    const at = new Tcan3(tcan.pos,tcan.sz,tcan.pRbIn)
     engine.tcans.push(tcan)
   }
 }
