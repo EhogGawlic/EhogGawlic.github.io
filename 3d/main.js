@@ -4,6 +4,7 @@ const HEIGHT = window.innerHeight
 import * as THREE from "three/webgpu"
 import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/main.js"
 //import {Engine} from "./fizks/main.js"
+import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
@@ -58,7 +59,7 @@ grid.position.y = -199.2
 scene.add(grid)
 cubes = []
 let VCMs = []
-let cubeParts = []
+cubeParts = []
 balls = []
 const controls = new OrbitControls( camera, renderer.domElement )
 camera.position.set( 0, 20, 100 )
@@ -839,9 +840,48 @@ $("rszbtn").addEventListener("click", ()=>{
     gcube.geometry=ggeo
     gcube.position.set(0, -hinp*0.5, 0)
     grid.position.y = -hinp*0.5+1
-    closePopup()
+    closePopup("popup")
 })
 $("delbtn").addEventListener("click", delCur)
+$("dnldbtn").addEventListener("click", ()=>{
+    const name = $("fnam").value
+    const data = pack(engine)
+    download(data, name)
+    $("download").style.display="none"
+    alert("Downloading...")
+})
+$("impbtn").addEventListener("click", async ()=>{
+    const inp = $("fimport")
+    const files = inp.files
+    if (files.length == 0){
+        $("info").style.color=errclr
+        $("info").innerText="No input files."
+        return
+    }
+    const firstfile = files[0]
+    const textData = await firstfile.text()
+    const data = JSON.parse(textData)
+    unpack(data, engine, cubes, balls, VCMs, cubeParts, fanVisuals, tcanVisuals, scene, storedFanMdl, storedTcanMdl)
+    scene.add(transformControls.getHelper())
+    if (cubes.length) {
+        selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+        transformControls.attach(cubes[0])
+    } else if (balls.length) {
+        selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+        transformControls.attach(balls[0].mesh)
+    } else if (fanVisuals.length) {
+        selectedObject = { type: 'fan', index: 0, fxd: true }
+        transformControls.attach(fanVisuals[0])
+    } else if (tcanVisuals.length) {
+        selectedObject = { type: 'tcan', index: 0, fxd: true }
+        transformControls.attach(tcanVisuals[0].mesh)
+    } else {
+        selectedObject = { type: 'none', index: -1, fxd: false }
+        transformControls.detach()
+    }
+    $("info").style.color=infoclr
+    $("info").innerText="Imported"
+})
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }

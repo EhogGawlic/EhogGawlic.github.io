@@ -14,41 +14,41 @@
             <summary>Dynamic objects</summary>
             <button id="add-ball" type="button">Add Ball</button><br>
             <button id="add-box" type="button">Add Box</button><br>
-            <div class="inp"><label>Fixed</label> <input type="checkbox" id="fxchk"></div>
-            <div class="inp"><label>Color</label> <input type="color" id="bclr" value="#aaaaaa"></div>
-            <div class="inp"><label>Width</label> <input type="number" value="20" id="bwidi"></div>
-            <div class="inp"><label>Height</label> <input type="number" value="20" id="bheii"></div>
-            <div class="inp"><label>Depth</label> <input type="number" value="20" id="bdepi"></div>
-            <div class="inp"><label>X</label> <input type="number" value="0" id="bxi"></div>
-            <div class="inp"><label>Y</label> <input type="number" value="0" id="byi"></div>
-            <div class="inp"><label>Z</label> <input type="number" value="0" id="bzi"></div>
-            <div class="inp"><label>Radius</label> <input type="number" value="8" id="bri"></div>
+            <div class="inp"><label for="fxchk">Fixed</label> <input type="checkbox" id="fxchk"></div>
+            <div class="inp"><label for="bclr">Color</label> <input type="color" id="bclr" value="#aaaaaa"></div>
+            <div class="inp"><label for="bwidi">Width</label> <input type="number" value="20" id="bwidi"></div>
+            <div class="inp"><label for="bheii">Height</label> <input type="number" value="20" id="bheii"></div>
+            <div class="inp"><label for="bdepi">Depth</label> <input type="number" value="20" id="bdepi"></div>
+            <div class="inp"><label for="bxi">X</label> <input type="number" value="0" id="bxi"></div>
+            <div class="inp"><label for="byi">Y</label> <input type="number" value="0" id="byi"></div>
+            <div class="inp"><label for="bzi">Z</label> <input type="number" value="0" id="bzi"></div>
+            <div class="inp"><label for="bri">Radius</label> <input type="number" value="8" id="bri"></div>
         </details>
         <details class="section" open>
             <summary>Properties</summary>
-            <div class="inp"><label>Fixed</label> <input type="checkbox" id="fxchk2"></div>
-            <div class="inp"><label>X</label> <input type="number" value="0" id="bxip"></div>
-            <div class="inp"><label>Y</label> <input type="number" value="0" id="byip"></div>
-            <div class="inp"><label>Z</label> <input type="number" value="0" id="bzip"></div>
-            <div class="inp"><label>Radius</label> <input type="number" value="0" id="brp"></div>
-            <div class="inp"><label>Color</label> <input type="color" id="bclr2"></div>
-            <div class="inp"><label>Mass</label> <input type="number" value="0" id="bmp"></div>
+            <div class="inp"><label for="fxchk2">Fixed</label> <input type="checkbox" id="fxchk2"></div>
+            <div class="inp"><label for="bxip">X</label> <input type="number" value="0" id="bxip"></div>
+            <div class="inp"><label for="byip">Y</label> <input type="number" value="0" id="byip"></div>
+            <div class="inp"><label for="bzip">Z</label> <input type="number" value="0" id="bzip"></div>
+            <div class="inp"><label for="brp">Radius</label> <input type="number" value="0" id="brp"></div>
+            <div class="inp"><label for="bclr2">Color</label> <input type="color" id="bclr2"></div>
+            <div class="inp"><label for="bmp">Mass</label> <input type="number" value="0" id="bmp"></div>
         </details>
         <details class="section">
             <summary>Add other</summary>
-            <div class="inp"><label>Type</label><select id="aothersel">
+            <div class="inp"><label  for="aothersel">Type</label><select id="aothersel">
                 <option value="fan">Fan</option>
                 <option value="tcan">Trash can</option>
             </select></div>
 
             <div id="fanutils">
-                <div class="inp"><label>Speed</label> <input type="number" value="100" id="fspd" step="any"></div>
-                <div class="inp"><label>Radius</label> <input type="number" value="20" id="frad" min="0.01" step="any"></div>
-                <div class="inp" title="How much the cone of air tapers, in radians."><label>Taper</label> <input type="number" value="0.05" id="ftap" min="-1.57" max="1.57" step="0.01"></div>
+                <div class="inp"><label for="fspd">Speed</label> <input type="number" value="100" id="fspd" step="any"></div>
+                <div class="inp"><label for="frad">Radius</label> <input type="number" value="20" id="frad" min="0.01" step="any"></div>
+                <div class="inp" title="How much the cone of air tapers, in radians."><label for="ftap">Taper</label> <input type="number" value="0.05" id="ftap" min="-1.57" max="1.57" step="0.01"></div>
             </div>
 
             <div id="tcanutils" class="hidden">
-                <div class="inp"><label>Size</label> <input type="number" value="20" id="tcanSize" min="0.01" step="any"></div>
+                <div class="inp"><label for="tcanSize">Size</label> <input type="number" value="20" id="tcanSize" min="0.01" step="any"></div>
             </div>
             <p id="fanstatus" aria-live="polite"></p>
             <button id="fanaddok" type="button">Place fan</button>
@@ -57,7 +57,7 @@
     <div id="toolmenutop">
         <button class="tool" id="pauplaybtn"><img src="./pplay.svg"></button>
         <button class="tool" id="cbalsbtn"><img src="./cballs.svg"></button>
-        <button class="tool" onclick="openPopup()"><img src="./resize.svg"></button>
+        <button class="tool" data-popup-target="popup"><img src="./resize.svg"></button>
         <button class="tool" id="clearbtn"><img src="./delscene.svg"></button>
     </div>
     <div id="toolmenuright">
@@ -68,13 +68,49 @@
         <button class="tool" id="wbtn"><img src="./weld.png"></button>
 
     </div>
-    <div id="popup">
-        <div id="popupHead">Resize boundraries</div>
-        <div id="popupContent">
-            <div class="inp"><label>Width</label> <input type="number" value="20" id="wwid"></div>
-            <div class="inp"><label>Height</label> <input type="number" value="20" id="whei"></div>
-            <div class="inp"><label>Depth</label> <input type="number" value="20" id="wdep"></div>
+    <div id="topdiv">
+        <b>Physics</b>
+        <div id="topmenu">
+
+            <div class="menuitem">
+                <span class="itemtrig">File</span>
+                <ul class="dropdown">
+                    <li>
+                        <button id="exportbtn" data-popup-target="download">Export</button>
+                    </li>
+                    <li>
+                        <button id="importbtn" data-popup-target="import">Import</button>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+    <div id="bottomthing">
+        <p id="info">Info</p>
+    </div>
+    <div id="popup" class="popup">
+        <div class="popupHead"><span>Resize boundaries</span><button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <div class="inp"><label for="wwid">Width</label> <input type="number" value="20" id="wwid"></div>
+            <div class="inp"><label for="whei">Height</label> <input type="number" value="20" id="whei"></div>
+            <div class="inp"><label for="wdep">Depth</label> <input type="number" value="20" id="wdep"></div>
             <button id="rszbtn">Resize</button>
+        </div>
+    </div>
+    <div class="popup" id="download">
+        <div class="popupHead"><span>Export</span><button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <p>Name MUST end in ".ps3" otherwise it will not be accepted.</p>
+            <div class="inp"><label for="fnam">Name</label> <input type="text" value="save.ps3" id="fnam"></div>
+            <button id="dnldbtn">Export</button>
+        </div>
+    </div>
+    <div class="popup" id="import">
+        <div class="popupHead"><span>Import</span><button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <div class="inp"><label for="fimport">File</label> <label for="fimport" class="fimportlbl">Choose/drag a file</label><input type="file" id="fimport" accept=".ps3"></div>
+            <button id="impbtn">Import</button>
         </div>
     </div>
     <script type="importmap">

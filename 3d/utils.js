@@ -1,7 +1,7 @@
 
 //ykw?
 const $ = document.getElementById.bind(document)
-let engine, ggeo, gcube, selectedObject,balls,cubes
+let engine, ggeo, gcube, selectedObject,balls,cubes,cubeParts
 function componentToHex(c) {
   var hex = c.toString(16);
   return hex.length == 1 ? "0" + hex : hex;
@@ -25,3 +25,5 @@ tbtns.forEach(btn => {
 })
 
 tbtns[0].classList.add('active')
+const infoclr = "#3d699e"
+const errclr = "#ff5555"
