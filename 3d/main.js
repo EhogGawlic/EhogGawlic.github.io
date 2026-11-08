@@ -39,7 +39,7 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(100, WIDTH / HEIGHT)
 camera.position.z = 500
 scene.add(camera)
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.2)
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4) //briter
 scene.add(ambientLight)
 const keyLight = new THREE.DirectionalLight(0xffffff, 1.4)
 keyLight.position.set(-300, 450, 600)
@@ -54,6 +54,9 @@ keyLight.shadow.mapSize.width = 1024
 keyLight.shadow.mapSize.height = 1024
 scene.background = new THREE.Color(0x1a1a1a)
 scene.add(keyLight)
+
+const hemi = new THREE.HemisphereLight(0xdfe9ff, 0x1a1a1a, 0.8)
+scene.add(hemi)
 const grid = new THREE.GridHelper(800, 40, 0xff0000, 0xffffff)
 grid.position.y = -199.2
 scene.add(grid)
@@ -401,6 +404,7 @@ function startFanPlacement(){
         setFanPlacementStatus('Fan models are still loading.')
         return
     }
+    exitGroup()
     transformControls.detach()
     const cursors = [storedCurMdl.clone(true), storedCurMdl.clone(true)]
     for (const cursor of cursors) scene.add(cursor)
@@ -419,6 +423,7 @@ function startTcanPlacement(){
         setFanPlacementStatus('Trash-can models are still loading.')
         return
     }
+    exitGroup()
     transformControls.detach()
     const cursor = storedCurMdl.clone(true)
     scene.add(cursor)
@@ -500,6 +505,7 @@ function handleFanPlacementClick(event){
 }
 function clear(){
     cancelFanPlacement()
+    exitGroup()
     if (transformControls) {
         transformControls.detach()
     }
@@ -539,6 +545,7 @@ function clear(){
     transformControls.visible = true
 }
 function clearB(){
+    exitGroup()
     if (transformControls) {
         transformControls.detach()
     }
@@ -554,6 +561,7 @@ function clearB(){
         : { type: 'none', index: -1, fxd: false }
 }
 function delCur(){
+    if (groupActive()) { deleteGroup(); return }
     const typ = selectedObject.type
     const ind = selectedObject.index
     const rb = engine.rigidbodies
@@ -635,17 +643,24 @@ document.getElementById('modetrans').addEventListener('click', ()=>{
     transformControls.setMode('translate')
 })
 document.getElementById('modescale').addEventListener('click', ()=>{
+    if (groupActive()) {
+        setGroupInfo("Scale only works on a single object.", true)
+        $('modetrans').click()
+        return
+    }
     transformControls.setMode('scale')
 })
 document.getElementById('moderot').addEventListener('click', ()=>{
     transformControls.setMode('rotate')
 })
 document.getElementById('wbtn').addEventListener('click', ()=>{
+    exitGroup()
     welding=true
     transformControls.visible = false
     transformControls.detach(); 
 })
 fchkbx2.addEventListener("change", ()=>{
+    if (groupActive()) { setGroupFixed(fchkbx2.checked); return }
     //let selectedObject = { type: 'box', index: 0 }
     switch(selectedObject.type){
         case 'box':
@@ -662,6 +677,8 @@ fchkbx2.addEventListener("change", ()=>{
 })
 
 function updProps(){
+    if (groupActive()) { updGroupProps(); return }
+    if (fchkbx2.indeterminate) fchkbx2.indeterminate = false
     const typ = selectedObject.type
     const ind = selectedObject.index
     const rb = engine.rigidbodies
@@ -861,6 +878,7 @@ $("impbtn").addEventListener("click", async ()=>{
     const firstfile = files[0]
     const textData = await firstfile.text()
     const data = JSON.parse(textData)
+    exitGroup()
     unpack(data, engine, cubes, balls, VCMs, cubeParts, fanVisuals, tcanVisuals, scene, storedFanMdl, storedTcanMdl)
     scene.add(transformControls.getHelper())
     if (cubes.length) {
@@ -897,6 +915,10 @@ const GRID_SNAP_UNIT = 10.0
 transformControls.addEventListener('objectChange', () => {
     const mesh = transformControls.object
     if (!mesh) return
+    if (mesh === groupSel.pivot) {
+        applyGroupTransform()
+        return
+    }
 
     if (selectedObject.type === 'ball') {
         const { body } = balls[selectedObject.index]
@@ -1050,7 +1072,447 @@ transformControls.addEventListener('objectChange', () => {
 })
 transformControls.addEventListener('dragging-changed', (event) => {
     controls.enabled = !event.value
+    if (transformControls.object === groupSel.pivot) {
+        if (event.value) beginGroupDrag()
+        else endGroupDrag()
+    }
 })
+const groupSel = {
+    items: [],
+    pivot: new THREE.Object3D(),
+    drag: null
+}
+scene.add(groupSel.pivot)
+
+const _gv = new THREE.Vector3()
+const _gm = new THREE.Matrix4()
+const _gq = new THREE.Quaternion()
+const _gq2 = new THREE.Quaternion()
+const _gbox = new THREE.Box3()
+
+let groupInfoShown = false
+function setGroupInfo(text, isError = false){
+    const el = $("info")
+    el.style.color = isError ? errclr : infoclr
+    el.innerText = text
+    groupInfoShown = true
+}
+function clearGroupInfo(){
+    if (!groupInfoShown) return
+    groupInfoShown = false
+    const el = $("info")
+    el.style.color = ''
+    el.innerText = 'Info'
+}
+
+function groupActive(){
+    return groupSel.items.length > 0
+}
+function allItems(){
+    const items = []
+    for (let i = 0; i < cubes.length; i++) {
+        if (!cubeParts[i]) continue
+        items.push({ type: 'box', index: i, root: cubes[i], part: cubeParts[i] })
+    }
+    for (let i = 0; i < balls.length; i++) {
+        items.push({ type: 'ball', index: i, root: balls[i].mesh, ball: balls[i] })
+    }
+    for (let i = 0; i < fanVisuals.length; i++) {
+        if (!engine.fans[i]) continue
+        items.push({ type: 'fan', index: i, root: fanVisuals[i], fan: engine.fans[i] })
+    }
+    for (let i = 0; i < tcanVisuals.length; i++) {
+        if (!engine.tcans[i]) continue
+        items.push({ type: 'tcan', index: i, root: tcanVisuals[i].mesh, tcanItem: tcanVisuals[i], tcan: engine.tcans[i] })
+    }
+    return items
+}
+
+function currentSelectionRoots(){
+    if (groupActive()) return groupSel.items.map(it => it.root)
+    const { type, index } = selectedObject
+    const root = type === 'box' ? cubes[index]
+        : type === 'ball' ? balls[index]?.mesh
+        : type === 'fan' ? fanVisuals[index]
+        : type === 'tcan' ? tcanVisuals[index]?.mesh
+        : null
+    return root && root.parent && transformControls.object === root ? [root] : []
+}
+
+function selectSingle(it){
+    const fxd = it.type === 'box' ? it.part.body.f : it.type === 'ball' ? it.ball.body.f : true
+    selectedObject = { type: it.type, index: it.index, fxd }
+    transformControls.attach(it.root)
+}
+
+function commitRoots(roots){
+    const wanted = new Set(roots)
+    const items = allItems().filter(it => wanted.has(it.root))
+    if (items.length >= 2) {
+        enterGroup(items)
+        return
+    }
+    exitGroup()
+    if (items.length === 1) {
+        selectSingle(items[0])
+    } else {
+        transformControls.detach()
+        selectedObject = { type: 'none', index: -1, fxd: false }
+    }
+}
+
+function groupAnchor(it){
+    if (it.type === 'box') return partCenter(it.part)
+    if (it.type === 'ball') return it.ball.body.p
+    return it.root.position
+}
+function syncGroupPivot(){
+    let minX = Infinity, minY = Infinity, minZ = Infinity
+    let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity
+    for (const it of groupSel.items) {
+        const p = groupAnchor(it)
+        if (p.x < minX) minX = p.x
+        if (p.y < minY) minY = p.y
+        if (p.z < minZ) minZ = p.z
+        if (p.x > maxX) maxX = p.x
+        if (p.y > maxY) maxY = p.y
+        if (p.z > maxZ) maxZ = p.z
+    }
+    groupSel.pivot.position.set((minX + maxX) / 2, (minY + maxY) / 2, (minZ + maxZ) / 2)
+    groupSel.pivot.quaternion.identity()
+    groupSel.pivot.scale.set(1, 1, 1)
+    groupSel.pivot.updateMatrixWorld(true)
+}
+
+function enterGroup(items){
+    if (groupSel.drag) endGroupDrag()
+    groupSel.items = items
+    selectedObject = { type: 'none', index: -1, fxd: false }
+    if (transformControls.mode === 'scale') $('modetrans').click()
+    syncGroupPivot()
+    transformControls.attach(groupSel.pivot)
+    outlinePass.selectedObjects = items.map(it => it.root)
+    setGroupInfo(`${items.length} objects selected`)
+}
+
+function exitGroup(){
+    if (!groupActive()) return
+    if (groupSel.drag) endGroupDrag()
+    groupSel.items = []
+    if (transformControls.object === groupSel.pivot) transformControls.detach()
+    outlinePass.selectedObjects = []
+    clearGroupInfo()
+}
+
+function syncGroup(){
+    if (!groupActive() || transformControls.dragging) return
+    const alive = groupSel.items.filter(it => it.root.parent)
+    if (alive.length !== groupSel.items.length) {
+        commitRoots(alive.map(it => it.root))
+        return
+    }
+    syncGroupPivot()
+}
+
+function beginGroupDrag(){
+    groupSel.pivot.updateMatrixWorld(true)
+    const d = {
+        startInv: groupSel.pivot.matrixWorld.clone().invert(),
+        startQ: groupSel.pivot.quaternion.clone(),
+        bodies: [], balls: [], fans: [], tcans: [], cubes: []
+    }
+    const moved = new Set()
+    for (const it of groupSel.items) {
+        if (it.type === 'box') {
+            const body = it.part.body
+            if (moved.has(body)) continue
+            moved.add(body)
+            const pts = body.pts
+            const start = new Float64Array(pts.length * 3)
+            for (let i = 0; i < pts.length; i++) {
+                start[i * 3] = pts[i].p.x
+                start[i * 3 + 1] = pts[i].p.y
+                start[i * 3 + 2] = pts[i].p.z
+            }
+            d.bodies.push({ body, start, wasFixed: body.f, q0: body.q ? { ...body.q } : null })
+        } else if (it.type === 'ball') {
+            const body = it.ball.body
+            d.balls.push({ body, start: new THREE.Vector3(body.p.x, body.p.y, body.p.z), wasFixed: body.f })
+        } else if (it.type === 'fan') {
+            d.fans.push({ fan: it.fan, mesh: it.root, pos: it.root.position.clone(), quat: it.root.quaternion.clone() })
+        } else if (it.type === 'tcan') {
+            d.tcans.push({ tcan: it.tcan, size: it.tcanItem.size, mesh: it.root, pos: it.root.position.clone() })
+        }
+    }
+    for (let i = 0; i < cubes.length; i++) {
+        if (cubeParts[i] && moved.has(cubeParts[i].body)) d.cubes.push({ mesh: cubes[i], quat: cubes[i].quaternion.clone() })
+    }
+    groupSel.drag = d
+    for (const b of d.bodies) b.body.f = true
+    for (const b of d.balls) b.body.f = true
+}
+
+function applyGroupTransform(){
+    const d = groupSel.drag
+    if (!d) return
+    const pivot = groupSel.pivot
+    pivot.scale.set(1, 1, 1)
+    pivot.updateMatrixWorld(true)
+    _gm.multiplyMatrices(pivot.matrixWorld, d.startInv)
+    _gq.copy(d.startQ).invert().premultiply(pivot.quaternion)
+
+    for (const b of d.bodies) {
+        const pts = b.body.pts
+        for (let i = 0; i < pts.length; i++) {
+            _gv.set(b.start[i * 3], b.start[i * 3 + 1], b.start[i * 3 + 2]).applyMatrix4(_gm)
+            const pt = pts[i]
+            pt.p.x = _gv.x; pt.p.y = _gv.y; pt.p.z = _gv.z
+            pt.pp.x = _gv.x; pt.pp.y = _gv.y; pt.pp.z = _gv.z
+        }
+        b.body.f = true
+        if (b.q0 && b.body.q) {
+            _gq2.set(b.q0.x, b.q0.y, b.q0.z, b.q0.w).premultiply(_gq)
+            b.body.q.w = _gq2.w; b.body.q.x = _gq2.x; b.body.q.y = _gq2.y; b.body.q.z = _gq2.z
+        }
+        b.body.update()
+    }
+    for (const c of d.cubes) {
+        c.mesh.quaternion.copy(c.quat).premultiply(_gq)
+        c.mesh.userData.physicsRotation = c.mesh.quaternion.clone()
+    }
+    for (const b of d.balls) {
+        _gv.copy(b.start).applyMatrix4(_gm)
+        const body = b.body
+        body.p.x = _gv.x; body.p.y = _gv.y; body.p.z = _gv.z
+        body.pp.x = _gv.x; body.pp.y = _gv.y; body.pp.z = _gv.z
+        body.f = true
+    }
+    for (const f of d.fans) {
+        f.mesh.position.copy(f.pos).applyMatrix4(_gm)
+        f.mesh.quaternion.copy(f.quat).premultiply(_gq)
+        f.fan.pos.x = f.mesh.position.x
+        f.fan.pos.y = f.mesh.position.y
+        f.fan.pos.z = f.mesh.position.z
+        _gv.set(1, 0, 0).applyQuaternion(f.mesh.quaternion).normalize()
+        f.fan.dir.x = _gv.x; f.fan.dir.y = _gv.y; f.fan.dir.z = _gv.z
+    }
+    for (const t of d.tcans) {
+        t.mesh.position.copy(t.pos).applyMatrix4(_gm)
+        t.tcan.pos.x = t.mesh.position.x
+        t.tcan.pos.y = t.mesh.position.y + t.size / 2
+        t.tcan.pos.z = t.mesh.position.z
+    }
+}
+
+function endGroupDrag(){
+    const d = groupSel.drag
+    if (!d) return
+    groupSel.drag = null
+    for (const b of d.bodies) b.body.f = b.wasFixed
+    for (const b of d.balls) b.body.f = b.wasFixed
+    syncGroupPivot()
+}
+
+function updGroupProps(){
+    for (const id of ["bxip", "byip", "bzip", "bclr2"]) $(id).readOnly = true
+    if (groupSel.drag) return
+    let fixed = 0, total = 0
+    for (const it of groupSel.items) {
+        if (it.type !== 'box' && it.type !== 'ball') continue
+        total++
+        if (it.type === 'box' ? it.part.body.f : it.ball.body.f) fixed++
+    }
+    fchkbx2.indeterminate = fixed > 0 && fixed < total
+    fchkbx2.checked = total > 0 && fixed === total
+}
+function setGroupFixed(value){
+    for (const it of groupSel.items) {
+        if (it.type === 'box') it.part.body.f = value
+        else if (it.type === 'ball') it.ball.body.f = value
+    }
+    fchkbx2.indeterminate = false
+}
+
+function deleteGroup(){
+    const items = groupSel.items.slice()
+    exitGroup()
+    const bodies = new Set(items.filter(it => it.type === 'box').map(it => it.part.body))
+    for (let i = cubes.length - 1; i >= 0; i--) {
+        if (!bodies.has(cubeParts[i].body)) continue
+        const cube = cubes[i]
+        scene.remove(cube)
+        if (cube.geometry) cube.geometry.dispose()
+        if (cube.material) cube.material.dispose()
+        cubes.splice(i, 1)
+        VCMs.splice(i, 1)
+        cubeParts.splice(i, 1)
+    }
+    for (const body of bodies) {
+        const k = engine.rigidbodies.indexOf(body)
+        if (k >= 0) engine.rigidbodies.splice(k, 1)
+    }
+    const byIndexDesc = (a, b) => b.index - a.index
+    for (const it of items.filter(it => it.type === 'ball').sort(byIndexDesc)) {
+        const ball = balls[it.index]
+        if (!ball) continue
+        scene.remove(ball.mesh)
+        if (ball.mesh.geometry) ball.mesh.geometry.dispose()
+        if (ball.mesh.material) ball.mesh.material.dispose()
+        const k = engine.objs.indexOf(ball.body)
+        if (k >= 0) engine.objs.splice(k, 1)
+        balls.splice(it.index, 1)
+    }
+    for (const it of items.filter(it => it.type === 'fan').sort(byIndexDesc)) {
+        scene.remove(fanVisuals[it.index])
+        engine.fans.splice(it.index, 1)
+        fanVisuals.splice(it.index, 1)
+    }
+    for (const it of items.filter(it => it.type === 'tcan').sort(byIndexDesc)) {
+        scene.remove(tcanVisuals[it.index].mesh)
+        engine.tcans.splice(it.index, 1)
+        tcanVisuals.splice(it.index, 1)
+    }
+    transformControls.detach()
+    selectedObject = { type: 'none', index: -1, fxd: false }
+}
+const MARQUEE_MIN_PX = 4
+const isMarqueeGesture = (event) => event.shiftKey
+const marqueeEl = document.createElement('div')
+marqueeEl.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:50;box-sizing:border-box;' +
+    'border:1px dashed #6fa3ff;background:rgba(71,114,179,0.18);'
+document.body.appendChild(marqueeEl)
+let marquee = null
+
+function drawMarquee(){
+    const dragged = Math.hypot(marquee.x1 - marquee.x0, marquee.y1 - marquee.y0) >= MARQUEE_MIN_PX
+    marqueeEl.style.display = dragged ? 'block' : 'none'
+    marqueeEl.style.left = Math.min(marquee.x0, marquee.x1) + 'px'
+    marqueeEl.style.top = Math.min(marquee.y0, marquee.y1) + 'px'
+    marqueeEl.style.width = Math.abs(marquee.x1 - marquee.x0) + 'px'
+    marqueeEl.style.height = Math.abs(marquee.y1 - marquee.y0) + 'px'
+}
+function endMarqueeUI(pointerId){
+    marquee = null
+    marqueeEl.style.display = 'none'
+    document.body.style.userSelect = ''
+    try { renderer.domElement.releasePointerCapture(pointerId) } catch (e) { /* already released */ }
+}
+function cancelMarquee(){
+    if (!marquee) return false
+    endMarqueeUI(marquee.id)
+    return true
+}
+
+function itemScreenRect(it, cr){
+    if (it.type === 'ball') {
+        const p = it.ball.body.p
+        _gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
+        const depth = -_gv.z
+        if (depth <= camera.near) return null
+        const rad = it.ball.body.r * camera.projectionMatrix.elements[5] / depth * cr.height / 2
+        _gv.applyMatrix4(camera.projectionMatrix)
+        const cx = cr.left + (_gv.x * 0.5 + 0.5) * cr.width
+        const cy = cr.top + (-_gv.y * 0.5 + 0.5) * cr.height
+        return { l: cx - rad, r: cx + rad, t: cy - rad, b: cy + rad }
+    }
+    const pts = []
+    if (it.type === 'box') {
+        for (const q of it.part.pts) pts.push(q.p)
+    } else {
+        _gbox.setFromObject(it.root)
+        if (_gbox.isEmpty()) return null
+        for (let i = 0; i < 8; i++) {
+            pts.push({
+                x: i & 1 ? _gbox.max.x : _gbox.min.x,
+                y: i & 2 ? _gbox.max.y : _gbox.min.y,
+                z: i & 4 ? _gbox.max.z : _gbox.min.z
+            })
+        }
+    }
+    let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity
+    for (const p of pts) {
+        _gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
+        if (_gv.z > -camera.near) continue            // behind the camera
+        _gv.applyMatrix4(camera.projectionMatrix)
+        const sx = cr.left + (_gv.x * 0.5 + 0.5) * cr.width
+        const sy = cr.top + (-_gv.y * 0.5 + 0.5) * cr.height
+        if (sx < l) l = sx
+        if (sx > r) r = sx
+        if (sy < t) t = sy
+        if (sy > b) b = sy
+    }
+    return l === Infinity ? null : { l, r, t, b }
+}
+
+function boxSelect(m){
+    const sl = Math.min(m.x0, m.x1), sr = Math.max(m.x0, m.x1)
+    const st = Math.min(m.y0, m.y1), sb = Math.max(m.y0, m.y1)
+    camera.updateMatrixWorld()
+    scene.updateMatrixWorld(true)
+    const cr = renderer.domElement.getBoundingClientRect()
+    const hits = allItems().filter(it => {
+        const r = itemScreenRect(it, cr)
+        return r && r.r >= sl && r.l <= sr && r.b >= st && r.t <= sb
+    })
+    const roots = hits.map(it => it.root)
+    commitRoots(m.additive ? [...currentSelectionRoots(), ...roots] : roots)
+}
+
+function pickItemAt(event){
+    const cr = renderer.domElement.getBoundingClientRect()
+    mouse.x = ((event.clientX - cr.left) / cr.width) * 2 - 1
+    mouse.y = -((event.clientY - cr.top) / cr.height) * 2 + 1
+    raycaster.setFromCamera(mouse, camera)
+    const items = allItems()
+    const hit = raycaster.intersectObjects(items.map(it => it.root), true)[0]
+    if (!hit) return null
+    return items.find(it => it.root === hit.object || it.root.getObjectById(hit.object.id) === hit.object) ?? null
+}
+function toggleAt(event){
+    const it = pickItemAt(event)
+    if (!it) return
+    const roots = currentSelectionRoots()
+    commitRoots(roots.includes(it.root) ? roots.filter(r => r !== it.root) : [...roots, it.root])
+}
+window.addEventListener('pointerdown', (event) => {
+    if (event.target !== renderer.domElement) return
+    if (event.button !== 0 || !event.isPrimary || !isMarqueeGesture(event)) return
+    if (fanPlacement || welding) return
+    event.preventDefault()
+    event.stopPropagation()
+    marquee = {
+        id: event.pointerId,
+        x0: event.clientX, y0: event.clientY, x1: event.clientX, y1: event.clientY,
+        additive: event.ctrlKey || event.metaKey
+    }
+    renderer.domElement.setPointerCapture(event.pointerId)
+    document.body.style.userSelect = 'none'
+}, true)
+renderer.domElement.addEventListener('pointermove', (event) => {
+    if (!marquee || event.pointerId !== marquee.id) return
+    marquee.x1 = event.clientX
+    marquee.y1 = event.clientY
+    drawMarquee()
+})
+renderer.domElement.addEventListener('pointerup', (event) => {
+    if (!marquee || event.pointerId !== marquee.id) return
+    const m = marquee
+    m.x1 = event.clientX
+    m.y1 = event.clientY
+    endMarqueeUI(event.pointerId)
+    if (Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEE_MIN_PX) toggleAt(event)
+    else boxSelect(m)
+})
+renderer.domElement.addEventListener('pointercancel', () => { cancelMarquee() })
+
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Shift' && !fanPlacement && !welding) renderer.domElement.style.cursor = 'crosshair'
+})
+window.addEventListener('keyup', (event) => {
+    if (event.key === 'Shift') renderer.domElement.style.cursor = ''
+})
+window.addEventListener('blur', () => { renderer.domElement.style.cursor = '' })
+
 engine.rigidbodies[0].f=true
 selectedObject.fxd = true
 
@@ -1072,6 +1534,7 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
     const intersects = raycaster.intersectObjects(selectableMeshes, true)
     if (intersects.length > 0) {
         if (transformControls.dragging || intersects[0].object.type === 'TransformControlsPlane') return
+        exitGroup()
 
         const clickedMesh = intersects[0].object
         const meshIndex = cubes.indexOf(clickedMesh)
@@ -1134,7 +1597,15 @@ renderer.domElement.addEventListener('pointermove', (event) => {
     fanPlacement.cursors[cursorIndex].position.copy(point)
 })
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') cancelFanPlacement()
+    if (event.key !== 'Escape') return
+    if (cancelMarquee()) return
+    if (groupActive() && !fanPlacement) {
+        exitGroup()
+        transformControls.detach()
+        selectedObject = { type: 'none', index: -1, fxd: false }
+        return
+    }
+    cancelFanPlacement()
 })
 function processTcanCaptures(){
     const removed = engine.doTcans()
@@ -1160,6 +1631,7 @@ function processTcanCaptures(){
     }
 
     if (removed.dIndsO.length || removed.dIndsR.length) {
+        exitGroup()
         transformControls.detach()
         if (engine.rigidbodies.length) {
             selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
@@ -1223,6 +1695,7 @@ function render() {
     for (const { body, mesh } of balls) {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
     }
+    syncGroup()
     updateFanAirVisual()
     controls.update()
     renderPipeline.render()

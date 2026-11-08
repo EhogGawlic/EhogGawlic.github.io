@@ -303,3 +303,6 @@ input[type=file]{
 #info{
     margin: 5px;
 }
+*:not(input,textarea){
+    user-select: none;
+}
