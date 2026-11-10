@@ -310,7 +310,13 @@ function addBall(fixed=false,rad=8, color="#18a8d1"){
     mesh.castShadow = true
     mesh.receiveShadow = true
     scene.add(mesh)
-    balls.push({ body: engine.objs[engine.objs.length - 1], mesh })
+    const currentBody = engine.objs[engine.objs.length - 1]
+    currentBody.c = [
+        Math.round(nclr.r * 255),
+        Math.round(nclr.g * 255),
+        Math.round(nclr.b * 255)
+    ]
+    balls.push({ body: currentBody, mesh })
 }
 function fanAirLength(fan){
     const position = fan.pos
