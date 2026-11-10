@@ -1,4 +1,3 @@
-
 import * as THREE from "three/webgpu"
 import { Rigid3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/rigid.js";
 import { Obj3 } from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/obj.js";
@@ -43,8 +42,7 @@ export function pack(engine) {
             }))
         })),
         fans: engine.fans,
-        tcans: engine.tcans,
-        walls: engine.walls
+        tcans: engine.tcans
     })
 }
 
@@ -151,6 +149,7 @@ export function unpack(
   VCMs.length = 0
   cubeParts.length = 0
   fanVisuals.length = 0
+  tcanVisuals.length = 0 
 
   engine.walls = walls
   engine.objs = []
@@ -214,6 +213,16 @@ export function unpack(
       const { mesh, vertexMap } = buildPartMesh(part, body.color)
       group.add(mesh)
 
+      mesh.geometry.computeBoundingBox()
+      const box = mesh.geometry.boundingBox
+      mesh.userData.baseDimensions = new THREE.Vector3(
+          box.max.x - box.min.x,
+          box.max.y - box.min.y,
+          box.max.z - box.min.z
+      )
+      mesh.userData.physicsScale = mesh.scale.clone()
+      mesh.userData.physicsRotation = mesh.quaternion.clone()
+
       cubes.push(mesh)
       cubeParts.push(part)
       VCMs.push(new Int32Array(vertexMap))
@@ -235,7 +244,7 @@ export function unpack(
       tcanVisuals.push({ mesh: visual, size: tcan.sz })
     }
     const at = new Tcan3(tcan.pos,tcan.sz,tcan.pRbIn)
-    engine.tcans.push(tcan)
+    engine.tcans.push(at)
   }
 }
 export function download(data, name){
