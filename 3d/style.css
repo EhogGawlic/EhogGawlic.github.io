@@ -238,11 +238,11 @@ hr {
 }
 .menuitem{
     position: relative;
+    top: 0;
+    left: 0;
+    margin-right: 16px;
 }
 .itemtrig{
-    position: absolute;
-    left: 0;
-    top: 0;
     border-radius: 3px;
     padding: 2px;
 }
@@ -305,4 +305,16 @@ input[type=file]{
 }
 *:not(input,textarea){
     user-select: none;
+}
+.infoimg {
+    width: 16px;
+
+    position: relative;
+    top: 2px;
+}
+.infoimg1{
+    width: 16px;
+
+    position: relative;
+    top: 8px;
 }

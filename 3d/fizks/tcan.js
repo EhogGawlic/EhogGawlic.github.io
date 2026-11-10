@@ -7,6 +7,11 @@ export class Tcan2{
         this.sz=sz
         this.pRbIn=pRbIn
     }
+    clone(){
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pos = new Vec2(this.pos.x, this.pos.y)
+        return copy
+    }
     checkBoundsBall(b){
         return b.p.x > this.pos.x-this.sz*0.5+b.r && b.p.y > this.pos.y-this.sz*0.5+b.r &&
                b.p.x < this.pos.x+this.sz*0.5-b.r && b.p.y < this.pos.y+this.sz*0.5-b.r
@@ -55,8 +60,13 @@ export class Tcan3{
         this.sz=sz
         this.pRbIn=pRbIn
     }
+    clone(){
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pos = new Vec3(this.pos.x, this.pos.y, this.pos.z)
+        return copy
+    }
     checkBoundsBall(b){
-        // a trash can hitbox is a blender default cylinder (rad: this.sz*0.5, height: this.sz)
+        // a trash can hitbox is a blender default cylinder (rad: this.sz, height: this.sz*2)
         // so if we imagine it as an infinite cylinder along the y axis, we can treat it as two
         // circles, then check the y-axis like normal walls
         const dfc = Math.sqrt((this.pos.x-b.p.x)**2+(this.pos.z-b.p.z)**2)
@@ -64,9 +74,9 @@ export class Tcan3{
         // naah half in is fine
         // actually
         // i choose fully in
-        if (dfc < this.sz*0.5-b.r){
+        if (dfc < this.sz-b.r){
             const distAlngY = Math.abs(this.pos.y-b.p.y) // centered
-            if (distAlngY < this.sz*0.5){
+            if (distAlngY < this.sz){
                 return true
             }
         }

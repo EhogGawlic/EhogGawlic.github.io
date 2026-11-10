@@ -84,6 +84,18 @@
                 </ul>
             </div>
 
+            <!--<div class="menuitem">
+                <span class="itemtrig">Select</span>
+                <ul class="dropdown">
+                    <li>
+                        <button id="exportbtn" data-popup-target="selectByClr">By color</button>
+                    </li>
+                    <li>
+                        <button id="importbtn" data-popup-target="selectByRad">By radius</button>
+                    </li>
+                </ul>
+            </div>-->
+
         </div>
     </div>
     <div id="bottomthing">
@@ -92,16 +104,16 @@
     <div id="popup" class="popup">
         <div class="popupHead"><span>Resize boundaries</span><button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
         <div class="popupContent">
-            <div class="inp"><label for="wwid">Width</label> <input type="number" value="20" id="wwid"></div>
-            <div class="inp"><label for="whei">Height</label> <input type="number" value="20" id="whei"></div>
-            <div class="inp"><label for="wdep">Depth</label> <input type="number" value="20" id="wdep"></div>
+            <div class="inp"><label for="wwid">Width</label> <input type="number" value="400" id="wwid"></div>
+            <div class="inp"><label for="whei">Height</label> <input type="number" value="400" id="whei"></div>
+            <div class="inp"><label for="wdep">Depth</label> <input type="number" value="400" id="wdep"></div>
             <button id="rszbtn">Resize</button>
         </div>
     </div>
     <div class="popup" id="download">
         <div class="popupHead"><span>Export</span><button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
         <div class="popupContent">
-            <p>Name MUST end in ".ps3" otherwise it will not be accepted.</p>
+            <p><img src="info.svg" class="infoimg1">Name MUST end in ".ps3" otherwise it will not be accepted.</p>
             <div class="inp"><label for="fnam">Name</label> <input type="text" value="save.ps3" id="fnam"></div>
             <button id="dnldbtn">Export</button>
         </div>
@@ -111,6 +123,20 @@
         <div class="popupContent">
             <div class="inp"><label for="fimport">File</label> <label for="fimport" class="fimportlbl">Choose/drag a file</label><input type="file" id="fimport" accept=".ps3"></div>
             <button id="impbtn">Import</button>
+        </div>
+    </div>
+    <div class="popup" id="selectByClr">
+        <div class="popupHead">Select by color<button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <div class="inp"><label for="bclrs">Color</label> <input type="color" id="bclrs" value="#aaaaaa"></div>
+            <button id="selclrbtn">Select <span id="selclramt">?</span> items</button>
+        </div>
+    </div>
+    <div class="popup" id="selectByRad">
+        <div class="popupHead">Select by radius<button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <div class="inp"><label for="brads">Color</label> <input type="number" id="brads" value="8"></div>
+            <button id="selradbtn">Select <span id="selradamt">?</span> items</button>
         </div>
     </div>
     <script type="importmap">

@@ -1,9 +1,19 @@
+// Coding style:
+// Always use camelCase
+// NO semicolons unless in for loop or dense variables (e.g. let a=2; const b=2; var c=1;)
+// Use a ? b : c a lot, but if statements if better
+// Use shortened names because fast to type
+// Make stupid comments
+// Only comment when confusing or info
+// No emojis (except for the next line)
+// american (god bless america but not trump) 🦅
+
 const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@d8c5160b6b7eef7340987958a468fd2e2fab4fd7/main.js"
-//import {Engine} from "./fizks/main.js"
+import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@939ab5031bb6ca9f33c16ab8343e297efbb1984d/main.js"
+//import {addVec3, Engine} from "./fizks/main.js"
 import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
@@ -897,8 +907,9 @@ $("impbtn").addEventListener("click", async ()=>{
         selectedObject = { type: 'none', index: -1, fxd: false }
         transformControls.detach()
     }
+    
     $("info").style.color=infoclr
-    $("info").innerText="Imported"
+    $("info").innerHTML='<img src="info.svg" class="infoimg">Imported'
 })
 for (let i = 0; i < 100; i++){
     addBoxRnd()
@@ -910,7 +921,7 @@ transformControls.translationSnap = 5
 transformControls.rotationSnap = Math.PI / 12 //15 deg
 scene.add(transformControls.getHelper())
 
-const GRID_SNAP_UNIT = 10.0
+const GRIDSNAPUNIT = 10.0
 
 transformControls.addEventListener('objectChange', () => {
     const mesh = transformControls.object
@@ -990,9 +1001,9 @@ transformControls.addEventListener('objectChange', () => {
     const currentSizeY = mesh.scale.y * baseDim.y
     const currentSizeZ = mesh.scale.z * baseDim.z
 
-    const snappedSizeX = Math.round(currentSizeX / GRID_SNAP_UNIT) * GRID_SNAP_UNIT
-    const snappedSizeY = Math.round(currentSizeY / GRID_SNAP_UNIT) * GRID_SNAP_UNIT
-    const snappedSizeZ = Math.round(currentSizeZ / GRID_SNAP_UNIT) * GRID_SNAP_UNIT
+    const snappedSizeX = Math.round(currentSizeX / GRIDSNAPUNIT) * GRIDSNAPUNIT
+    const snappedSizeY = Math.round(currentSizeY / GRIDSNAPUNIT) * GRIDSNAPUNIT
+    const snappedSizeZ = Math.round(currentSizeZ / GRIDSNAPUNIT) * GRIDSNAPUNIT
 
     const nextScale = new THREE.Vector3(
         Math.max(snappedSizeX / baseDim.x, 0.01),
@@ -1084,17 +1095,30 @@ const groupSel = {
 }
 scene.add(groupSel.pivot)
 
-const _gv = new THREE.Vector3()
-const _gm = new THREE.Matrix4()
-const _gq = new THREE.Quaternion()
-const _gq2 = new THREE.Quaternion()
-const _gbox = new THREE.Box3()
+const gv = new THREE.Vector3()
+const gm = new THREE.Matrix4()
+const gq = new THREE.Quaternion()
+const gq2 = new THREE.Quaternion()
+const gbox = new THREE.Box3()
 
 let groupInfoShown = false
+
+const clrCond = (item, wantedColor)=>{
+    if (item.type == "box"){
+        const color = item.root.material.color.getHexString()
+        if (color == wantedColor) return true
+    }
+    if (item.type == "ball"){
+        const color = rgbToHex(...engine.objs[item.index].c)
+        if (color == wantedColor) return true
+    }
+    return false
+}
+
 function setGroupInfo(text, isError = false){
     const el = $("info")
     el.style.color = isError ? errclr : infoclr
-    el.innerText = text
+    el.innerHTML = isError ? '<img src="err.svg" class="infoimg">' : '<img src="info.svg" class="infoimg">' + text
     groupInfoShown = true
 }
 function clearGroupInfo(){
@@ -1145,9 +1169,7 @@ function selectSingle(it){
     transformControls.attach(it.root)
 }
 
-function commitRoots(roots){
-    const wanted = new Set(roots)
-    const items = allItems().filter(it => wanted.has(it.root))
+function selGroup(items){
     if (items.length >= 2) {
         enterGroup(items)
         return
@@ -1160,7 +1182,18 @@ function commitRoots(roots){
         selectedObject = { type: 'none', index: -1, fxd: false }
     }
 }
-
+function commitRoots(roots){
+    const wanted = new Set(roots)
+    const items = allItems().filter(it => wanted.has(it.root))
+    selGroup(items)
+}
+function getGroupWhere(condition){
+    return allItems().filter(item => condition(item))
+}
+function selGroupWhere(condition){
+    const items = getGroupWhere(condition)
+    selGroup(items)
+}
 function groupAnchor(it){
     if (it.type === 'box') return partCenter(it.part)
     if (it.type === 'ball') return it.ball.body.p
@@ -1258,46 +1291,46 @@ function applyGroupTransform(){
     const pivot = groupSel.pivot
     pivot.scale.set(1, 1, 1)
     pivot.updateMatrixWorld(true)
-    _gm.multiplyMatrices(pivot.matrixWorld, d.startInv)
-    _gq.copy(d.startQ).invert().premultiply(pivot.quaternion)
+    gm.multiplyMatrices(pivot.matrixWorld, d.startInv)
+    gq.copy(d.startQ).invert().premultiply(pivot.quaternion)
 
     for (const b of d.bodies) {
         const pts = b.body.pts
         for (let i = 0; i < pts.length; i++) {
-            _gv.set(b.start[i * 3], b.start[i * 3 + 1], b.start[i * 3 + 2]).applyMatrix4(_gm)
+            gv.set(b.start[i * 3], b.start[i * 3 + 1], b.start[i * 3 + 2]).applyMatrix4(gm)
             const pt = pts[i]
-            pt.p.x = _gv.x; pt.p.y = _gv.y; pt.p.z = _gv.z
-            pt.pp.x = _gv.x; pt.pp.y = _gv.y; pt.pp.z = _gv.z
+            pt.p.x = gv.x; pt.p.y = gv.y; pt.p.z = gv.z
+            pt.pp.x = gv.x; pt.pp.y = gv.y; pt.pp.z = gv.z
         }
         b.body.f = true
         if (b.q0 && b.body.q) {
-            _gq2.set(b.q0.x, b.q0.y, b.q0.z, b.q0.w).premultiply(_gq)
-            b.body.q.w = _gq2.w; b.body.q.x = _gq2.x; b.body.q.y = _gq2.y; b.body.q.z = _gq2.z
+            gq2.set(b.q0.x, b.q0.y, b.q0.z, b.q0.w).premultiply(gq)
+            b.body.q.w = gq2.w; b.body.q.x = gq2.x; b.body.q.y = gq2.y; b.body.q.z = gq2.z
         }
         b.body.update()
     }
     for (const c of d.cubes) {
-        c.mesh.quaternion.copy(c.quat).premultiply(_gq)
+        c.mesh.quaternion.copy(c.quat).premultiply(gq)
         c.mesh.userData.physicsRotation = c.mesh.quaternion.clone()
     }
     for (const b of d.balls) {
-        _gv.copy(b.start).applyMatrix4(_gm)
+        gv.copy(b.start).applyMatrix4(gm)
         const body = b.body
-        body.p.x = _gv.x; body.p.y = _gv.y; body.p.z = _gv.z
-        body.pp.x = _gv.x; body.pp.y = _gv.y; body.pp.z = _gv.z
+        body.p.x = gv.x; body.p.y = gv.y; body.p.z = gv.z
+        body.pp.x = gv.x; body.pp.y = gv.y; body.pp.z = gv.z
         body.f = true
     }
     for (const f of d.fans) {
-        f.mesh.position.copy(f.pos).applyMatrix4(_gm)
-        f.mesh.quaternion.copy(f.quat).premultiply(_gq)
+        f.mesh.position.copy(f.pos).applyMatrix4(gm)
+        f.mesh.quaternion.copy(f.quat).premultiply(gq)
         f.fan.pos.x = f.mesh.position.x
         f.fan.pos.y = f.mesh.position.y
         f.fan.pos.z = f.mesh.position.z
-        _gv.set(1, 0, 0).applyQuaternion(f.mesh.quaternion).normalize()
-        f.fan.dir.x = _gv.x; f.fan.dir.y = _gv.y; f.fan.dir.z = _gv.z
+        gv.set(1, 0, 0).applyQuaternion(f.mesh.quaternion).normalize()
+        f.fan.dir.x = gv.x; f.fan.dir.y = gv.y; f.fan.dir.z = gv.z
     }
     for (const t of d.tcans) {
-        t.mesh.position.copy(t.pos).applyMatrix4(_gm)
+        t.mesh.position.copy(t.pos).applyMatrix4(gm)
         t.tcan.pos.x = t.mesh.position.x
         t.tcan.pos.y = t.mesh.position.y + t.size / 2
         t.tcan.pos.z = t.mesh.position.z
@@ -1375,16 +1408,28 @@ function deleteGroup(){
     transformControls.detach()
     selectedObject = { type: 'none', index: -1, fxd: false }
 }
-const MARQUEE_MIN_PX = 4
+function dupeMesh(mesh){
+    const clone = mesh.clone();
+    clone.geometry = mesh.geometry.clone();
+    clone.material = mesh.material.clone();
+    return clone
+}
+function cloneSelection(){
+    const newS = []
+    if (groupSel.length == 1){
+        // TODO: add cloning here and under here and the select by color and radius and this and that and that one over there and also that one and this here and
+    }
+}
+const MARQUEEMINPX = 4
 const isMarqueeGesture = (event) => event.shiftKey
 const marqueeEl = document.createElement('div')
 marqueeEl.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:50;box-sizing:border-box;' +
-    'border:1px dashed #6fa3ff;background:rgba(71,114,179,0.18);'
+    'border:1px solid white;background:#ffffff00;'
 document.body.appendChild(marqueeEl)
 let marquee = null
 
 function drawMarquee(){
-    const dragged = Math.hypot(marquee.x1 - marquee.x0, marquee.y1 - marquee.y0) >= MARQUEE_MIN_PX
+    const dragged = Math.hypot(marquee.x1 - marquee.x0, marquee.y1 - marquee.y0) >= MARQUEEMINPX
     marqueeEl.style.display = dragged ? 'block' : 'none'
     marqueeEl.style.left = Math.min(marquee.x0, marquee.x1) + 'px'
     marqueeEl.style.top = Math.min(marquee.y0, marquee.y1) + 'px'
@@ -1406,36 +1451,36 @@ function cancelMarquee(){
 function itemScreenRect(it, cr){
     if (it.type === 'ball') {
         const p = it.ball.body.p
-        _gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
-        const depth = -_gv.z
+        gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
+        const depth = -gv.z
         if (depth <= camera.near) return null
         const rad = it.ball.body.r * camera.projectionMatrix.elements[5] / depth * cr.height / 2
-        _gv.applyMatrix4(camera.projectionMatrix)
-        const cx = cr.left + (_gv.x * 0.5 + 0.5) * cr.width
-        const cy = cr.top + (-_gv.y * 0.5 + 0.5) * cr.height
+        gv.applyMatrix4(camera.projectionMatrix)
+        const cx = cr.left + (gv.x * 0.5 + 0.5) * cr.width
+        const cy = cr.top + (-gv.y * 0.5 + 0.5) * cr.height
         return { l: cx - rad, r: cx + rad, t: cy - rad, b: cy + rad }
     }
     const pts = []
     if (it.type === 'box') {
         for (const q of it.part.pts) pts.push(q.p)
     } else {
-        _gbox.setFromObject(it.root)
-        if (_gbox.isEmpty()) return null
+        gbox.setFromObject(it.root)
+        if (gbox.isEmpty()) return null
         for (let i = 0; i < 8; i++) {
             pts.push({
-                x: i & 1 ? _gbox.max.x : _gbox.min.x,
-                y: i & 2 ? _gbox.max.y : _gbox.min.y,
-                z: i & 4 ? _gbox.max.z : _gbox.min.z
+                x: i & 1 ? gbox.max.x : gbox.min.x,
+                y: i & 2 ? gbox.max.y : gbox.min.y,
+                z: i & 4 ? gbox.max.z : gbox.min.z
             })
         }
     }
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity
     for (const p of pts) {
-        _gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
-        if (_gv.z > -camera.near) continue            // behind the camera
-        _gv.applyMatrix4(camera.projectionMatrix)
-        const sx = cr.left + (_gv.x * 0.5 + 0.5) * cr.width
-        const sy = cr.top + (-_gv.y * 0.5 + 0.5) * cr.height
+        gv.set(p.x, p.y, p.z).applyMatrix4(camera.matrixWorldInverse)
+        if (gv.z > -camera.near) continue            // behind the camera
+        gv.applyMatrix4(camera.projectionMatrix)
+        const sx = cr.left + (gv.x * 0.5 + 0.5) * cr.width
+        const sy = cr.top + (-gv.y * 0.5 + 0.5) * cr.height
         if (sx < l) l = sx
         if (sx > r) r = sx
         if (sy < t) t = sy
@@ -1500,7 +1545,7 @@ renderer.domElement.addEventListener('pointerup', (event) => {
     m.x1 = event.clientX
     m.y1 = event.clientY
     endMarqueeUI(event.pointerId)
-    if (Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEE_MIN_PX) toggleAt(event)
+    if (Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEEMINPX) toggleAt(event)
     else boxSelect(m)
 })
 renderer.domElement.addEventListener('pointercancel', () => { cancelMarquee() })
@@ -1606,6 +1651,70 @@ window.addEventListener('keydown', (event) => {
         return
     }
     cancelFanPlacement()
+})
+function dupeBody(body, offset) {
+    const copy = body.clone()
+
+    for (const point of copy.pts) {
+        point.p.x += offset.x
+        point.p.y += offset.y
+        point.p.z += offset.z
+        point.pp.x += offset.x
+        point.pp.y += offset.y
+        point.pp.z += offset.z
+    }
+
+    engine.rigidbodies.push(copy)
+
+    for (let i = 0; i < body.parts.length; i++) {
+        const part = body.parts[i]
+        const meshIndex = cubeParts.findIndex(item => item === part)
+        if (meshIndex < 0) continue
+
+        const mesh = dupeMesh(cubes[meshIndex])
+        mesh.position.add(new THREE.Vector3(offset.x, offset.y, offset.z))
+        scene.add(mesh)
+
+        cubes.push(mesh)
+        cubeParts.push(copy.parts[i])
+        VCMs.push(VCMs[meshIndex].slice())
+    }
+}
+function dupeBall(ball, meshIndex, offset) {
+    const copy = ball.clone()
+
+    ball.p = addVec3(ball.p,offset)
+    ball.pp = addVec3(ball.pp, offset)
+    engine.objs.push(copy)
+    const mesh = dupeMesh(balls[meshIndex].mesh)
+    mesh.position.add(new THREE.Vector3(offset.x, offset.y, offset.z))
+    scene.add(mesh)
+
+    balls.push({mesh, body:copy})
+}
+window.addEventListener("keydown", (e)=>{
+    if (e.key == "d" && (e.ctrlKey || e.metaKey)){
+        e.preventDefault()
+        let selAmt = groupSel.items.length
+        if (selAmt == 0){
+            if (selectedObject.type == "none") return
+            selAmt = 1
+        }
+        const selected = selAmt == 1 ? [selectedObject] : groupSel.items
+        selected.forEach(sel=>{
+            switch(sel.type){
+                case "box":
+                    const rb = engine.rigidbodies[sel.index]
+                    const clonerb = dupeBody(rb, cloneOffset)
+                    break
+                case "ball":
+                    const ob = engine.objs[sel.index]
+                    const cloneba = dupeBall(ob,sel.index, cloneOffset)
+                    break
+
+            }
+        })
+    }
 })
 function processTcanCaptures(){
     const removed = engine.doTcans()

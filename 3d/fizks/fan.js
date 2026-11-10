@@ -11,6 +11,12 @@ export class Fan2{
         this.focus=focus
         this.r=initialRadius
     }
+    clone(){
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pos = new Vec2(this.pos.x, this.pos.y)
+        copy.dir = new Vec2(this.dir.x, this.dir.y)
+        return copy
+    }
     windSpeedFromDist(d){ // real math, unlike my other one
         const nRad = this.r + d*Math.tan(this.focus) // Get radius
         const rComp = (this.r / nRad) ** 2 // Do shit
@@ -81,6 +87,12 @@ export class Fan3{
         this.s=strength
         this.focus=focus
         this.r=initialRadius
+    }
+    clone(){
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pos = new Vec3(this.pos.x, this.pos.y, this.pos.z)
+        copy.dir = new Vec3(this.dir.x, this.dir.y, this.dir.z)
+        return copy
     }
     windSpeedFromDist(d){ // real math, unlike my other one
         const nRad = this.r + d*Math.tan(this.focus) // Get radius

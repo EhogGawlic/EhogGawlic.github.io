@@ -33,6 +33,14 @@ class Part2 {
         this.update()
     }
 
+    clone(body, pointCopies) {
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.body = body
+        copy.pts = this.pts.map(point => pointCopies.get(point))
+        copy.update()
+        return copy
+    }
+
     get f() { return this.body.f }
 
     update() {
@@ -238,6 +246,16 @@ export class Rigid2 {
         return new Rigid2({ ...options, parts: [{ w: options.w ?? 40, h: options.h ?? 40 }] })
     }
 
+    clone() {
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pts = this.pts.map(point => point.clone())
+        const pointCopies = new Map(this.pts.map((point, index) => [point, copy.pts[index]]))
+        copy.parts = this.parts.map(part => part.clone(copy, pointCopies))
+        copy.rest = this.rest.map(point => point.slice())
+        copy.update()
+        return copy
+    }
+
     com() {
         let m = 0, x = 0, y = 0
         for (const q of this.pts) { m += q.m; x += q.m * q.p.x; y += q.m * q.p.y }
@@ -266,8 +284,6 @@ export class Rigid2 {
         return this
     }
 
-    // Fixed bodies don't move. The flag has to reach every particle (they are what integrates), so it
-    // is an accessor: `body.f = true` behaves the same as passing fixed: true when the body is made.
     get f() { return this._f }
     set f(v) {
         if (v === this._f) return
@@ -566,6 +582,16 @@ class Part3 {
         this.minX = this.minY = this.minZ = this.maxX = this.maxY = this.maxZ = 0
         this.cx = this.cy = this.cz = 0
         this.update()
+    }
+
+    clone(body, pointCopies) {
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.body = body
+        copy.pts = this.pts.map(point => pointCopies.get(point))
+        copy.faces = this.faces.map(face => face.slice())
+        copy.edgeSets = this.edgeSets.map(set => set.map(edge => edge.slice()))
+        copy.update()
+        return copy
     }
 
     get f() { return this.body.f }
@@ -913,6 +939,18 @@ export class Rigid3 {
 
     static box(options) {
         return new Rigid3({ ...options, parts: [{ w: options.w ?? 40, h: options.h ?? 40, d: options.d ?? 40 }] })
+    }
+
+    clone() {
+        const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this)
+        copy.pts = this.pts.map(point => point.clone())
+        const pointCopies = new Map(this.pts.map((point, index) => [point, copy.pts[index]]))
+        copy.parts = this.parts.map(part => part.clone(copy, pointCopies))
+        copy.rest = this.rest.map(point => point.slice())
+        copy.q = { ...this.q }
+        copy._A = this._A.slice()
+        copy.update()
+        return copy
     }
 
     // mass-weighted centre of the particles, from where they are now

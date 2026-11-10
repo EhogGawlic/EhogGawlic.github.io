@@ -4,6 +4,12 @@ import {Obj2, Obj3} from "./obj.js"
 import {Rigid2, Rigid3} from "./rigid.js"
 import { Fan2, Fan3 } from "./fan.js";
 import { Tcan2, Tcan3} from "./tcan.js"
+export {Vec2, Vec3, addVec2,addVec3,subVec2,subVec3,multVec2,multVec3,divVec2,divVec3,multVec22,multVec32,divVec22,divVec32,dist2, dist3, URD2, URD3, norm2, norm3, dot2, dot3, reflect2, reflect3} from "./vec.js"
+
+export {Obj2, Obj3} from "./obj.js"
+export {Rigid2, Rigid3} from "./rigid.js"
+export { Fan2, Fan3 } from "./fan.js";
+export { Tcan2, Tcan3} from "./tcan.js"
 export class Engine{
     constructor(options){
         this.objs = []
