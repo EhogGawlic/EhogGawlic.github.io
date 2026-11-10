@@ -12,7 +12,7 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@939ab5031bb6ca9f33c16ab8343e297efbb1984d/main.js"
+import {addVec3, Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@939ab5031bb6ca9f33c16ab8343e297efbb1984d/main.js"
 //import {addVec3, Engine} from "./fizks/main.js"
 import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -38,6 +38,8 @@ engine = new Engine({
     substeps: 8
 })
 const renderer = new THREE.WebGPURenderer({ antialias: true, forceWebGL: true  })
+renderer.domElement.tabIndex = 0
+renderer.domElement.style.outline = 'none'
 renderer.shadowMap.enabled = true
 renderer.setSize(WIDTH, HEIGHT)
 renderer.setClearColor(0xdddddd, 1)
@@ -76,6 +78,11 @@ cubeParts = []
 balls = []
 const controls = new OrbitControls( camera, renderer.domElement )
 camera.position.set( 0, 20, 100 )
+controls.mouseButtons = {
+    LEFT: THREE.MOUSE.NONE,
+    MIDDLE: THREE.MOUSE.ROTATE,
+    RIGHT: THREE.MOUSE.NONE
+}
 controls.update()
 let am
 let storedFanMdl
@@ -687,6 +694,8 @@ fchkbx2.addEventListener("change", ()=>{
 })
 
 function updProps(){
+    $("selclramt").innerText = getGroupWhere(clrCond).length
+    $("selradamt").innerText = getGroupWhere(radCond).length
     if (groupActive()) { updGroupProps(); return }
     if (fchkbx2.indeterminate) fchkbx2.indeterminate = false
     const typ = selectedObject.type
@@ -911,6 +920,20 @@ $("impbtn").addEventListener("click", async ()=>{
     $("info").style.color=infoclr
     $("info").innerHTML='<img src="info.svg" class="infoimg">Imported'
 })
+$("selclrbtn").addEventListener("click", (e)=>{
+    selGroupWhere(clrCond)
+
+})
+$("bclrs").addEventListener("change", (e)=>{
+    wantedColor = e.target.value
+})
+$("selradbtn").addEventListener("click", (e)=>{
+    selGroupWhere(radCond)
+
+})
+$("brads").addEventListener("change", (e)=>{
+    wantedRad = e.target.value
+})
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
@@ -1102,10 +1125,9 @@ const gq2 = new THREE.Quaternion()
 const gbox = new THREE.Box3()
 
 let groupInfoShown = false
-
-const clrCond = (item, wantedColor)=>{
+const clrCond = (item)=>{
     if (item.type == "box"){
-        const color = item.root.material.color.getHexString()
+        const color = "#"+item.root.material.color.getHexString()
         if (color == wantedColor) return true
     }
     if (item.type == "ball"){
@@ -1114,7 +1136,13 @@ const clrCond = (item, wantedColor)=>{
     }
     return false
 }
-
+const radCond = (item)=>{
+    if (item.type == "ball"){
+        const radius = engine.objs[item.index].r
+        if (radius == wantedRad) return true
+    }
+    return false
+}
 function setGroupInfo(text, isError = false){
     const el = $("info")
     el.style.color = isError ? errclr : infoclr
@@ -1192,6 +1220,7 @@ function getGroupWhere(condition){
 }
 function selGroupWhere(condition){
     const items = getGroupWhere(condition)
+    console.log(items)
     selGroup(items)
 }
 function groupAnchor(it){
@@ -1414,14 +1443,7 @@ function dupeMesh(mesh){
     clone.material = mesh.material.clone();
     return clone
 }
-function cloneSelection(){
-    const newS = []
-    if (groupSel.length == 1){
-        // TODO: add cloning here and under here and the select by color and radius and this and that and that one over there and also that one and this here and
-    }
-}
 const MARQUEEMINPX = 4
-const isMarqueeGesture = (event) => event.shiftKey
 const marqueeEl = document.createElement('div')
 marqueeEl.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:50;box-sizing:border-box;' +
     'border:1px solid white;background:#ffffff00;'
@@ -1519,16 +1541,40 @@ function toggleAt(event){
     const roots = currentSelectionRoots()
     commitRoots(roots.includes(it.root) ? roots.filter(r => r !== it.root) : [...roots, it.root])
 }
+function handleSingleClick(event) {
+    if (fanPlacement) {
+        handleFanPlacementClick(event)
+        return
+    }
+
+    const canvasBounds = renderer.domElement.getBoundingClientRect()
+    mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
+    mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
+    raycaster.setFromCamera(mouse, camera)
+
+    const selectableMeshes = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
+    if (am) selectableMeshes.push(am)
+    const intersects = raycaster.intersectObjects(selectableMeshes, true)
+    
+    if (intersects.length > 0) {
+        if (transformControls.dragging || intersects[0].object.type === 'TransformControlsPlane') return
+        exitGroup()
+    } else {
+        exitGroup()
+        transformControls.detach()
+        selectedObject = { type: 'none', index: -1, fxd: false }
+    }
+}
+
 window.addEventListener('pointerdown', (event) => {
     if (event.target !== renderer.domElement) return
-    if (event.button !== 0 || !event.isPrimary || !isMarqueeGesture(event)) return
-    if (fanPlacement || welding) return
-    event.preventDefault()
-    event.stopPropagation()
+    if (event.button !== 0 || !event.isPrimary) return
+    if (fanPlacement || welding || transformControls.dragging || transformControls.axis) return
+    
     marquee = {
         id: event.pointerId,
         x0: event.clientX, y0: event.clientY, x1: event.clientX, y1: event.clientY,
-        additive: event.ctrlKey || event.metaKey
+        additive: event.shiftKey
     }
     renderer.domElement.setPointerCapture(event.pointerId)
     document.body.style.userSelect = 'none'
@@ -1539,17 +1585,24 @@ renderer.domElement.addEventListener('pointermove', (event) => {
     marquee.y1 = event.clientY
     drawMarquee()
 })
+
 renderer.domElement.addEventListener('pointerup', (event) => {
     if (!marquee || event.pointerId !== marquee.id) return
     const m = marquee
     m.x1 = event.clientX
     m.y1 = event.clientY
     endMarqueeUI(event.pointerId)
-    if (Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEEMINPX) toggleAt(event)
-    else boxSelect(m)
+    
+    const isClick = Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEEMINPX
+    if (isClick) {
+        if (m.additive) toggleAt(event)
+        else handleSingleClick(event)
+    } else {
+        boxSelect(m)
+    }
 })
-renderer.domElement.addEventListener('pointercancel', () => { cancelMarquee() })
 
+renderer.domElement.addEventListener('pointercancel', () => { cancelMarquee() })
 window.addEventListener('keydown', (event) => {
     if (event.key === 'Shift' && !fanPlacement && !welding) renderer.domElement.style.cursor = 'crosshair'
 })
@@ -1714,6 +1767,10 @@ window.addEventListener("keydown", (e)=>{
 
             }
         })
+    }
+    if ((e.key == "Delete" || e.key == "Backspace") && document.activeElement == renderer.domElement){
+        e.preventDefault()
+        delCur()
     }
 })
 function processTcanCaptures(){

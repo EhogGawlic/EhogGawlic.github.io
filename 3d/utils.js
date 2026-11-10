@@ -28,3 +28,5 @@ tbtns[0].classList.add('active')
 const infoclr = "#3d699e"
 const errclr = "#ff5555"
 let cloneOffset = {x:10,y:0,z:0}
+let wantedColor = "#aaaaaa"
+let wantedRad = 8
