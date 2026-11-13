@@ -70,6 +70,15 @@ input{
     margin:0;
     width: 60%;
 }
+.inp button{
+    display: inline;
+    background-color: #232323;
+    border: 1px solid #1c1c1c;
+    border-radius: 2px;
+    color: #e6e6e6;
+    margin:0;
+    width: 60%;
+}
 input[readonly] {
     background-color: #4d4d4d;
     color: #6e6e6e;
