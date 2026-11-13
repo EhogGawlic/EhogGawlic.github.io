@@ -28,6 +28,7 @@ selectedObject = { type: 'box', index: 0, fxd: false }
 let welding = false
 let sobj0,sobjn=0
 let adding = "none"
+let qual = 16
 const BOX = { x0: -200, y0: -200, x1: 200, y1: 200, z0: -200, z1: 200 }
 engine = new Engine({
     mode: 'plain',
@@ -304,7 +305,7 @@ function addBall(fixed=false,rad=8, color="#18a8d1"){
     engine.addObj({ x, y, z, rad: radius, mass: radius**2*Math.PI, bounce: 0.1, fixed })
     const nclr = new THREE.Color(color)
     const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(radius, 20, 14),
+        new THREE.SphereGeometry(radius, qual*1.25, qual*0.875),
         new THREE.MeshStandardMaterial({ color: nclr, roughness: 0.55 })
     )
     mesh.castShadow = true
@@ -940,6 +941,14 @@ $("selradbtn").addEventListener("click", (e)=>{
 $("brads").addEventListener("change", (e)=>{
     wantedRad = e.target.value
 })
+$("settingsok").addEventListener("click", (e)=>{
+    engine.substeps = parseInt($("substeps").value)
+    qual = parseInt($("bqual").value)
+    closePopup("settings")
+})
+window.onbeforeunload = (e)=>{
+    e.preventDefault()
+}
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
