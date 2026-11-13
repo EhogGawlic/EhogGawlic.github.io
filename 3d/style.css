@@ -46,6 +46,14 @@ button:hover {
 .section * {
     margin: 5px;
 }
+.section2{
+    border: none;
+    background-color: #3b3b3b;
+    padding:5px;
+}
+.section2 * {
+    margin: 5px;
+}
 .inp{
     display: flex;
     align-items: stretch;
