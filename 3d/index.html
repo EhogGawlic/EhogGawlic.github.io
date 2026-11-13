@@ -81,6 +81,9 @@
                     <li>
                         <button id="importbtn" data-popup-target="import">Import</button>
                     </li>
+                    <li>
+                        <button data-popup-target="settings">Preferences</button>
+                    </li>
                 </ul>
             </div>
 
@@ -140,6 +143,14 @@
             <div class="inp"><label for="brads">Color</label> <input type="number" id="brads" value="8"></div>
             <button onclick='$("brads").value=$("brp").value;wantedColor = $("brads").value'>Select current object radius</button><br>
             <button id="selradbtn">Select <span id="selradamt">?</span> items</button>
+        </div>
+    </div>
+    <div class="popup" id="settings">
+        <div class="popupHead">Preferences<button class="popupClose" type="button" aria-label="Close popup">&times;</button></div>
+        <div class="popupContent">
+            <div class="inp"><label for="substeps">Substeps</label> <input type="number" value="8" id="substeps"></div>
+            <div class="inp"><label for="bqual">Ball quality</label> <input type="number" value="16" id="bqual"></div>
+            <button id="settingsok">OK</button>
         </div>
     </div>
     <script type="importmap">
