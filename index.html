@@ -5,162 +5,126 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Boxsand / PHYSICS</title>
         <meta name="description" content="A physics engine sandbox game for 2D and 3D uses.">
-        <link rel="icon" href="3dball.jpg">
+        <link rel="icon" href="favicon.ico">
         <style>
             *{
                 font-family: 'Courier New', Courier, monospace;
             }
             body{
-                background-color: lightgray;
+                background-color: #303030;
             }
-            div{
-                background-color: gray;
-                border: 5px solid black;
-                border-radius: 10px;
-            }
-            #s1{
+            #top{
+                background-color: #505050;
+                border: 1px solid black;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
                 height: 100px;
+                padding: 10px;
             }
-            #s2{
-                position: absolute;
-                top: 120px;
-                width: 63%;
-                bottom: 10px;
+            h1{
+                margin-top: 0;
             }
-            #s3{
+            #main{
+                background-color: #505050;
+                border: 1px solid black;
                 position: absolute;
-                top: 120px;
-                right: 10px;
-                width: 35%;
-                bottom: 10px;
+                left: 0;
+                top: 100px;
+                right: 0;
+                bottom: 0;
             }
-            #s2 button{
-                position: absolute;
-                width:50%;
-                height: 20%;
-                left:2%;
-                border: 5px solid black;
+            #things {
+                background-color: #a0a0a0;
+                border: 1px solid black;
                 border-radius: 10px;
-                background-color: lightgray;
-                font-size: x-large;
-                cursor:pointer;
-            }
-            #twdphys{
-                top:10%;
-            }
-            #thdphys{
-                top:40%;
-            }
-            #upd{
-                top: 70%;
-            }
-            #updates{
-                position: fixed;
-                top: 25%;
-                left: 25%;
-                right: 25%;
-                bottom: 25%;
-                display: none;
-            }
-            #closebtn{
                 position: absolute;
-                top: 5px;
-                right: 5px;
-                width: 20px;
-                height: 20px;
-                background-color: red;
+                top: calc(20px + 3rem);
+                left: 20px;
+                width: calc(50vw - 60px);
+                bottom: 20px;
+                display:grid;
+                grid-template-columns: auto auto;
+                padding: 10px;
+                padding-right: 0;
+                overflow-y: scroll;
             }
-            #s1 h1{
-                margin: 0;
-                font-size: 90px;
+            .thing {
+                background-color: #707070;
+                border: 1px solid black;
+                width: calc(100% - 20px);
+                height: calc(100% - 20px);
+                text-align: center;
+                padding: 5px;
+                overflow-y: auto;
             }
-            #s1 p{
+            .thinglink {
+                justify-content: center;
+                align-items: center; 
+                display: inline-flex;
+                width: calc(100% - 10px);
+                height: 100px;
+                background-color: #57abff;
+                border: 2px solid white;
+                border-radius: 5px;
+                color:black;
+                text-decoration: none;
+                font-size: xx-large;
+            }
+            #main h1 {
+                margin: 20px;
+            }
+            #filler {
                 position: absolute;
-                left: 500px;
-                top: 15px;
-                margin: 0;
-                font-size: 20px;
+                top: calc(20px + 3rem);
+                right: 20px;
+                width: calc(50vw - 60px);
+                bottom: 20px;
+                padding: 10px;
+            }
+            #highlightimg {
+                width: 100%;
+            }
+            #filler a {
+                color: #1585f4;
             }
         </style>
     </head>
     <body>
-        <div id="s1">
-            <h1>PHYSICS</h1>
-            <p>
-                A 2D and 3D physics engine for whatever you want.<br>
-                Including an exploding banana.<br>
-                <a href="https://w-chat-pht6.onrender.com/">W Chat</a> (sign up, do not use email or computer password, make one)<br>
-                <a href="https://tilesgame.netlify.app">Tiles</a>, a completely different game<br>
-            </p>
+        <div id="top">
+            <h1><em>Physics</em></h1>
+            <p>rly cool physics bc its 2d and 3d. Does not care what you put into it, and I hope you do not care what comes out. May explode.</p>
         </div>
-        <div id="s2">
-            <button id="twdphys">2D physics</button>
-            <button id="thdphys">3D physics</button>
-            <button id="upd">Updates</button>
+        <div id="main">
+            <h1><em>Things</em></h1>
+            <div id="things">
+                <div class="thing">
+                    <h2 class="thinghead">2D physics</h2>
+                    <p class="thingdesc">2D physics. Took 2 years of stupidity. Cool and has lots of tools though. Easier to make scenes.</p>
+                    <a class="thinglink" href="./main">aight</a>
+                </div>
+                <div class="thing">
+                    <h2 class="thinghead">3D physics</h2>
+                    <p class="thingdesc">3D physics [beta-ish]. Uses vanilla JS (upgrade soon) and THREE.js. Joints! Cool! tWeE dEe</p>
+                    <a class="thinglink" href="./3d">cool</a>
+                </div>
+                <div class="thing">
+                    <h2 class="thinghead">Tiles</h2>
+                    <p class="thingdesc">A game inspired by my ocd-like tile walk in fifth grade. not intuitive though</p>
+                    <a class="thinglink" href="./3d">i guess</a>
+                </div>
+                <div class="thing">
+                    <h2 class="thinghead">capture the egg</h2>
+                    <p class="thingdesc">coming soon</p>
+                </div>
+            </div>
+            <div id="filler">
+                <img src="highlight.png" id="highlightimg"/>
+                <h3>3D physics, as it looks when you open it</h3>
+                <p>Progress on capture the egg: <b>Close, now tuning things</b></p>
+                <a href="./docs">Docs/how to use it [inactive]</a>
+            </div>
         </div>
-        <div id="s3">
-            <h3>Notable ppl</h3>
-            <ul>
-                <li>Frankie (89723423pts)</li>
-                <li>Grayson (89723422pts)</li>
-                <li>Oliver (89723422pts)</li>
-                <li>Kaden (50 pts, pocky sticks)</li>
-            </ul><br>
-            <h3>Other things</h3>
-            <ul>
-                <li><a href="https://fastboxsand.netlify.app">Fast physics, does not work well :(</a></li>
-                <li><a href="https://github.com/EhogGawlic/physics">Source code</a></li>
-            </ul>
-        </div>
-        <div id="updates">
-            <h2>Update log</h2>
-            <h4>Latest 5 commits (updates)</h4>
-            <ul id="updl">
-            </ul>
-            <button id="closebtn">x</button>
-        </div>
-        <script>
-            const b1 = document.getElementById("twdphys")
-            const b2 = document.getElementById("thdphys")
-            const b3 = document.getElementById("upd")
-            const upd = document.getElementById("updates")
-            b3.onclick = function(){
-                upd.style.display = "block"
-                fetch('https://api.github.com/repos/EhogGawlic/EhogGawlic.github.io/commits?per_page=5')
-    .then(response => response.json())
-    .then(data => {
-        // The API returns an array of commits; the latest is at index 0
-        data.forEach(commit => {
-            const li = document.createElement("li")
-            li.textContent = `2D: ${commit.commit.message} (by ${commit.commit.author.name} on ${new Date(commit.commit.author.date).toLocaleDateString()})`
-            document.getElementById("updl").appendChild(li)
-        });
-        // Display the information in your HTML
-
-    })
-    .catch(error => console.error('Error fetching commit:', error));
-            }
-            const cbtn = document.getElementById("closebtn")
-            cbtn.onclick = function(){
-                upd.style.display="none"
-            }
-            /**
-             * 
-             * @param {string} url 
-             */
-            function goTo(url){
-                if (window.location.href.startsWith("http://localhost")||window.location.href.startsWith("https://raw.githack") || window.location.href.startsWith("http://127.")){
-                    console.log("dev mode")
-                    url += ".html"
-                    console.log(url)
-                }
-                const a = document.createElement("a")
-                a.href=url
-                a.click()
-                a.remove()
-            }
-            b1.onclick = function(){goTo("/main")}
-            b2.onclick = function(){goTo("https://raw.githack.com/EhogGawlic/TeeDeeFiziks/refs/heads/main/index.html")}
-        </script>
     </body>
 </html>
