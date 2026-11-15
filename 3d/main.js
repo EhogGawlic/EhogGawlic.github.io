@@ -2,7 +2,13 @@
 // Always use camelCase
 // NO semicolons unless in for loop or dense variables (e.g. let a=2; const b=2; var c=1;)
 // Use a ? b : c a lot, but if statements if better
-// Use shortened names because fast to type
+// Use shortened names because fast to type !!IMPORTANT!!
+//     e.g:
+//         position --> pos
+//         attachment --> att
+//         geometry --> geo
+//         material --> mat
+//         selected --> sel (less important)
 // Make stupid comments
 // Only comment when confusing or info
 // No emojis (except for the next line)
@@ -12,7 +18,7 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {addVec3, Engine} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@939ab5031bb6ca9f33c16ab8343e297efbb1984d/main.js"
+import {addVec3, BarB3, Engine, Obj3} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@7b7bbf56c356668430acece2a408d11554860a00/main.js"
 //import {addVec3, Engine} from "./fizks/main.js"
 import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -24,7 +30,7 @@ const loader = new GLTFLoader()
 const raycaster = new THREE.Raycaster()
 const mouse = new THREE.Vector2()
 
-selectedObject = { type: 'box', index: 0, fxd: false }
+selectedObject = { type: 'box', ind: 0, fxd: false }
 let welding = false
 let sobj0,sobjn=0
 let adding = "none"
@@ -38,6 +44,10 @@ engine = new Engine({
     gravity: -0.098,
     substeps: 8
 })
+const atts = []
+const pointJoints = []
+let nextAttId = 1
+
 const renderer = new THREE.WebGPURenderer({ antialias: true, forceWebGL: true  })
 renderer.domElement.tabIndex = 0
 renderer.domElement.style.outline = 'none'
@@ -94,6 +104,7 @@ let fanVisuals = []
 let tcanVisuals = []
 let fanAirVisual = null
 let fanAirVisualData = null
+let storedAttMdl
 loader.load(
     'Adder.glb',
     function (gltf) {
@@ -204,6 +215,228 @@ loader.load(
         console.error('An error happened', error)
     }
 )
+
+loader.load(
+    'att.glb',
+    function (gltf) {
+        storedAttMdl = gltf.scene
+        storedAttMdl.traverse(function (child) {
+            if (child.isMesh) {
+                child.material.depthTest = false
+                child.material.depthWrite = false
+                child.renderOrder = 1
+                child.material.side = THREE.FrontSide
+                child.material.vertexColors = true
+                if (child.material.color) {
+                    child.material.color.setHex(0xffffff)
+                }
+                child.material.needsUpdate = true
+            }
+        })
+        storedAttMdl.scale.set(2, 2, 2)
+        storedAttMdl.userData.initialTransform = {
+            position: storedAttMdl.position.clone(),
+            quaternion: storedAttMdl.quaternion.clone(),
+            scale: storedAttMdl.scale.clone()
+        }
+    },
+    function (xhr) {
+        console.log((xhr.loaded / xhr.total * 100) + '% loaded')
+    },
+    function (error) {
+        console.error('An error happened', error)
+    }
+)
+//{
+
+    function bodyQuat(body) {
+        return new THREE.Quaternion(body.q.x, body.q.y, body.q.z, body.q.w).normalize()
+    }
+
+    function bodyCenter(body) {
+        return body.center ?? body.com()
+    }
+
+    function attWorldPos(att, target = new THREE.Vector3()) {
+        const center = bodyCenter(att.body)
+        return target.copy(att.local)
+            .applyQuaternion(bodyQuat(att.body))
+            .add(new THREE.Vector3(center.x, center.y, center.z))
+    }
+
+    function setJointStatus(message) {
+        const status = document.getElementById('jointstatus')
+        if (status) status.textContent = message
+    }
+
+    function refreshAttPickers() {
+        for (const picker of [document.getElementById('atttarget1'), document.getElementById('atttarget2')]) {
+            const selectedId = picker.dataset.pickInd
+            const att = atts.find(item => String(item.id) === selectedId)
+            if (att) {
+                picker.textContent = `Att ${att.id}`
+            } else {
+                picker.dataset.pickInd = ''
+                picker.dataset.pickType = 'att'
+                picker.textContent = 'Click to select'
+            }
+        }
+    }
+
+
+    function addAtt(body, worldPosition) {
+        const center = bodyCenter(body)
+        const local = worldPosition.clone()
+            .sub(new THREE.Vector3(center.x, center.y, center.z))
+            .applyQuaternion(bodyQuat(body).invert())
+        const marker = storedAttMdl.clone()
+        marker.renderOrder = 10
+        marker.position.copy(worldPosition)
+        scene.add(marker)
+        const att = { id: nextAttId++, body, local, marker }
+        atts.push(att)
+        return att
+    }
+
+    function removeAtts(removedAtts) {
+        if (!removedAtts.size) return
+        for (const att of removedAtts) {
+            if (transformControls?.object === att.marker) transformControls.detach()
+            scene.remove(att.marker)
+        }
+        for (let index = atts.length - 1; index >= 0; index--) {
+            if (removedAtts.has(atts[index])) atts.splice(index, 1)
+        }
+        for (let index = pointJoints.length - 1; index >= 0; index--) {
+            const joint = pointJoints[index]
+            if (!joint.atts.some(att => removedAtts.has(att))) continue
+            const engineIndex = engine.bars.indexOf(joint.constraint)
+            if (engineIndex >= 0) engine.bars.splice(engineIndex, 1)
+            pointJoints.splice(index, 1)
+        }
+        refreshAttPickers()
+    }
+
+    function removeAttsForBodies(bodies) {
+        const removedBodies = new Set(bodies)
+        removeAtts(new Set(atts.filter(att => removedBodies.has(att.body))))
+    }
+
+    function clearJointsAndAtts() {
+        for (const att of atts) {
+            if (transformControls?.object === att.marker) transformControls.detach()
+            scene.remove(att.marker)
+        }
+        atts.length = 0
+        pointJoints.length = 0
+        engine.bars.length = 0
+        refreshAttPickers()
+    }
+
+    function updateAttMarkers() {
+        for (const att of atts) att.marker.position.copy(attWorldPos(att))
+    }
+
+    function updateAttJointPoints(att) {
+        for (const joint of pointJoints) {
+            if (!joint.atts.includes(att)) continue
+            joint.constraint.updatePoints(
+                attWorldPos(joint.atts[0]),
+                attWorldPos(joint.atts[1])
+            )
+        }
+    }
+
+    function attachAttControls(att) {
+        selectedObject = { type: 'att', ind: atts.indexOf(att), fxd: true }
+        if (transformControls.mode !== 'translate') {
+            transformControls.setMode('translate')
+            tbtns.forEach(button => button.classList.remove('active'))
+            document.getElementById('modetrans').classList.add('active')
+        }
+        transformControls.attach(att.marker)
+    }
+
+    class PointJoint3 {
+        constructor(body1, body2, point1, point2) {
+            this.body1 = body1
+            this.body2 = body2
+            this.pivot1 = new Obj3({ ...point1, rad: 0, fixed: body1.f, mass: body1.pts[0]?.m ?? 1 })
+            this.pivot2 = new Obj3({ ...point2, rad: 0, fixed: body2.f, mass: body2.pts[0]?.m ?? 1 })
+            this.bars = []
+            for (const point of body1.pts) {
+                const length = Math.hypot(point.p.x - this.pivot1.p.x, point.p.y - this.pivot1.p.y, point.p.z - this.pivot1.p.z)
+                this.bars.push(new BarB3(point, this.pivot1, length))
+            }
+            for (const point of body2.pts) {
+                const length = Math.hypot(point.p.x - this.pivot2.p.x, point.p.y - this.pivot2.p.y, point.p.z - this.pivot2.p.z)
+                this.bars.push(new BarB3(point, this.pivot2, length))
+            }
+            this.bars.push(new BarB3(this.pivot1, this.pivot2, 0))
+        }
+
+        updatePoints(point1, point2) {
+            const updatePivot = (pivot, body, point, barOffset) => {
+                pivot.p.x = point.x; pivot.p.y = point.y; pivot.p.z = point.z
+                pivot.pp.x = point.x; pivot.pp.y = point.y; pivot.pp.z = point.z
+                for (let index = 0; index < body.pts.length; index++) {
+                    const bodyPoint = body.pts[index].p
+                    this.bars[barOffset + index].len = Math.hypot(
+                        bodyPoint.x - point.x,
+                        bodyPoint.y - point.y,
+                        bodyPoint.z - point.z
+                    )
+                }
+            }
+            updatePivot(this.pivot1, this.body1, point1, 0)
+            updatePivot(this.pivot2, this.body2, point2, this.body1.pts.length)
+            this.bars[this.bars.length - 1].len = 0
+        }
+
+        solve() {
+            this.pivot1.f = this.body1.f
+            this.pivot2.f = this.body2.f
+            for (const bar of this.bars) bar.solve()
+        }
+    }
+
+    document.getElementById('addatt').addEventListener('click', () => {
+        const parentPicker = document.getElementById('attparent')
+        const parentType = parentPicker.dataset.pickType
+        const parentIndex = Number(parentPicker.dataset.objInd)
+        if (parentType !== 'box' || !cubeParts[parentIndex]) {
+            setJointStatus('Choose a parent first')
+            return
+        }
+        const body = cubeParts[parentIndex].body
+        const center = bodyCenter(body)
+        const att = addAtt(body, new THREE.Vector3(center.x, center.y, center.z))
+        attachAttControls(att)
+        setJointStatus(`Att ${att.id} added.`)
+    })
+
+    document.getElementById('addjnt').addEventListener('click', () => {
+        const att1 = atts.find(att => String(att.id) === document.getElementById('atttarget1').dataset.pickInd)
+        const att2 = atts.find(att => String(att.id) === document.getElementById('atttarget2').dataset.pickInd)
+        if (!att1 || !att2) {
+            return
+        }
+        if (att1.body === att2.body) {
+            return
+        }
+        const point1 = attWorldPos(att1)
+        const point2 = attWorldPos(att2)
+        const constraint = new PointJoint3(
+            att1.body,
+            att2.body,
+            { x: point1.x, y: point1.y, z: point1.z },
+            { x: point2.x, y: point2.y, z: point2.z }
+        )
+        engine.bars.push(constraint)
+        pointJoints.push({ constraint, atts: [att1, att2] })
+    })
+//}
+
 const selectedForOutline = []
 const outlinePass = outline(scene, camera, {
     selectedObjects: selectedForOutline,
@@ -342,7 +575,7 @@ function updateFanAirVisual(){
         return
     }
 
-    const fan = engine.fans[selectedObject.index]
+    const fan = engine.fans[selectedObject.ind]
     if (!fan) {
         if (fanAirVisual) fanAirVisual.visible = false
         return
@@ -381,10 +614,10 @@ function updateFanAirVisual(){
     fanAirVisual.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction)
     fanAirVisual.visible = true
 }
-function fanPlacementPoint(event, surfaceOffset = 0){
+function fanPlacementPoint(e, surfaceOffset = 0){
     const bounds = renderer.domElement.getBoundingClientRect()
-    mouse.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1
-    mouse.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1
+    mouse.x = ((e.clientX - bounds.left) / bounds.width) * 2 - 1
+    mouse.y = -((e.clientY - bounds.top) / bounds.height) * 2 + 1
     raycaster.setFromCamera(mouse, camera)
 
     const surfaces = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
@@ -457,9 +690,9 @@ function startTcanPlacement(){
     transformControls.visible = false
     setFanPlacementStatus('Click the trash-can base. Press Escape to cancel.')
 }
-function handleFanPlacementClick(event){
+function handleFanPlacementClick(e){
     if (fanPlacement.type === 'tcan') {
-        const point = fanPlacementPoint(event)
+        const point = fanPlacementPoint(e)
         if (!point) return
         const size = Number(document.getElementById('tcanSize').value)
         if (!Number.isFinite(size) || size <= 0) {
@@ -481,7 +714,7 @@ function handleFanPlacementClick(event){
     const originOffset = fanPlacement.stage === 'origin'
         ? Math.max(Number(document.getElementById('frad').value) || 0, 0)
         : 0
-    const point = fanPlacementPoint(event, originOffset)
+    const point = fanPlacementPoint(e, originOffset)
     if (!point) return
 
     if (fanPlacement.stage === 'origin') {
@@ -530,6 +763,7 @@ function handleFanPlacementClick(event){
 function clear(){
     cancelFanPlacement()
     exitGroup()
+    clearJointsAndAtts()
     if (transformControls) {
         transformControls.detach()
     }
@@ -562,7 +796,7 @@ function clear(){
     fanVisuals = []
     for (const item of tcanVisuals) scene.remove(item.mesh)
     tcanVisuals = []
-    selectedObject = { type: 'box', index: 0, fxd: false }
+    selectedObject = { type: 'box', ind: 0, fxd: false }
     outlinePass.selectedObjects = []
     welding = false
     sobjn = 0
@@ -570,6 +804,7 @@ function clear(){
 }
 function clearB(){
     exitGroup()
+    clearJointsAndAtts()
     if (transformControls) {
         transformControls.detach()
     }
@@ -581,13 +816,22 @@ function clearB(){
     balls = []
     engine.objs = []
     selectedObject = engine.rigidbodies.length
-        ? { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
-        : { type: 'none', index: -1, fxd: false }
+        ? { type: 'box', ind: 0, fxd: engine.rigidbodies[0].f }
+        : { type: 'none', ind: -1, fxd: false }
 }
 function delCur(){
     if (groupActive()) { deleteGroup(); return }
     const typ = selectedObject.type
-    const ind = selectedObject.index
+    const ind = selectedObject.ind
+    if (typ === 'att') {
+        const att = atts[ind]
+        if (!att) return
+        removeAtts(new Set([att]))
+        transformControls.detach()
+        selectedObject = { type: 'none', ind: -1, fxd: false }
+        return
+    }
+    const targetBody = typ === 'box' ? cubeParts[ind]?.body : null
     const rb = engine.rigidbodies
     const bs = engine.objs
     if (typ == "box") {
@@ -626,17 +870,18 @@ function delCur(){
         engine.tcans.splice(ind, 1)
         tcanVisuals.splice(ind, 1)
     }
+    if (targetBody) removeAttsForBodies([targetBody])
     transformControls.detach()
     if (engine.rigidbodies.length) {
-        selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+        selectedObject = { type: 'box', ind: 0, fxd: engine.rigidbodies[0].f }
     } else if (engine.objs.length) {
-        selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+        selectedObject = { type: 'ball', ind: 0, fxd: engine.objs[0].f }
     } else if (engine.fans.length) {
-        selectedObject = { type: 'fan', index: 0, fxd: true }
+        selectedObject = { type: 'fan', ind: 0, fxd: true }
     } else if (engine.tcans.length) {
-        selectedObject = { type: 'tcan', index: 0, fxd: true }
+        selectedObject = { type: 'tcan', ind: 0, fxd: true }
     } else {
-        selectedObject = { type: 'none', index: -1, fxd: false }
+        selectedObject = { type: 'none', ind: -1, fxd: false }
     }
 }
 const fchkbx = document.getElementById("fxchk")
@@ -649,8 +894,8 @@ document.getElementById('add-ball').addEventListener('click', () => {
     addBall(isFixed, radius, ballColor)
 })
 document.getElementById('clearbtn').addEventListener('click', clear)
-document.getElementById('aothersel').addEventListener('change', event => {
-    const isFan = event.target.value === 'fan'
+document.getElementById('aothersel').addEventListener('change', e => {
+    const isFan = e.target.value === 'fan'
     document.getElementById('fanutils').classList.toggle('hidden', !isFan)
     document.getElementById('tcanutils').classList.toggle('hidden', isFan)
     document.getElementById('fanaddok').textContent = isFan ? 'Place fan' : 'Place trash can'
@@ -685,16 +930,16 @@ document.getElementById('wbtn').addEventListener('click', ()=>{
 })
 fchkbx2.addEventListener("change", ()=>{
     if (groupActive()) { setGroupFixed(fchkbx2.checked); return }
-    //let selectedObject = { type: 'box', index: 0 }
+    //let selectedObject = { type: 'box', ind: 0 }
     switch(selectedObject.type){
         case 'box':
-            if (engine.rigidbodies.length < selectedObject.index+1) return
-            engine.rigidbodies[selectedObject.index].f=fchkbx2.checked
+            if (engine.rigidbodies.length < selectedObject.ind+1) return
+            engine.rigidbodies[selectedObject.ind].f=fchkbx2.checked
             selectedObject.fxd = fchkbx2.checked
             break
         case 'ball':
-            if (engine.objs.length < selectedObject.index+1) return
-            engine.objs[selectedObject.index].f=fchkbx2.checked
+            if (engine.objs.length < selectedObject.ind+1) return
+            engine.objs[selectedObject.ind].f=fchkbx2.checked
             selectedObject.fxd = fchkbx2.checked
             break
     }
@@ -706,7 +951,7 @@ function updProps(){
     if (groupActive()) { updGroupProps(); return }
     if (fchkbx2.indeterminate) fchkbx2.indeterminate = false
     const typ = selectedObject.type
-    const ind = selectedObject.index
+    const ind = selectedObject.ind
     const rb = engine.rigidbodies
     const bs = engine.objs
     const hasSelection = typ === 'box' ? ind < rb.length : typ === 'ball' ? ind < bs.length : false
@@ -750,7 +995,7 @@ function updProps(){
 $("bxip").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         const bs = engine.objs
         if (typ == "box"){
             if (engine.rigidbodies.length < ind+1) return
@@ -776,7 +1021,7 @@ $("bxip").addEventListener("change", function(e){
 $("byip").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         const bs = engine.objs
         if (typ == "box"){
             if (engine.rigidbodies.length < ind+1) return
@@ -802,7 +1047,7 @@ $("byip").addEventListener("change", function(e){
 $("bzip").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         const bs = engine.objs
         if (typ == "box"){
             if (engine.rigidbodies.length < ind+1) return
@@ -828,7 +1073,7 @@ $("bzip").addEventListener("change", function(e){
 $("brp").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         const bs = engine.objs
         if (typ == "ball"){
             if (engine.objs.length < ind + 1) return
@@ -842,7 +1087,7 @@ $("brp").addEventListener("change", function(e){
 $("bclr2").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         if (typ=="box"){
             if (engine.rigidbodies.length < ind+1) return
             cubes[ind].material.color.set(this.value)
@@ -857,7 +1102,7 @@ $("bclr2").addEventListener("change", function(e){
 $("bmp").addEventListener("change", function(e){
     if (!this.readOnly){
         const typ = selectedObject.type
-        const ind = selectedObject.index
+        const ind = selectedObject.ind
         if (typ=="ball"){
             if (engine.objs.length < ind + 1) return
             balls[ind].body.m=parseFloat(this.value)
@@ -905,22 +1150,23 @@ $("impbtn").addEventListener("click", async ()=>{
     const textData = await firstfile.text()
     const data = JSON.parse(textData)
     exitGroup()
+    clearJointsAndAtts()
     unpack(data, engine, cubes, balls, VCMs, cubeParts, fanVisuals, tcanVisuals, scene, storedFanMdl, storedTcanMdl)
     scene.add(transformControls.getHelper())
     if (cubes.length) {
-        selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+        selectedObject = { type: 'box', ind: 0, fxd: engine.rigidbodies[0].f }
         transformControls.attach(cubes[0])
     } else if (balls.length) {
-        selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+        selectedObject = { type: 'ball', ind: 0, fxd: engine.objs[0].f }
         transformControls.attach(balls[0].mesh)
     } else if (fanVisuals.length) {
-        selectedObject = { type: 'fan', index: 0, fxd: true }
+        selectedObject = { type: 'fan', ind: 0, fxd: true }
         transformControls.attach(fanVisuals[0])
     } else if (tcanVisuals.length) {
-        selectedObject = { type: 'tcan', index: 0, fxd: true }
+        selectedObject = { type: 'tcan', ind: 0, fxd: true }
         transformControls.attach(tcanVisuals[0].mesh)
     } else {
-        selectedObject = { type: 'none', index: -1, fxd: false }
+        selectedObject = { type: 'none', ind: -1, fxd: false }
         transformControls.detach()
     }
     
@@ -947,14 +1193,14 @@ $("settingsok").addEventListener("click", (e)=>{
     closePopup("settings")
 })
 window.onbeforeunload = (e)=>{
-    e.preventDefault()
+    //e.preDefault()
 }
 for (let i = 0; i < 100; i++){
     addBoxRnd()
 }
 
 const transformControls = new TransformControls(camera, renderer.domElement);
-transformControls.attach(cubes[selectedObject.index]);
+transformControls.attach(cubes[selectedObject.ind]);
 transformControls.translationSnap = 5
 transformControls.rotationSnap = Math.PI / 12 //15 deg
 scene.add(transformControls.getHelper())
@@ -969,8 +1215,18 @@ transformControls.addEventListener('objectChange', () => {
         return
     }
 
+    const att = atts.find(item => item.marker === mesh)
+    if (att) {
+        const center = bodyCenter(att.body)
+        att.local.copy(mesh.position)
+            .sub(new THREE.Vector3(center.x, center.y, center.z))
+            .applyQuaternion(bodyQuat(att.body).invert())
+        updateAttJointPoints(att)
+        return
+    }
+
     if (selectedObject.type === 'ball') {
-        const { body } = balls[selectedObject.index]
+        const { body } = balls[selectedObject.ind]
         const dx = mesh.position.x - body.p.x
         const dy = mesh.position.y - body.p.y
         const dz = mesh.position.z - body.p.z
@@ -980,8 +1236,8 @@ transformControls.addEventListener('objectChange', () => {
         return
     }
     if (selectedObject.type === 'fan') {
-        const fan = engine.fans[selectedObject.index]
-        if (!fan || fanVisuals[selectedObject.index] !== mesh) return
+        const fan = engine.fans[selectedObject.ind]
+        if (!fan || fanVisuals[selectedObject.ind] !== mesh) return
         fan.pos.x = mesh.position.x
         fan.pos.y = mesh.position.y
         fan.pos.z = mesh.position.z
@@ -994,8 +1250,8 @@ transformControls.addEventListener('objectChange', () => {
         return
     }
     if (selectedObject.type === 'tcan') {
-        const item = tcanVisuals[selectedObject.index]
-        const tcan = engine.tcans[selectedObject.index]
+        const item = tcanVisuals[selectedObject.ind]
+        const tcan = engine.tcans[selectedObject.ind]
         if (!item || !tcan || item.mesh !== mesh) return
         tcan.pos.x = mesh.position.x
         tcan.pos.y = mesh.position.y + item.size / 2
@@ -1004,7 +1260,7 @@ transformControls.addEventListener('objectChange', () => {
     }
     if (selectedObject.type === 'adder') return
 
-    const part = cubeParts[selectedObject.index]
+    const part = cubeParts[selectedObject.ind]
     const rb = part.body
     const pc = partCenter(part)
     
@@ -1117,12 +1373,12 @@ transformControls.addEventListener('objectChange', () => {
     }
     
     rb.update()
-    boxToCube(selectedObject.index)
+    boxToCube(selectedObject.ind)
 })
-transformControls.addEventListener('dragging-changed', (event) => {
-    controls.enabled = !event.value
+transformControls.addEventListener('dragging-changed', (e) => {
+    controls.enabled = !e.value
     if (transformControls.object === groupSel.pivot) {
-        if (event.value) beginGroupDrag()
+        if (e.value) beginGroupDrag()
         else endGroupDrag()
     }
 })
@@ -1146,14 +1402,14 @@ const clrCond = (item)=>{
         if (color == wantedColor) return true
     }
     if (item.type == "ball"){
-        const color = rgbToHex(...engine.objs[item.index].c)
+        const color = rgbToHex(...engine.objs[item.ind].c)
         if (color == wantedColor) return true
     }
     return false
 }
 const radCond = (item)=>{
     if (item.type == "ball"){
-        const radius = engine.objs[item.index].r
+        const radius = engine.objs[item.ind].r
         if (radius == wantedRad) return true
     }
     return false
@@ -1179,36 +1435,36 @@ function allItems(){
     const items = []
     for (let i = 0; i < cubes.length; i++) {
         if (!cubeParts[i]) continue
-        items.push({ type: 'box', index: i, root: cubes[i], part: cubeParts[i] })
+        items.push({ type: 'box', ind: i, root: cubes[i], part: cubeParts[i] })
     }
     for (let i = 0; i < balls.length; i++) {
-        items.push({ type: 'ball', index: i, root: balls[i].mesh, ball: balls[i] })
+        items.push({ type: 'ball', ind: i, root: balls[i].mesh, ball: balls[i] })
     }
     for (let i = 0; i < fanVisuals.length; i++) {
         if (!engine.fans[i]) continue
-        items.push({ type: 'fan', index: i, root: fanVisuals[i], fan: engine.fans[i] })
+        items.push({ type: 'fan', ind: i, root: fanVisuals[i], fan: engine.fans[i] })
     }
     for (let i = 0; i < tcanVisuals.length; i++) {
         if (!engine.tcans[i]) continue
-        items.push({ type: 'tcan', index: i, root: tcanVisuals[i].mesh, tcanItem: tcanVisuals[i], tcan: engine.tcans[i] })
+        items.push({ type: 'tcan', ind: i, root: tcanVisuals[i].mesh, tcanItem: tcanVisuals[i], tcan: engine.tcans[i] })
     }
     return items
 }
 
 function currentSelectionRoots(){
     if (groupActive()) return groupSel.items.map(it => it.root)
-    const { type, index } = selectedObject
-    const root = type === 'box' ? cubes[index]
-        : type === 'ball' ? balls[index]?.mesh
-        : type === 'fan' ? fanVisuals[index]
-        : type === 'tcan' ? tcanVisuals[index]?.mesh
+    const { type, ind } = selectedObject
+    const root = type === 'box' ? cubes[ind]
+        : type === 'ball' ? balls[ind]?.mesh
+        : type === 'fan' ? fanVisuals[ind]
+        : type === 'tcan' ? tcanVisuals[ind]?.mesh
         : null
     return root && root.parent && transformControls.object === root ? [root] : []
 }
 
 function selectSingle(it){
     const fxd = it.type === 'box' ? it.part.body.f : it.type === 'ball' ? it.ball.body.f : true
-    selectedObject = { type: it.type, index: it.index, fxd }
+    selectedObject = { type: it.type, ind: it.ind, fxd }
     transformControls.attach(it.root)
 }
 
@@ -1222,7 +1478,7 @@ function selGroup(items){
         selectSingle(items[0])
     } else {
         transformControls.detach()
-        selectedObject = { type: 'none', index: -1, fxd: false }
+        selectedObject = { type: 'none', ind: -1, fxd: false }
     }
 }
 function commitRoots(roots){
@@ -1264,7 +1520,7 @@ function syncGroupPivot(){
 function enterGroup(items){
     if (groupSel.drag) endGroupDrag()
     groupSel.items = items
-    selectedObject = { type: 'none', index: -1, fxd: false }
+    selectedObject = { type: 'none', ind: -1, fxd: false }
     if (transformControls.mode === 'scale') $('modetrans').click()
     syncGroupPivot()
     transformControls.attach(groupSel.pivot)
@@ -1414,6 +1670,7 @@ function deleteGroup(){
     const items = groupSel.items.slice()
     exitGroup()
     const bodies = new Set(items.filter(it => it.type === 'box').map(it => it.part.body))
+    removeAttsForBodies(bodies)
     for (let i = cubes.length - 1; i >= 0; i--) {
         if (!bodies.has(cubeParts[i].body)) continue
         const cube = cubes[i]
@@ -1428,29 +1685,29 @@ function deleteGroup(){
         const k = engine.rigidbodies.indexOf(body)
         if (k >= 0) engine.rigidbodies.splice(k, 1)
     }
-    const byIndexDesc = (a, b) => b.index - a.index
+    const byIndexDesc = (a, b) => b.ind - a.ind
     for (const it of items.filter(it => it.type === 'ball').sort(byIndexDesc)) {
-        const ball = balls[it.index]
+        const ball = balls[it.ind]
         if (!ball) continue
         scene.remove(ball.mesh)
         if (ball.mesh.geometry) ball.mesh.geometry.dispose()
         if (ball.mesh.material) ball.mesh.material.dispose()
         const k = engine.objs.indexOf(ball.body)
         if (k >= 0) engine.objs.splice(k, 1)
-        balls.splice(it.index, 1)
+        balls.splice(it.ind, 1)
     }
     for (const it of items.filter(it => it.type === 'fan').sort(byIndexDesc)) {
-        scene.remove(fanVisuals[it.index])
-        engine.fans.splice(it.index, 1)
-        fanVisuals.splice(it.index, 1)
+        scene.remove(fanVisuals[it.ind])
+        engine.fans.splice(it.ind, 1)
+        fanVisuals.splice(it.ind, 1)
     }
     for (const it of items.filter(it => it.type === 'tcan').sort(byIndexDesc)) {
-        scene.remove(tcanVisuals[it.index].mesh)
-        engine.tcans.splice(it.index, 1)
-        tcanVisuals.splice(it.index, 1)
+        scene.remove(tcanVisuals[it.ind].mesh)
+        engine.tcans.splice(it.ind, 1)
+        tcanVisuals.splice(it.ind, 1)
     }
     transformControls.detach()
-    selectedObject = { type: 'none', index: -1, fxd: false }
+    selectedObject = { type: 'none', ind: -1, fxd: false }
 }
 function dupeMesh(mesh){
     const clone = mesh.clone();
@@ -1460,7 +1717,7 @@ function dupeMesh(mesh){
 }
 const MARQUEEMINPX = 4
 const marqueeEl = document.createElement('div')
-marqueeEl.style.cssText = 'position:fixed;display:none;pointer-events:none;z-index:50;box-sizing:border-box;' +
+marqueeEl.style.cssText = 'position:fixed;display:none;pointer-es:none;z-ind:50;box-sizing:border-box;' +
     'border:1px solid white;background:#ffffff00;'
 document.body.appendChild(marqueeEl)
 let marquee = null
@@ -1540,31 +1797,31 @@ function boxSelect(m){
     commitRoots(m.additive ? [...currentSelectionRoots(), ...roots] : roots)
 }
 
-function pickItemAt(event){
+function pickItemAt(e){
     const cr = renderer.domElement.getBoundingClientRect()
-    mouse.x = ((event.clientX - cr.left) / cr.width) * 2 - 1
-    mouse.y = -((event.clientY - cr.top) / cr.height) * 2 + 1
+    mouse.x = ((e.clientX - cr.left) / cr.width) * 2 - 1
+    mouse.y = -((e.clientY - cr.top) / cr.height) * 2 + 1
     raycaster.setFromCamera(mouse, camera)
     const items = allItems()
     const hit = raycaster.intersectObjects(items.map(it => it.root), true)[0]
     if (!hit) return null
     return items.find(it => it.root === hit.object || it.root.getObjectById(hit.object.id) === hit.object) ?? null
 }
-function toggleAt(event){
-    const it = pickItemAt(event)
+function toggleAt(e){
+    const it = pickItemAt(e)
     if (!it) return
     const roots = currentSelectionRoots()
     commitRoots(roots.includes(it.root) ? roots.filter(r => r !== it.root) : [...roots, it.root])
 }
-function handleSingleClick(event) {
+function handleSingleClick(e) {
     if (fanPlacement) {
-        handleFanPlacementClick(event)
+        handleFanPlacementClick(e)
         return
     }
 
     const canvasBounds = renderer.domElement.getBoundingClientRect()
-    mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
-    mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
+    mouse.x = ((e.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
+    mouse.y = -((e.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
     raycaster.setFromCamera(mouse, camera)
 
     const selectableMeshes = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
@@ -1577,52 +1834,93 @@ function handleSingleClick(event) {
     } else {
         exitGroup()
         transformControls.detach()
-        selectedObject = { type: 'none', index: -1, fxd: false }
+        selectedObject = { type: 'none', ind: -1, fxd: false }
     }
 }
-
-window.addEventListener('pointerdown', (event) => {
-    if (event.target !== renderer.domElement) return
-    if (event.button !== 0 || !event.isPrimary) return
-    if (fanPlacement || welding || transformControls.dragging || transformControls.axis) return
-    
-    marquee = {
-        id: event.pointerId,
-        x0: event.clientX, y0: event.clientY, x1: event.clientX, y1: event.clientY,
-        additive: event.shiftKey
+function samePosAttAs(att){
+    const pos = att.marker.position
+    let out = []
+    for (let i = 0; i < atts.length; i++){ // feelin' loopy today *tonight
+        if (att !== atts[i] && atts[i].marker.pos.distanceTo(pos) < 1e-6){
+            out.push(atts[i])
+        }
     }
-    renderer.domElement.setPointerCapture(event.pointerId)
+    return out
+}
+window.addEventListener('pointerdown', (e) => {
+    if (e.target !== renderer.domElement) return
+    if (e.button !== 0 || !e.isPrimary) return
+    if (fanPlacement || welding || transformControls.dragging) return
+    
+    if (isPicking){
+        const picker = curPicker
+        if (picker.dataset.pickType === 'att') {
+            const bounds = renderer.domElement.getBoundingClientRect()
+            mouse.x = ((e.clientX - bounds.left) / bounds.width) * 2 - 1
+            mouse.y = -((e.clientY - bounds.top) / bounds.height) * 2 + 1
+            raycaster.setFromCamera(mouse, camera)
+            const hit = raycaster.intersectObjects(atts.map(att => att.marker), false)[0]
+            let att = hit && atts.find(item => item.marker === hit.object)
+            if (!att) return
+            picker.dataset.pickInd = String(att.id)
+            picker.textContent = `Att ${att.id}`
+            picker.style.fontSize = 'small'
+            isPicking = false
+            return
+        }
+        const o = pickItemAt(e)
+        if (o){
+            const pickType = picker.dataset.pickType
+            if (pickType && pickType !== o.type) return
+            picker.setAttribute("data-pick-type", o.type)
+            picker.setAttribute("data-obj-ind", o.ind)
+            picker.innerText = o.type.charAt(0).toUpperCase()+o.type.slice(1)
+            picker.style.fontSize = "small"
+            isPicking=false
+            return
+        }
+    }
+
+    if (transformControls.axis) return
+
+    marquee = {
+        id: e.pointerId,
+        x0: e.clientX, y0: e.clientY, x1: e.clientX, y1: e.clientY,
+        additive: e.shiftKey
+    }
+    renderer.domElement.setPointerCapture(e.pointerId)
     document.body.style.userSelect = 'none'
+
 }, true)
-renderer.domElement.addEventListener('pointermove', (event) => {
-    if (!marquee || event.pointerId !== marquee.id) return
-    marquee.x1 = event.clientX
-    marquee.y1 = event.clientY
+renderer.domElement.addEventListener('pointermove', (e) => {
+    if (!marquee || e.pointerId !== marquee.id) return
+    marquee.x1 = e.clientX
+    marquee.y1 = e.clientY
     drawMarquee()
 })
 
-renderer.domElement.addEventListener('pointerup', (event) => {
-    if (!marquee || event.pointerId !== marquee.id) return
+renderer.domElement.addEventListener('pointerup', (e) => {
+    if (!marquee || e.pointerId !== marquee.id) return
     const m = marquee
-    m.x1 = event.clientX
-    m.y1 = event.clientY
-    endMarqueeUI(event.pointerId)
+    m.x1 = e.clientX
+    m.y1 = e.clientY
+    endMarqueeUI(e.pointerId)
     
     const isClick = Math.hypot(m.x1 - m.x0, m.y1 - m.y0) < MARQUEEMINPX
     if (isClick) {
-        if (m.additive) toggleAt(event)
-        else handleSingleClick(event)
+        if (m.additive) toggleAt(e)
+        else handleSingleClick(e)
     } else {
         boxSelect(m)
     }
 })
 
 renderer.domElement.addEventListener('pointercancel', () => { cancelMarquee() })
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'Shift' && !fanPlacement && !welding) renderer.domElement.style.cursor = 'crosshair'
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift' && !fanPlacement && !welding) renderer.domElement.style.cursor = 'crosshair'
 })
-window.addEventListener('keyup', (event) => {
-    if (event.key === 'Shift') renderer.domElement.style.cursor = ''
+window.addEventListener('keyup', (e) => {
+    if (e.key === 'Shift') renderer.domElement.style.cursor = ''
 })
 window.addEventListener('blur', () => { renderer.domElement.style.cursor = '' })
 
@@ -1630,17 +1928,25 @@ engine.rigidbodies[0].f=true
 selectedObject.fxd = true
 
 
-renderer.domElement.addEventListener('pointerdown', (event) => {
+renderer.domElement.addEventListener('pointerdown', (e) => {
     if (fanPlacement) {
-        handleFanPlacementClick(event)
+        handleFanPlacementClick(e)
         return
     }
+    if (transformControls.dragging || transformControls.axis) return
 
     const canvasBounds = renderer.domElement.getBoundingClientRect()
-    mouse.x = ((event.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
-    mouse.y = -((event.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
+    mouse.x = ((e.clientX - canvasBounds.left) / canvasBounds.width) * 2 - 1
+    mouse.y = -((e.clientY - canvasBounds.top) / canvasBounds.height) * 2 + 1
 
     raycaster.setFromCamera(mouse, camera)
+
+    const markerHit = raycaster.intersectObjects(atts.map(att => att.marker), false)[0]
+    if (markerHit) {
+        const att = atts.find(item => item.marker === markerHit.object)
+        if (att) attachAttControls(att)
+        return
+    }
 
     const selectableMeshes = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
     if (am) selectableMeshes.push(am)
@@ -1660,10 +1966,10 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
         )
 
         if (am && am.getObjectById(clickedMesh.id) === clickedMesh) {
-            selectedObject = { type: 'adder', index: 0, fxd: false }
+            selectedObject = { type: 'adder', ind: 0, fxd: false }
             if (!welding) transformControls.attach(am)
         } else if (meshIndex !== -1) {
-            selectedObject = { type: 'box', index: meshIndex, fxd: engine.rigidbodies[meshIndex].f }
+            selectedObject = { type: 'box', ind: meshIndex, fxd: engine.rigidbodies[meshIndex].f }
             if (!welding) transformControls.attach(clickedMesh)
             if (welding){
                 if (sobjn == 0){
@@ -1673,7 +1979,10 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
                 } else {
                     const bodyA = cubeParts[sobj0].body
                     const bodyB = cubeParts[meshIndex].body
-                    if (bodyA !== bodyB) engine.weld(bodyA, bodyB)
+                    if (bodyA !== bodyB) {
+                        removeAttsForBodies([bodyA, bodyB])
+                        engine.weld(bodyA, bodyB)
+                    }
                     welding = false
                     sobjn = 0
 
@@ -1688,34 +1997,34 @@ renderer.domElement.addEventListener('pointerdown', (event) => {
                 }
             }
         } else if (ballIndex !== -1) {
-            selectedObject = { type: 'ball', index: ballIndex, fxd: engine.objs[ballIndex].f }
+            selectedObject = { type: 'ball', ind: ballIndex, fxd: engine.objs[ballIndex].f }
             transformControls.attach(clickedMesh)
         } else if (fanIndex !== -1) {
-            selectedObject = { type: 'fan', index: fanIndex, fxd: true }
+            selectedObject = { type: 'fan', ind: fanIndex, fxd: true }
             transformControls.attach(fanVisuals[fanIndex])
         } else if (tcanIndex !== -1) {
-            selectedObject = { type: 'tcan', index: tcanIndex, fxd: true }
+            selectedObject = { type: 'tcan', ind: tcanIndex, fxd: true }
             transformControls.attach(tcanVisuals[tcanIndex].mesh)
         }
     }
 })
-renderer.domElement.addEventListener('pointermove', (event) => {
+renderer.domElement.addEventListener('pointermove', (e) => {
     if (!fanPlacement) return
     const originOffset = fanPlacement.type === 'fan' && fanPlacement.stage === 'origin'
         ? Math.max(Number(document.getElementById('frad').value) || 0, 0)
         : 0
-    const point = fanPlacementPoint(event, originOffset)
+    const point = fanPlacementPoint(e, originOffset)
     if (!point) return
     const cursorIndex = fanPlacement.type === 'fan' && fanPlacement.stage === 'direction' ? 1 : 0
     fanPlacement.cursors[cursorIndex].position.copy(point)
 })
-window.addEventListener('keydown', (event) => {
-    if (event.key !== 'Escape') return
+window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return
     if (cancelMarquee()) return
     if (groupActive() && !fanPlacement) {
         exitGroup()
         transformControls.detach()
-        selectedObject = { type: 'none', index: -1, fxd: false }
+        selectedObject = { type: 'none', ind: -1, fxd: false }
         return
     }
     cancelFanPlacement()
@@ -1762,7 +2071,7 @@ function dupeBall(ball, meshIndex, offset) {
 }
 window.addEventListener("keydown", (e)=>{
     if (e.key == "d" && (e.ctrlKey || e.metaKey)){
-        e.preventDefault()
+        e.preDefault()
         let selAmt = groupSel.items.length
         if (selAmt == 0){
             if (selectedObject.type == "none") return
@@ -1772,58 +2081,60 @@ window.addEventListener("keydown", (e)=>{
         selected.forEach(sel=>{
             switch(sel.type){
                 case "box":
-                    const rb = engine.rigidbodies[sel.index]
+                    const rb = engine.rigidbodies[sel.ind]
                     const clonerb = dupeBody(rb, cloneOffset)
                     break
                 case "ball":
-                    const ob = engine.objs[sel.index]
-                    const cloneba = dupeBall(ob,sel.index, cloneOffset)
+                    const ob = engine.objs[sel.ind]
+                    const cloneba = dupeBall(ob,sel.ind, cloneOffset)
                     break
 
             }
         })
     }
     if ((e.key == "Delete" || e.key == "Backspace") && document.activeElement == renderer.domElement){
-        e.preventDefault()
+        e.preDefault()
         delCur()
     }
 })
 function processTcanCaptures(){
+    const rigidBodiesBefore = engine.rigidbodies.slice()
     const removed = engine.doTcans()
     if (!removed) return
 
-    for (const index of removed.dIndsO) {
-        const item = balls[index]
+    for (const ind of removed.dIndsO) {
+        const item = balls[ind]
         if (!item) continue
         scene.remove(item.mesh)
         item.mesh.geometry.dispose()
         item.mesh.material.dispose()
-        balls.splice(index, 1)
+        balls.splice(ind, 1)
     }
-    for (const index of removed.dIndsR) {
-        const mesh = cubes[index]
+    for (const ind of removed.dIndsR) {
+        const mesh = cubes[ind]
         if (!mesh) continue
         scene.remove(mesh)
         mesh.geometry.dispose()
         mesh.material.dispose()
-        cubes.splice(index, 1)
-        VCMs.splice(index, 1)
-        cubeParts.splice(index, 1)
+        cubes.splice(ind, 1)
+        VCMs.splice(ind, 1)
+        cubeParts.splice(ind, 1)
     }
+    removeAttsForBodies(removed.dIndsR.map(ind => rigidBodiesBefore[ind]).filter(Boolean))
 
     if (removed.dIndsO.length || removed.dIndsR.length) {
         exitGroup()
         transformControls.detach()
         if (engine.rigidbodies.length) {
-            selectedObject = { type: 'box', index: 0, fxd: engine.rigidbodies[0].f }
+            selectedObject = { type: 'box', ind: 0, fxd: engine.rigidbodies[0].f }
         } else if (engine.objs.length) {
-            selectedObject = { type: 'ball', index: 0, fxd: engine.objs[0].f }
+            selectedObject = { type: 'ball', ind: 0, fxd: engine.objs[0].f }
         } else if (engine.fans.length) {
-            selectedObject = { type: 'fan', index: 0, fxd: true }
+            selectedObject = { type: 'fan', ind: 0, fxd: true }
         } else if (engine.tcans.length) {
-            selectedObject = { type: 'tcan', index: 0, fxd: true }
+            selectedObject = { type: 'tcan', ind: 0, fxd: true }
         } else {
-            selectedObject = { type: 'none', index: -1, fxd: false }
+            selectedObject = { type: 'none', ind: -1, fxd: false }
         }
     }
 }
@@ -1851,7 +2162,7 @@ gcube.position.set(0, -200, 0)
 scene.add(gcube)
 function render() {
     const typ = selectedObject.type
-    const ind = selectedObject.index
+    const ind = selectedObject.ind
     if (transformControls.dragging){
         if (typ == "box" && ind < engine.rigidbodies.length){
             engine.rigidbodies[ind].f=true
@@ -1873,6 +2184,7 @@ function render() {
         processTcanCaptures()
     }
     boxToCubeALL()
+    updateAttMarkers()
     for (const { body, mesh } of balls) {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
     }

@@ -78,6 +78,13 @@ input{
     color: #e6e6e6;
     margin:0;
     width: 60%;
+    font-size:x-small;
+    height:calc(1rem + 4px);
+    text-align: left;
+}
+
+.inp button:focus{
+    box-shadow: 0 0 5px #3d699e;
 }
 input[readonly] {
     background-color: #4d4d4d;

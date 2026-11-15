@@ -57,12 +57,14 @@
             <summary>Joints</summary>
             <details class="section2">
                 <summary>Attachments</summary>
-                <button id="addatt">Add attachment to current</button>
+                <div class="inp"><label for="attparent">Parent</label><button class="objpick" data-pick-type="box" data-obj-ind="0" id="attparent" type="button">Click to select</button></div>
+                <button id="addatt" type="button">Add attachment to current</button>
             </details>
             <details class="section2">
                 <summary>Joint</summary>
-                <div class="inp"><label>Object 1</label><button class="objpick" data-obj-type="none" data-obj-ind="0">Click to select</button></div>
-                <button id="addatt">Create joint</button>
+                <div class="inp"><label for="atttarget1">Att. 1</label><button class="objpick" data-pick-type="att" data-pick-ind="" id="atttarget1" type="button">Click to select</button></div>
+                <div class="inp"><label for="atttarget2">Att. 2</label><button class="objpick" data-pick-type="att" data-pick-ind="" id="atttarget2" type="button">Click to select</button></div>
+                <button id="addjnt" type="button">Create joint</button>
             </details>
         </details>
     </div>

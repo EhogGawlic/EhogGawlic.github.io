@@ -1,7 +1,7 @@
 
 //ykw?
 const $ = document.getElementById.bind(document)
-let engine, ggeo, gcube, selectedObject,balls,cubes,cubeParts
+let engine, ggeo, gcube, selectedObject,balls,cubes,cubeParts, isPicking, curPicker
 function componentToHex(c) {
   var hex = c.toString(16);
   return hex.length == 1 ? "0" + hex : hex;
@@ -30,3 +30,15 @@ const errclr = "#ff5555"
 let cloneOffset = {x:10,y:0,z:0}
 let wantedColor = "#aaaaaa"
 let wantedRad = 8
+
+// object pickers
+
+const pickers = document.querySelectorAll(".objpick")
+
+pickers.forEach(picker=>{
+  picker.addEventListener("click", ()=>{
+    isPicking = true
+    curPicker = picker
+    picker.innerText="Picking"
+  })
+})
