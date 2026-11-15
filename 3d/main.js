@@ -298,6 +298,11 @@ loader.load(
         return att
     }
 
+    function attFromMarkerHit(hit) {
+        if (!hit) return null
+        return atts.find(item => item.marker === hit.object || item.marker.getObjectById(hit.object.id) === hit.object) ?? null
+    }
+
     function removeAtts(removedAtts) {
         if (!removedAtts.size) return
         for (const att of removedAtts) {
@@ -1859,8 +1864,8 @@ window.addEventListener('pointerdown', (e) => {
             mouse.x = ((e.clientX - bounds.left) / bounds.width) * 2 - 1
             mouse.y = -((e.clientY - bounds.top) / bounds.height) * 2 + 1
             raycaster.setFromCamera(mouse, camera)
-            const hit = raycaster.intersectObjects(atts.map(att => att.marker), false)[0]
-            let att = hit && atts.find(item => item.marker === hit.object)
+            const hit = raycaster.intersectObjects(atts.map(att => att.marker), true)[0]
+            const att = attFromMarkerHit(hit)
             if (!att) return
             picker.dataset.pickInd = String(att.id)
             picker.textContent = `Att ${att.id}`
@@ -1941,9 +1946,9 @@ renderer.domElement.addEventListener('pointerdown', (e) => {
 
     raycaster.setFromCamera(mouse, camera)
 
-    const markerHit = raycaster.intersectObjects(atts.map(att => att.marker), false)[0]
+    const markerHit = raycaster.intersectObjects(atts.map(att => att.marker), true)[0]
     if (markerHit) {
-        const att = atts.find(item => item.marker === markerHit.object)
+        const att = attFromMarkerHit(markerHit)
         if (att) attachAttControls(att)
         return
     }
