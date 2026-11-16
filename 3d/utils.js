@@ -1,7 +1,7 @@
 
 //ykw?
 const $ = document.getElementById.bind(document)
-let engine, ggeo, gcube, selectedObject,balls,cubes,cubeParts, isPicking, curPicker
+let engine, ggeo, gcube, selectedObject,balls,cubes,cubeParts, isPicking, curPicker,cloths=[]
 function componentToHex(c) {
   var hex = c.toString(16);
   return hex.length == 1 ? "0" + hex : hex;

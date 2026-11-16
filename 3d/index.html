@@ -39,6 +39,7 @@
             <div class="inp"><label  for="aothersel">Type</label><select id="aothersel">
                 <option value="fan">Fan</option>
                 <option value="tcan">Trash can</option>
+                <option value="cloth">Cloth</option>
             </select></div>
 
             <div id="fanutils">
@@ -50,8 +51,17 @@
             <div id="tcanutils" class="hidden">
                 <div class="inp"><label for="tcanSize">Size</label> <input type="number" value="20" id="tcanSize" min="0.01" step="any"></div>
             </div>
+
+            <div id="clothutils" class="hidden">
+                <div class="inp"><label for="cwid">Width (points)</label> <input type="number" value="12" id="cwid" min="2" max="64" step="1"></div>
+                <div class="inp"><label for="chei">Depth (points)</label> <input type="number" value="12" id="chei" min="2" max="64" step="1"></div>
+                <div class="inp"><label for="csep">Spacing</label> <input type="number" value="8" id="csep" min="0.01" step="any"></div>
+                <div class="inp"><label for="crad">Collision radius</label> <input type="number" value="3" id="crad" min="0.01" step="any"></div>
+                <div class="inp"><label for="cstiff">Stiffness</label> <input type="number" value="0.8" id="cstiff" min="0" max="1" step="0.01"></div>
+                <div class="inp"><label for="cclr">Color</label> <input type="color" value="#42a5b5" id="cclr"></div>
+            </div>
             <p id="fanstatus" aria-live="polite"></p>
-            <button id="fanaddok" type="button">Place fan</button>
+            <button id="fanaddok" type="button">Place</button>
         </details>
         <details class="section">
             <summary>Joints</summary>

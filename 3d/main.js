@@ -18,7 +18,7 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {addVec3, BarB3, Engine, Obj3} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@7b7bbf56c356668430acece2a408d11554860a00/main.js"
+import {addVec3, BarB3, Engine, Obj3} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@65f665ac7ca045c4b065014bc77fdfd976eb925f/main.js"
 //import {addVec3, Engine} from "./fizks/main.js"
 import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -187,7 +187,6 @@ loader.load(
         console.error('An error happened', error)
     }
 )
-
 loader.load(
     'cursor.glb',
     function (gltf) {
@@ -215,7 +214,6 @@ loader.load(
         console.error('An error happened', error)
     }
 )
-
 loader.load(
     'att.glb',
     function (gltf) {
@@ -252,23 +250,19 @@ loader.load(
     function bodyQuat(body) {
         return new THREE.Quaternion(body.q.x, body.q.y, body.q.z, body.q.w).normalize()
     }
-
     function bodyCenter(body) {
         return body.center ?? body.com()
     }
-
     function attWorldPos(att, target = new THREE.Vector3()) {
         const center = bodyCenter(att.body)
         return target.copy(att.local)
             .applyQuaternion(bodyQuat(att.body))
             .add(new THREE.Vector3(center.x, center.y, center.z))
     }
-
     function setJointStatus(message) {
         const status = document.getElementById('jointstatus')
         if (status) status.textContent = message
     }
-
     function refreshAttPickers() {
         for (const picker of [document.getElementById('atttarget1'), document.getElementById('atttarget2')]) {
             const selectedId = picker.dataset.pickInd
@@ -282,8 +276,6 @@ loader.load(
             }
         }
     }
-
-
     function addAtt(body, worldPosition) {
         const center = bodyCenter(body)
         const local = worldPosition.clone()
@@ -297,12 +289,10 @@ loader.load(
         atts.push(att)
         return att
     }
-
     function attFromMarkerHit(hit) {
         if (!hit) return null
         return atts.find(item => item.marker === hit.object || item.marker.getObjectById(hit.object.id) === hit.object) ?? null
     }
-
     function removeAtts(removedAtts) {
         if (!removedAtts.size) return
         for (const att of removedAtts) {
@@ -321,12 +311,10 @@ loader.load(
         }
         refreshAttPickers()
     }
-
     function removeAttsForBodies(bodies) {
         const removedBodies = new Set(bodies)
         removeAtts(new Set(atts.filter(att => removedBodies.has(att.body))))
     }
-
     function clearJointsAndAtts() {
         for (const att of atts) {
             if (transformControls?.object === att.marker) transformControls.detach()
@@ -337,11 +325,9 @@ loader.load(
         engine.bars.length = 0
         refreshAttPickers()
     }
-
     function updateAttMarkers() {
         for (const att of atts) att.marker.position.copy(attWorldPos(att))
     }
-
     function updateAttJointPoints(att) {
         for (const joint of pointJoints) {
             if (!joint.atts.includes(att)) continue
@@ -351,7 +337,6 @@ loader.load(
             )
         }
     }
-
     function attachAttControls(att) {
         selectedObject = { type: 'att', ind: atts.indexOf(att), fxd: true }
         if (transformControls.mode !== 'translate') {
@@ -361,7 +346,6 @@ loader.load(
         }
         transformControls.attach(att.marker)
     }
-
     class PointJoint3 {
         constructor(body1, body2, point1, point2) {
             this.body1 = body1
@@ -404,7 +388,6 @@ loader.load(
             for (const bar of this.bars) bar.solve()
         }
     }
-
     document.getElementById('addatt').addEventListener('click', () => {
         const parentPicker = document.getElementById('attparent')
         const parentType = parentPicker.dataset.pickType
@@ -419,7 +402,6 @@ loader.load(
         attachAttControls(att)
         setJointStatus(`Att ${att.id} added.`)
     })
-
     document.getElementById('addjnt').addEventListener('click', () => {
         const att1 = atts.find(att => String(att.id) === document.getElementById('atttarget1').dataset.pickInd)
         const att2 = atts.find(att => String(att.id) === document.getElementById('atttarget2').dataset.pickInd)
@@ -441,6 +423,7 @@ loader.load(
         pointJoints.push({ constraint, atts: [att1, att2] })
     })
 //}
+
 
 const selectedForOutline = []
 const outlinePass = outline(scene, camera, {
@@ -557,6 +540,63 @@ function addBall(fixed=false,rad=8, color="#18a8d1"){
     
     balls.push({ body: engine.objs[engine.objs.length - 1], mesh })
 }
+function addCloth(options = {}) {
+    const width = Math.max(2, Math.floor(options.width ?? 12))
+    const depth = Math.max(2, Math.floor(options.depth ?? 12))
+    const height = options.height ?? 1
+
+    if (height !== 1) {
+        throw new Error('Cloth rendering currently supports height: 1')
+    }
+
+    const body = engine.addCloth({ ...options, width, height, depth })
+    const positions = new Float32Array(body.points.length * 3)
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute(
+        'position',
+        new THREE.BufferAttribute(positions, 3).setUsage(THREE.DynamicDrawUsage)
+    )
+
+    const indices = []
+    for (let z = 0; z < depth - 1; z++) {
+        for (let x = 0; x < width - 1; x++) {
+            const a = z * width + x
+            const b = a + 1
+            const c = a + width
+            const d = c + 1
+            indices.push(a, c, b, b, c, d)
+        }
+    }
+    geo.setIndex(indices)
+
+    const mesh = new THREE.Mesh(
+        geo,
+        new THREE.MeshStandardMaterial({
+            color: options.color ?? '#42a5b5',
+            roughness: 0.55,
+            side: THREE.DoubleSide
+        })
+    )
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+    scene.add(mesh)
+
+    const item = { mesh, body }
+    cloths.push(item)
+    updClothGeo(item)
+    return item
+}
+
+function updClothGeo(item) {
+    const positions = item.mesh.geometry.attributes.position
+    for (let i = 0; i < item.body.points.length; i++) {
+        const point = item.body.points[i].p
+        positions.setXYZ(i, point.x, point.y, point.z)
+    }
+    positions.needsUpdate = true
+    item.mesh.geometry.computeVertexNormals()
+    item.mesh.geometry.computeBoundingSphere()
+}
 function fanAirLength(fan){
     const position = fan.pos
     const direction = fan.dir
@@ -626,6 +666,7 @@ function fanPlacementPoint(e, surfaceOffset = 0){
     raycaster.setFromCamera(mouse, camera)
 
     const surfaces = [...cubes, ...balls.map(ball => ball.mesh), ...fanVisuals, ...tcanVisuals.map(item => item.mesh)]
+    surfaces.push(...cloths.map(item => item.mesh))
     if (gcube) surfaces.push(gcube)
     if (am) surfaces.push(am)
     scene.updateMatrixWorld(true)
@@ -695,7 +736,53 @@ function startTcanPlacement(){
     transformControls.visible = false
     setFanPlacementStatus('Click the trash-can base. Press Escape to cancel.')
 }
+function startClothPlacement(){
+    if (fanPlacement) {
+        cancelFanPlacement()
+        return
+    }
+    exitGroup()
+    transformControls.detach()
+    fanPlacement = { type: 'cloth', cursors: [], stage: 'origin', origin: null }
+    adding = 'cloth'
+    controls.enabled = false
+    transformControls.visible = false
+    setFanPlacementStatus('Click where the cloth center should go. Press Escape to cancel.')
+}
 function handleFanPlacementClick(e){
+    if (fanPlacement.type === 'cloth') {
+        const point = fanPlacementPoint(e)
+        if (!point) return
+
+        const width = Number(document.getElementById('cwid').value)
+        const depth = Number(document.getElementById('chei').value)
+        const separation = Number(document.getElementById('csep').value)
+        const collisionRadius = Number(document.getElementById('crad').value)
+        const stiffness = Number(document.getElementById('cstiff').value)
+        if (!Number.isInteger(width) || width < 2 || width > 64 ||
+            !Number.isInteger(depth) || depth < 2 || depth > 64 ||
+            width * depth > 4096 || !Number.isFinite(separation) || separation <= 0 ||
+            !Number.isFinite(collisionRadius) || collisionRadius <= 0 ||
+            !Number.isFinite(stiffness) || stiffness < 0 || stiffness > 1) {
+            setFanPlacementStatus('Use 2 to 64 points per side, positive spacing and radius, and stiffness from 0 to 1.')
+            return
+        }
+
+        addCloth({
+            x: point.x - width * separation * 0.5,
+            y: point.y + collisionRadius,
+            z: point.z - depth * separation * 0.5,
+            width,
+            height: 1,
+            depth,
+            seperation: separation,
+            collisionRadius,
+            stiffness,
+            color: document.getElementById('cclr').value
+        })
+        cancelFanPlacement()
+        return
+    }
     if (fanPlacement.type === 'tcan') {
         const point = fanPlacementPoint(e)
         if (!point) return
@@ -801,6 +888,13 @@ function clear(){
     fanVisuals = []
     for (const item of tcanVisuals) scene.remove(item.mesh)
     tcanVisuals = []
+    for (const item of cloths) {
+        scene.remove(item.mesh)
+        item.mesh.geometry.dispose()
+        item.mesh.material.dispose()
+    }
+    cloths.length = 0
+    engine.cloths = []
     selectedObject = { type: 'box', ind: 0, fxd: false }
     outlinePass.selectedObjects = []
     welding = false
@@ -900,14 +994,17 @@ document.getElementById('add-ball').addEventListener('click', () => {
 })
 document.getElementById('clearbtn').addEventListener('click', clear)
 document.getElementById('aothersel').addEventListener('change', e => {
-    const isFan = e.target.value === 'fan'
-    document.getElementById('fanutils').classList.toggle('hidden', !isFan)
-    document.getElementById('tcanutils').classList.toggle('hidden', isFan)
-    document.getElementById('fanaddok').textContent = isFan ? 'Place fan' : 'Place trash can'
+    const type = e.target.value
+    document.getElementById('fanutils').classList.toggle('hidden', type !== 'fan')
+    document.getElementById('tcanutils').classList.toggle('hidden', type !== 'tcan')
+    document.getElementById('clothutils').classList.toggle('hidden', type !== 'cloth')
+    document.getElementById('fanaddok').textContent = type === 'fan' ? 'Place fan' : type === 'tcan' ? 'Place trash can' : 'Place cloth'
     setFanPlacementStatus('')
 })
 document.getElementById('fanaddok').addEventListener('click', () => {
-    if (document.getElementById('aothersel').value === 'tcan') startTcanPlacement()
+    const type = document.getElementById('aothersel').value
+    if (type === 'tcan') startTcanPlacement()
+    else if (type === 'cloth') startClothPlacement()
     else startFanPlacement()
 })
 document.getElementById('add-box').addEventListener('click', ()=>{
@@ -2015,6 +2112,7 @@ renderer.domElement.addEventListener('pointerdown', (e) => {
 })
 renderer.domElement.addEventListener('pointermove', (e) => {
     if (!fanPlacement) return
+    if (fanPlacement.type === 'cloth') return
     const originOffset = fanPlacement.type === 'fan' && fanPlacement.stage === 'origin'
         ? Math.max(Number(document.getElementById('frad').value) || 0, 0)
         : 0
@@ -2189,6 +2287,7 @@ function render() {
         processTcanCaptures()
     }
     boxToCubeALL()
+    for (const cloth of cloths) updClothGeo(cloth)
     updateAttMarkers()
     for (const { body, mesh } of balls) {
         mesh.position.set(body.p.x, body.p.y, body.p.z)
