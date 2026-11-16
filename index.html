@@ -3,9 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Boxsand / PHYSICS</title>
-        <meta name="description" content="A physics engine sandbox game for 2D and 3D uses.">
+        <title>Boxsand - free browser-based 2D and 3D physics sandbox</title>
+        <meta name="description" content="A physics engine sandbox game for 2D and 3D uses. Does not care what you put in. Physics is fun! No install, free as in free beer and freedom.">
         <link rel="icon" href="favicon.ico">
+        <link rel="canonical" href="https://boxsand.netlify.app"/>
         <style>
             *{
                 font-family: 'Courier New', Courier, monospace;
@@ -40,10 +41,11 @@
                 border: 1px solid black;
                 border-radius: 10px;
                 position: absolute;
-                top: calc(20px + 3rem);
+                top: calc(20px + 3em);
                 left: 20px;
-                width: calc(50vw - 60px);
+                width: calc(50% - 40px);
                 bottom: 20px;
+                height: calc(100% - 120px - 3em);
                 display:grid;
                 grid-template-columns: auto auto;
                 padding: 10px;
@@ -72,14 +74,14 @@
                 text-decoration: none;
                 font-size: xx-large;
             }
-            #main h1 {
+            #main h2 {
                 margin: 20px;
             }
             #filler {
                 position: absolute;
-                top: calc(20px + 3rem);
+                top: calc(20px + 3em);
                 right: 20px;
-                width: calc(50vw - 60px);
+                width: calc(50% - 40px);
                 bottom: 20px;
                 padding: 10px;
             }
@@ -89,30 +91,48 @@
             #filler a {
                 color: #1585f4;
             }
+            #filler h2 {
+                margin: 0;
+            }
+            @media (max-width: 768px){
+                #things {
+                    width: auto;
+                    right: 20px;
+                }
+                #filler {
+                    top: calc(100vh - 150px);
+                    width: auto;
+                    right: 20px;
+                    left: 20px;
+                }
+                #main {
+                    overflow-y: scroll;
+                }
+            }
         </style>
     </head>
     <body>
         <div id="top">
-            <h1><em>Physics</em></h1>
+            <h1><em>Boxsand Physics</em></h1>
             <p>rly cool physics bc its 2d and 3d. Does not care what you put into it, and I hope you do not care what comes out. May explode.</p>
         </div>
         <div id="main">
-            <h1><em>Things</em></h1>
+            <h2><em>Things</em></h2>
             <div id="things">
                 <div class="thing">
                     <h2 class="thinghead">2D physics</h2>
                     <p class="thingdesc">2D physics. Took 2 years of stupidity. Cool and has lots of tools though. Easier to make scenes.</p>
-                    <a class="thinglink" href="./main">aight</a>
+                    <a class="thinglink" href="./main">Play 2D</a>
                 </div>
                 <div class="thing">
                     <h2 class="thinghead">3D physics</h2>
                     <p class="thingdesc">3D physics [beta-ish]. Uses vanilla JS (upgrade soon) and THREE.js. Joints! Cool! tWeE dEe</p>
-                    <a class="thinglink" href="./3d">cool</a>
+                    <a class="thinglink" href="./3d">Play 3D</a>
                 </div>
                 <div class="thing">
                     <h2 class="thinghead">Tiles</h2>
-                    <p class="thingdesc">A game inspired by my ocd-like tile walk in fifth grade. not intuitive though</p>
-                    <a class="thinglink" href="https://tilesgame.netlify.app">i guess</a>
+                    <p class="thingdesc">A game inspired by my OCD-like tile walk in fifth grade. not intuitive though</p>
+                    <a class="thinglink" href="https://tilesgame.netlify.app">Play Tiles</a>
                 </div>
                 <div class="thing">
                     <h2 class="thinghead">capture the egg</h2>
@@ -120,10 +140,18 @@
                 </div>
             </div>
             <div id="filler">
-                <img src="highlight.png" id="highlightimg"/>
+                <h2>This week's highlight</h2>
+                <img src="highlight.png" id="highlightimg" alt="Highlight of the week, the new 3D physics engine"/>
                 <h3>3D physics, as it looks when you open it</h3>
                 <p>Progress on capture the egg: <b>Close, now tuning things</b></p>
-                <a href="./docs">Docs/how to use it [inactive]</a>
+                <a href="./docs">Docs/how to play</a>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>͏
             </div>
         </div>
     </body>

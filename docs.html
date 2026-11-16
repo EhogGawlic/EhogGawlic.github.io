@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Boxsand / PHYSICS</title>
+        <title>Boxsand | Docs</title>
         <meta name="description" content="A physics engine sandbox game for 2D and 3D uses.">
         <link rel="icon" href="favicon.ico">
         <style>
@@ -23,7 +23,7 @@
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 200px;
+                width: 300px;
                 bottom: 0;
                 padding: 10px;
             }
@@ -32,13 +32,22 @@
                 background-color: #d0d0d0;
                 border: 1px solid black;
                 top: 0;
-                left: 200px;
+                left: 300px;
                 right: 0;
                 bottom: 0;
-                padding: 10px;
+                padding: 50px;
+                overflow-y: scroll;
             }
-            #sections a {
+            a {
                 color: #0766c5;
+                cursor: pointer;
+            }
+            #sections ul {
+
+                list-style-type: none;
+            }
+            #body *:not(h1, h2, h3, h4, h5, h6,b,em,a,input,strong,u,s){
+                margin: 20px;
             }
         </style>
     </head>
@@ -47,21 +56,216 @@
             <div id="sections">
                 <h1>Docs</h1>
                 <h2>2D physics</h2>
-                <a>Balls</a><br>
-                <a>Boxes</a><br>
-                <a>Fans</a><br>
-                <a>Lines</a><br>
-                <a>Trash cans</a><br>
-                <a>Motors</a><br>
-                <a>Rails</a><br>
-                <a>Magnets</a><br>
-                <a>Various settings</a><br>
+                <ul>
+                    <li><a href="./docs.html#balls">Balls</a></li>
+                    <li><a href="./docs.html#boxes">Boxes</a></li>
+                    <li><a href="./docs.html#fans">Fans</a></li>
+                    <li><a href="./docs.html#lines">Lines</a></li>
+                    <li><a href="./docs.html#tcans">Trash cans</a></li>
+                    <li><a href="./docs.html#motors">Motors</a></li>
+                    <li><a href="./docs.html#rails">Rails</a></li>
+                    <li><a href="./docs.html#magnets">Magnets</a></li>
+                    <li><a href="./docs.html#lbar">Left bar</a></li>
+                    <li><a href="./docs.html#constraints">Constraints</a></li>
+                    <li><a href="./docs.html#shortcuts">Shortcuts</a></li>
+                    <li><a href="./docs.html#saving">Saving</a></li>
+                    <li><a href="./docs.html#settings">Various settings</a></li>
+                </ul>
+                <h2>3D physics</h2>
+                <ul>
+                    <li><a href="./docs.html#balls3">Balls</a></li>
+                    <li><a href="./docs.html#boxes3">Boxes</a></li>
+                    <li><a href="./docs.html#fans3">Fans</a></li>
+                    <li><a href="./docs.html#tcans3">Trash cans</a></li>
+                    <li><a href="./docs.html#att3">Attatchments</a></li>
+                    <li><a href="./docs.html#jnt3">Joints</a></li>
+                    <li><a href="./docs.html#sav3">Saving</a></li>
+                    <li><a href="./docs.html#sett3">Various settings</a></li>
+                </ul>
             </div>
             <div id="body">
-                <h2>Hi</h2>
-                <p>
-                    js so yall know this <s>does not work yet</s> is definitely not done yet
-                </p>
+                <h1>Docs</h1>
+                <div id="2d">
+                    <h2>2D physics</h2>
+                    <div id="balls">
+                        <h3>Balls</h3>
+                        <p>Balls can be added by simply clicking the canvas or <a href="./docs.html#lbar">opening the left bar</a> and clicking "Add ball".</p>
+                        <p>There are various settings to add balls, most usefully radius, presets, and velocity. They can be found in the <a href="./docs.html#lbar">left bar</a></p>
+                        <h4 id="2dxyv">X and Y values</h4>
+                        <p>X is the horzontal position, and Y is the vertical position. They start at the top left (e.g. x=0 and y=0 is the top left, x=500 and y=0 is the top right, etc.) and reach (soft limit) until 500.</p>
+                        <p>You can easily set the X and Y by right-clicking at a spot on the canvas.</p>
+                        <h4>Radius</h4>
+                        <p>The size of the ball. Default is 5, which means the default ball size is 10 meters (units) wide/tall.</p>
+                        <h4>Bounciness</h4>
+                        <p>How much speed the ball keeps after hitting a wall - 1 means full bounce (keeps all energy after bouncing on wall), and 0 means no bounce (loses all energy after bouncing).</p>
+                        <h4>Ball weight/mass</h4>
+                        <p>How much the ball weighs. Changes depending on density (see below).</p>
+                        <h4>X- and Y- velocity</h4>
+                        <p><b>X velocity:</b> The left-right speed of the ball - negative means left and positive means right.</p>
+                        <p><b>Y velocity:</b> The up-down speed of the ball - negative means up and positive means down.</p>
+                        <h4>Density</h4>
+                        <p>How dense the ball is. A little strange, mostly because I searched up 3D densities. Higher means more mass for size.</p>
+                        <h4>Auto-create</h4>
+                        <p>Adds large amounts of balls in a stream. <b>Stream width</b> means how many balls tall the stream is, and <b>Auto-create speed</b> is how many frames inbetween each addition. Check the auto-create box to toggle.</p>
+                        <h4>Substeps</h4>
+                        <p>Quality of simulation. 1=fast but low quality, and 8=slow but high quality. Search up <a href="https://www.google.com/search?q=substeps+in+physics">"substeps in physics" on Google.</a></p>
+                        <p><b>Fixed</b> toggles whether the balls you add are anchored (no gravity, unmovable).</p>
+                    </div>
+                    <div id="boxes">
+                        <h3>Boxes</h3>
+                        <p>Boxes are... well, boxes.</p>
+                        <p>Open the <a href="./docs.html#lbar">left bar</a> and press "Add box" to add.</p>
+                        <p>Boxes share the <a href="./docs.html#2dxyv">X and Y values</a> of the balls (see above), which means they are inserted at the same position when their respective "Add" button is clicked.</p>
+                        <p><b>Width</b> and <b>height</b> are the, well, width and height.</p>
+                        <p><b>Box rotation</b> is the starting rotation of a new box, in degrees, clockwise.</p>
+                    </div>
+                    <div id="lbar">
+                        <h3>Left bar</h3>
+                        <p>This contains the main settings for inserting dynamic objects.</p>
+                        <p>To open, press "View" in the top left, then press "Left bar".</p>
+                    </div>
+                    <div id="rbar">
+                        <h3>Right bar</h3>
+                        <p>This contains the main settings inserting static objects.</p>
+                        <p>Always open. There are 4 sections:</p>
+                        <ul>
+                            <li><b>Main tools</b> - This is where you add lines and fans. Default open.</li>
+                            <li><b>Object additions</b> - This is where you add curves, trash cans, speedometers, and magnets.</li>
+                            <li><b>Thing editing and deleting</b> - Lets you delete a specific type at once (so far).</li>
+                            <li><b>ropes and stuff</b> - Contains constraints, such as ropes (broken), bars, and springs. Includes jiggle physics.</li>
+                        </ul>
+                    </div>
+                    <div id="lines">
+                        <h3>Lines</h3>
+                        <p>Lines are static walls that everything dynamic collides with.</p>
+                        <p>Lines show up in the <b>Main tools</b> section, at the top. Click "Add line" or the L key to add a line.</p>
+                        <p>After you click "Add line" or L, click where you want the first point of the line to be, then click again to the other point. A line will appear.</p>
+                    </div>
+                    <div id="fans">
+                        <h3>Fans</h3>
+                        <p>Fans can be found in the <a href="./docs.html#rbar">right bar</a>, when you scroll down to the button on the <b>main tools</b> section.</p>
+                        <p>Fan strength is the speed of the fan.</p>
+                        <p>To add, click "Add fan" or press the F key, click where you want the fan to start, then click again at where it can reach + the direction (a line-ish thing will pop up when you do this part. Any balls in the line will get blown. Only a preview.)</p>
+                    </div>
+                    <div id="objadd">
+                        <h3>Object additions (expanded)</h3>
+                        <p>Shows up when you click the red square button in the right bar. You will see a dropdown, options, an "OK" button, a "Delete (select)" button, and a "Delete 2 (select)".</p>
+                        <div id="tcans">
+                            <h4>Trash cans</h4>
+                            <p>Deletes any balls inside it.</p>
+                            <p>Pick "Trash can" from the dropdown and press "OK". Click where you want it.</p>
+                        </div>
+                        <div id="motors">
+                            <h4>Motors</h4>
+                            <p>Spins a line around a point.</p>
+                            <p>You will see <input value="1">°/sec - this is the motor speed. You will also see a "Line #" input. The "Line #" input is the index of the line you want to spin, starting at 0. Line index 0 is the very first line you added, line index 1 is the second, etc.</p>
+                            <p>To add: Select line number, set speed, press "OK", and click where you want it to spin around.</p>
+                        </div>
+                        <div id="rails">
+                            <h4>Rails</h4>
+                            <p>Moves a line up and down along a "track".</p>
+                            <p>Line # will stay there (it will always), and it works the same as the motors line # (see above).</p>
+                            <p>To add, set speed and press "OK". Click where you want the line to start moving from (does not move line to that position, more like something on the actual track you set dragging the line), then click the second position. The line will start moving.</p>
+                        </div>
+                        <div id="curves">
+                            <h4>Curves</h4>
+                            <p>Creates a curve so you don't have to.</p>
+                            <p>To add:</p>
+                            <ol>
+                                <li>Press "OK".</li>
+                                <li>Click at the center point, where the circle's center will be.</li>
+                                <li>Click at the first point.</li>
+                                <li>Click at the second point. ⚠️ These go counterclockwise for the first point. Remember that.</li>
+                            </ol>
+                        </div>
+                        <p><b>Speedos</b> (shown as "speed tester thing") measure the speed of a ball inside it. Click OK and then select where you want it.</p>
+                        <p><b>Magnets</b> attract any gray balls. Slightly broken, though.</p>
+                    </div>
+                    <div id="shortcuts">
+                        <h3>Shortcuts</h3>
+                        <p>List of shortcuts</p>
+                        <ul>
+                            <li>L: <a href="./docs.html#lines">Add line</a></li>
+                            <li>F: <a href="./docs.html#fans">Add fan</a></li>
+                            <li>T: <a href="./docs.html#tcans">Add trash can</a></li>
+                            <li>D: <a href="./docs.html#rbar">Delete (select)</a></li>
+                            <li>K: Pause/play</li>
+                            <li>C:Cancel</li>
+                            <li>Ctrl + Z: Delete last line</li>
+                            <li>S: <a href="./docs.html#springs">Add spring</a></li>
+                            <li>R: <a href="./docs.html#ropes">Add rope</a></li>
+                            <li>B: <a href="./docs.html#bars">Add bar</a></li>
+                        </ul>
+                    </div>
+                    <div id="constraints">
+                        <h3>Constraints</h3>
+                        <p>This includes ropes, springs, bars, and various jiggle physics.</p>
+                        <p>Ropes, springs, and bars are added the same way:</p>
+                        <ol>
+                            <li>Open "Ropes and stuff" in the <a href="./docs.html#rbar">right bar</a>, if you haven't already</li>
+                            <li>Click "AdD rOpE (sElEcT 2 bAlLs)", "AdD sPrInG (sElEcT 2 bAlLs)", or "Add bar (select 2 balls)".</li>
+                            <li>Click the first ball you want to attach to.</li>
+                            <li>Click the second ball you want to attach to.</li>
+                        </ol>
+                        <h4 id="springs">Springs</h4>
+                        <p>Connect two balls with a stretchy connection. Best results are with density 1 to 2 and default radius.</p>
+                        <h4 id="ropes">Ropes</h4>
+                        <p>Connect two balls with a rope - can be squished, but not stretched. ⚠️ <strong>EXPLOSIVE!</strong> Do not stretch ropes, or it <em>will</em> explode.</p>
+                        <h4 id="bars">Bars</h4>
+                        <p>Connect two balls with a rigid connection. Best for mechanisms.</p>
+                    </div>
+                    <div id="saving">
+                        <h3>Saving</h3>
+                        <p>Either your whole creation or just a material can be saved.</p>
+                        <p>To save, click "File" in the top bar and press "Save" or "Save material". A popup will appear prompting you to enter a filename. It MUST end in .psv or .pms, or you cannot load it.</p>
+                        <p>To load a file, open the <a href="rbar">main tools</a> and press "Choose file".</p>
+                    </div>
+                    <div id="settings">
+                        <h3>Settings</h3>
+                        <ul>
+                            <li>
+                                <h4>Gravity</h4>
+                                <p>Gravity - higher means balls fall faster, lower = balls fall slower, negative = balls fly up.</p>
+                            </li>
+                            <li>
+                                <h4>Can explode</h4>
+                                <p>Whether you can add balls and if they can collide while <a href="./docs.html#shorcuts">paused</a>. Can be fun.</p>
+                            </li>
+                            <li>
+                                <h4>Save every <input value="5"> seconds:</h4>
+                                <p>Auto-saving locally. If your computer sucks (e.g. 1995), uncheck this.</p>
+                            </li>
+                            <li>
+                                <h4>Full save</h4>
+                                <p>Whether local saves (file-free) save everything.</p>
+                            </li>
+                            <li>
+                                <h4>Curve quality</h4>
+                                <p>Number of line segments in a <a href="./docs.html#curves">curve</a>. More means smoother but laggier.</p>
+                            </li>
+                            <li>
+                                <h4>Save slot # (1-3)</h4>
+                                <p>Save slot. You have 3, so you can have 3 different creations.</p>
+                            </li>
+                            <li>
+                                <h4>Infinite</h4>
+                                <p>Removes walls and lets you move the "camera" around with arrow keys or shift+drag. Arrow keys recommended.</p>
+                            </li>
+                            <li>
+                                <h4>High contrast</h4>
+                                <p>Off = white/gray background, on=black background.</p>
+                            </li>
+                            <li>
+                                <h4>Springs break</h4>
+                                <p>Whether springs can break if you stretch them too much. Useful for breakable softbodies.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="3d">
+                    <h2>3D physics</h2>
+                    <p>Coming soon, I'm tired.</p>
+                </div>
             </div>
         </div>
     </body>
