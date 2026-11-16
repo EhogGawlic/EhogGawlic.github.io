@@ -18,7 +18,7 @@ const WIDTH = window.innerWidth
 const HEIGHT = window.innerHeight
 
 import * as THREE from "three/webgpu"
-import {addVec3, BarB3, Engine, Obj3} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@6700d5d14e8ea74a743e708e6c6847308a4bef4e/main.js"
+import {addVec3, BarB3, Engine, Obj3} from "https://cdn.jsdelivr.net/gh/EhogGawlic/3d-physics-lib@7f59e81078292172990ef1f3e743be669eb91a0d/main.js"
 //import {addVec3, Engine} from "./fizks/main.js"
 import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
@@ -769,9 +769,9 @@ function handleFanPlacementClick(e){
         }
 
         addCloth({
-            x: point.x - width * separation,
+            x: point.x - width * separation * 0.5,
             y: point.y + collisionRadius,
-            z: point.z - depth * separation,
+            z: point.z - depth * separation * 0.5,
             width,
             height: 1,
             depth,
