@@ -24,7 +24,7 @@ import { pack, unpack, download } from "./fsave.js"
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { pass, uniform } from 'three/tsl'
 import { outline } from 'three/addons/tsl/display/OutlineNode.js'
 const loader = new GLTFLoader()
@@ -78,8 +78,10 @@ keyLight.shadow.camera.near = 0.5
 keyLight.shadow.camera.far = 2000
 keyLight.shadow.mapSize.width = 1024
 keyLight.shadow.mapSize.height = 1024
-const exrLoader = new EXRLoader()
-exrLoader.load('environment.exr', (texture) => {
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 0.5
+const rgbeLoader = new RGBELoader()
+rgbeLoader.load('path/to/your/environment.hdr', (texture) => {
     texture.mapping = THREE.EquirectangularReflectionMapping
     scene.background = texture
     scene.environment = texture
