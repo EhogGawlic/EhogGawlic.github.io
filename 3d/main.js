@@ -723,7 +723,7 @@ function startTcanPlacement(){
         return
     }
     if (!storedCurMdl || !storedTcanMdl) {
-        setFanPlacementStatus('Trash-can models are still loading.')
+        setFanPlacementStatus('Trash can models are still loading.')
         return
     }
     exitGroup()
@@ -734,7 +734,7 @@ function startTcanPlacement(){
     adding = 'tcan'
     controls.enabled = false
     transformControls.visible = false
-    setFanPlacementStatus('Click the trash-can base. Press Escape to cancel.')
+    setFanPlacementStatus('Click the trash can base. Press Escape to cancel.')
 }
 function startClothPlacement(){
     if (fanPlacement) {
@@ -788,7 +788,7 @@ function handleFanPlacementClick(e){
         if (!point) return
         const size = Number(document.getElementById('tcanSize').value)
         if (!Number.isFinite(size) || size <= 0) {
-            setFanPlacementStatus('Enter a positive trash-can size.')
+            setFanPlacementStatus('Enter a positive trash can size.')
             return
         }
 
@@ -1219,17 +1219,18 @@ $("cbalsbtn").addEventListener("click", ()=>{
     clearB()
 })
 $("rszbtn").addEventListener("click", ()=>{
+    const bi0 = $("wb0").checked
 
     const winp = parseFloat($('wwid').value)
     const hinp = parseFloat($('whei').value)
     const dinp = parseFloat($('wdep').value)
-    const walls = [-winp*0.5, -hinp*0.5,winp*0.5, hinp*0.5,-dinp*0.5, dinp*0.5]
+    const walls = [-winp*0.5, bi0 ? 0 : -hinp*0.5,winp*0.5, bi0 ? hinp : hinp*0.5,-dinp*0.5, dinp*0.5]
     engine.walls=walls
     ggeo = new THREE.BoxGeometry(winp, 1, dinp)
     ggeo.attributes.position.setUsage(THREE.DynamicDrawUsage)
     gcube.geometry=ggeo
-    gcube.position.set(0, -hinp*0.5, 0)
-    grid.position.y = -hinp*0.5+1
+    gcube.position.set(0, bi0 ? -0.5 : -hinp*0.5-0.5, 0)
+    grid.position.y = bi0 ? 0.5 : -hinp*0.5+0.5
     closePopup("popup")
 })
 $("delbtn").addEventListener("click", delCur)
@@ -1295,7 +1296,7 @@ $("settingsok").addEventListener("click", (e)=>{
     closePopup("settings")
 })
 window.onbeforeunload = (e)=>{
-    //e.preDefault()
+    //e.preventDefault()
 }
 for (let i = 0; i < 100; i++){
     addBoxRnd()
@@ -2173,8 +2174,8 @@ function dupeBall(ball, meshIndex, offset) {
     balls.push({mesh, body:copy})
 }
 window.addEventListener("keydown", (e)=>{
-    if (e.key == "d" && (e.ctrlKey || e.metaKey)){
-        e.preDefault()
+    if (e.key.toLowerCase() == "d" && (e.ctrlKey || e.metaKey)){
+        e.preventDefault()
         let selAmt = groupSel.items.length
         if (selAmt == 0){
             if (selectedObject.type == "none") return
@@ -2196,7 +2197,7 @@ window.addEventListener("keydown", (e)=>{
         })
     }
     if ((e.key == "Delete" || e.key == "Backspace") && document.activeElement == renderer.domElement){
-        e.preDefault()
+        e.preventDefault()
         delCur()
     }
 })
