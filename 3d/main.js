@@ -63,7 +63,7 @@ let paused = false
 await renderer.init()
 
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(100, WIDTH / HEIGHT)
+const camera = new THREE.PerspectiveCamera(75, WIDTH / HEIGHT, 0.1, 10000)
 camera.position.z = 500
 scene.add(camera)
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.4) //briter
@@ -82,15 +82,16 @@ keyLight.shadow.mapSize.height = 1024
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 0.5
 const rgbeLoader = new RGBELoader()
-rgbeLoader.load('./environment.hdr', (texture) => {
-  texture.mapping = THREE.EquirectangularReflectionMapping
-  scene.environment = texture
-  const height = 15
-  const radius = 100
-  const skybox = new GroundedSkybox(texture, height, radius)
-  skybox.position.y = height;
-  scene.add(skybox)
+rgbeLoader.load('./environment.hdr', (tex) => {
+    tex.mapping = THREE.EquirectangularReflectionMapping
+    scene.environment = tex
+    const camH = 120
+    const skyRad = 2500
+    const skybox = new GroundedSkybox(tex, camH, skyRad)
+    skybox.position.y = BOX.y0 + camH
+    scene.add(skybox)
 })
+
 scene.add(keyLight)
 
 const hemi = new THREE.HemisphereLight(0xdfe9ff, 0x1088ff, 0.8)
