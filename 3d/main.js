@@ -25,6 +25,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { TransformControls } from 'three/addons/controls/TransformControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
+import { GroundedSkybox } from 'three/addons/objects/GroundedSkybox.js';
 import { pass, uniform } from 'three/tsl'
 import { outline } from 'three/addons/tsl/display/OutlineNode.js'
 const loader = new GLTFLoader()
@@ -81,10 +82,14 @@ keyLight.shadow.mapSize.height = 1024
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 0.5
 const rgbeLoader = new RGBELoader()
-rgbeLoader.load('./environment.hdr', (texture) => {
-    texture.mapping = THREE.EquirectangularReflectionMapping
-    scene.background = texture
-    scene.environment = texture
+rgbeLoader.load('path/to/your/environment.hdr', (texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping
+  scene.environment = texture
+  const height = 15
+  const radius = 100
+  const skybox = new GroundedSkybox(texture, height, radius)
+  skybox.position.y = height;
+  scene.add(skybox)
 })
 scene.add(keyLight)
 
