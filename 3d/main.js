@@ -81,14 +81,16 @@ keyLight.shadow.mapSize.width = 1024
 keyLight.shadow.mapSize.height = 1024
 renderer.toneMapping = THREE.ACESFilmicToneMapping
 renderer.toneMappingExposure = 0.5
+scene.fog = new THREE.FogExp2(0xe7e8e8, 0.001)
 const rgbeLoader = new RGBELoader()
 rgbeLoader.load('./environment.hdr', (tex) => {
     tex.mapping = THREE.EquirectangularReflectionMapping
     scene.environment = tex
-    const camH = 120
+    const camH = 60
     const skyRad = 2500
     const skybox = new GroundedSkybox(tex, camH, skyRad)
     skybox.position.y = BOX.y0 + camH
+    skybox.material.fog = true
     scene.add(skybox)
 })
 
@@ -1247,6 +1249,7 @@ $("rszbtn").addEventListener("click", ()=>{
     gcube.geometry=ggeo
     gcube.position.set(0, bi0 ? -0.5 : -hinp*0.5-0.5, 0)
     grid.position.y = bi0 ? 0.5 : -hinp*0.5+0.5
+    if (skybox) skybox.position.y = floorY + camH
     closePopup("popup")
 })
 $("delbtn").addEventListener("click", delCur)
