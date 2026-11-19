@@ -2273,7 +2273,6 @@ gcube = new THREE.Mesh(ggeo, gmaterial)
 gcube.castShadow = true
 gcube.receiveShadow = true
 gcube.position.set(0, -200, 0)
-scene.add(gcube)
 function render() {
     const typ = selectedObject.type
     const ind = selectedObject.ind
